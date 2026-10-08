@@ -1,0 +1,11 @@
+# Build outputs
+build_manual/
+scene_backend/build/
+build/
+
+# XcodeGen generated
+WallpaperEngineMac.xcodeproj/
+
+# macOS
+.DS_Store
+*.swp

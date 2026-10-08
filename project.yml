@@ -1,0 +1,64 @@
+name: WallpaperEngineMac
+options:
+  bundleIdPrefix: com.wallpaperengine
+  deploymentTarget:
+    macOS: "12.0"
+  generateEmptyDirectories: true
+targets:
+  WallpaperEngineMac:
+    type: application
+    platform: macOS
+    sources:
+      - path: WallpaperEngineMac
+        excludes:
+          - Info.plist
+    settings:
+      base:
+        INFOPLIST_FILE: WallpaperEngineMac/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.wallpaperengine.mac
+        MACOSX_DEPLOYMENT_TARGET: "12.0"
+        SWIFT_VERSION: "5.9"
+        ENABLE_HARDENED_RUNTIME: NO
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: ""
+        CODE_SIGNING_ALLOWED: NO
+        # --- Scene engine (wallpaper-scene-renderer, Vulkan via MoltenVK) ---
+        SWIFT_OBJC_BRIDGING_HEADER: WallpaperEngineMac/WallpaperEngineMac-Bridging-Header.h
+        CLANG_CXX_LANGUAGE_STANDARD: "c++20"
+        CLANG_CXX_LIBRARY: "libc++"
+        HEADER_SEARCH_PATHS:
+          - "$(inherited)"
+          - "$(PROJECT_DIR)/scene_backend/src"
+          - /opt/homebrew/include
+          - /usr/local/include
+        LIBRARY_SEARCH_PATHS:
+          - "$(inherited)"
+          - "$(PROJECT_DIR)/scene_backend/build/install/lib"
+          - /opt/homebrew/lib
+          - /usr/local/lib
+        OTHER_LDFLAGS:
+          - "$(inherited)"
+          - -lwescene-renderer
+          - -lMoltenVK
+          - -llz4
+          - "-framework Metal"
+          - "-framework QuartzCore"
+          - "-framework IOSurface"
+          - "-framework CoreVideo"
+          - "-framework CoreGraphics"
+          - "-framework CoreAudio"
+          - "-framework AudioToolbox"
+          - "-framework AVFoundation"
+          - "-framework CoreMedia"
+          - "-framework IOKit"
+        # libMoltenVK.dylib lives in the Homebrew lib dir,
+        # which is not in dyld's default search path.
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@loader_path/../Frameworks"
+          - /opt/homebrew/lib
+          - /usr/local/lib
+        FRAMEWORK_SEARCH_PATHS: "$(inherited)"
+    dependencies: []
+    info:
+      path: WallpaperEngineMac/Info.plist

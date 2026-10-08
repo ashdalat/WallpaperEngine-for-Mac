@@ -1,0 +1,83 @@
+import AppKit
+
+@MainActor
+final class DesktopWindowManager: NSObject {
+    static let shared = DesktopWindowManager()
+
+    private var windows: [String: DesktopWallpaperWindow] = [:]
+    private var renderers: [String: WallpaperRenderer] = [:]
+
+    override private init() {
+        super.init()
+    }
+
+    func applyToAllScreens(_ item: WallpaperItem?, settings: AppSettings) {
+        for screen in NSScreen.screens {
+            apply(item, to: screen, settings: settings)
+        }
+    }
+
+    func apply(_ item: WallpaperItem?, to screen: NSScreen, settings: AppSettings) {
+        let key = screenKey(screen)
+
+        if item == nil {
+            renderers[key]?.unload()
+            renderers[key] = nil
+            windows[key]?.close()
+            windows[key] = nil
+            return
+        }
+
+        let window: DesktopWallpaperWindow
+        if let existing = windows[key] {
+            window = existing
+            window.updateFrame()
+        } else {
+            window = DesktopWallpaperWindow(screen: screen)
+            window.orderFront(nil)
+            windows[key] = window
+        }
+
+        let renderer = WallpaperRenderer()
+        renderers[key]?.unload()
+        renderers[key] = renderer
+        fputs("WEM: apply renderer for \(item!.title) on screen\n", stderr)
+        renderer.load(item: item!, in: window, settings: settings)
+    }
+
+    func pauseAll() {
+        renderers.values.forEach { $0.pause() }
+    }
+
+    func resumeAll() {
+        renderers.values.forEach { $0.play() }
+    }
+
+    func handleScreenConfigurationChange(settings: AppSettings, current: WallpaperItem?) {
+        let activeScreens = Set(NSScreen.screens.map(screenKey))
+        let staleKeys = windows.keys.filter { !activeScreens.contains($0) }
+        for key in staleKeys {
+            renderers[key]?.unload()
+            renderers[key] = nil
+            windows[key]?.close()
+            windows[key] = nil
+        }
+        if let current = current {
+            for screen in NSScreen.screens {
+                apply(current, to: screen, settings: settings)
+            }
+        }
+    }
+
+    func handleMouseEvent(_ event: CGEvent) {
+        for (key, renderer) in renderers {
+            guard let window = windows[key] else { continue }
+            renderer.handleMouseEvent(event, window: window)
+        }
+    }
+
+    private func screenKey(_ screen: NSScreen) -> String {
+        let number = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber
+        return number.map { "\($0.intValue)" } ?? UUID().uuidString
+    }
+}
