@@ -7,6 +7,18 @@ final class PausePolicy {
     private var batteryPause = false
     private var windowPause = false
 
+    // Window-driven pause changes are debounced: a new
+    // window state must stay stable for this long before
+    // it reaches the renderer. Minimize/maximize
+    // ANIMATIONS otherwise flip the state mid-flight (a
+    // window briefly passes through near-maximized bounds
+    // while zooming, or stays on screen while shrinking
+    // into the Dock), which abruptly pauses/resumes the
+    // renderer and drops wallpaper frames.
+    private static let windowDebounce: TimeInterval = 0.5
+    private var pendingWindowPause: Bool?
+    private var debounceWork: DispatchWorkItem?
+
     var onChange: ((Bool) -> Void)?
 
     func setManualPause(_ paused: Bool) {
@@ -20,8 +32,40 @@ final class PausePolicy {
     }
 
     func evaluateWindows(mode: PauseMode) {
-        windowPause = computeWindowPause(mode: mode)
-        update()
+        let raw = computeWindowPause(mode: mode)
+        if raw == windowPause {
+            // Settled back to the current state — drop any
+            // pending change so an animation does not
+            // resurrect a stale one.
+            cancelDebounce()
+            return
+        }
+        scheduleDebounce()
+        // Set AFTER scheduling: scheduleDebounce's
+        // cancelDebounce() clears pendingWindowPause.
+        pendingWindowPause = raw
+    }
+
+    private func scheduleDebounce() {
+        cancelDebounce()
+        let work = DispatchWorkItem { [weak self] in
+            guard let self, let pending = self.pendingWindowPause else { return }
+            self.pendingWindowPause = nil
+            self.debounceWork = nil
+            self.windowPause = pending
+            self.update()
+        }
+        debounceWork = work
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + Self.windowDebounce,
+            execute: work
+        )
+    }
+
+    private func cancelDebounce() {
+        debounceWork?.cancel()
+        debounceWork = nil
+        pendingWindowPause = nil
     }
 
     private func update() {
