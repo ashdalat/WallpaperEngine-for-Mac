@@ -64,7 +64,17 @@ final class DesktopWindowManager: NSObject {
         }
         if let current = current {
             for screen in NSScreen.screens {
-                apply(current, to: screen, settings: settings)
+                let key = screenKey(screen)
+                if windows[key] != nil {
+                    // This screen already shows the wallpaper.
+                    // Only track the new frame: rebuilding the
+                    // renderer here tears down the whole Vulkan
+                    // device and leaves a black gap on screen
+                    // until the scene is reloaded.
+                    windows[key]?.updateFrame()
+                } else {
+                    apply(current, to: screen, settings: settings)
+                }
             }
         }
     }

@@ -106,6 +106,7 @@ final class AppState: ObservableObject {
     }
 
     func applyWallpaper(_ item: WallpaperItem) {
+        fputs("WEM: applyWallpaper \(item.title)\n", stderr)
         currentWallpaper = item
         settings.currentWallpaperId = item.id
         windowManager.applyToAllScreens(item, settings: settings)
@@ -127,6 +128,7 @@ final class AppState: ObservableObject {
     }
 
     func applySettingsChanges() {
+        fputs("WEM: applySettingsChanges\n", stderr)
         guard let current = currentWallpaper else { return }
         windowManager.applyToAllScreens(current, settings: settings)
     }
@@ -194,6 +196,7 @@ final class AppState: ObservableObject {
     }
 
     private func handleScreenChange() {
+        fputs("WEM: screen parameters changed\n", stderr)
         windowManager.handleScreenConfigurationChange(settings: settings, current: currentWallpaper)
     }
 }
