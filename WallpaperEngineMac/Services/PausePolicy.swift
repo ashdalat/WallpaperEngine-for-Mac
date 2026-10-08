@@ -34,16 +34,30 @@ final class PausePolicy {
     func evaluateWindows(mode: PauseMode) {
         let raw = computeWindowPause(mode: mode)
         if raw == windowPause {
-            // Settled back to the current state — drop any
-            // pending change so an animation does not
-            // resurrect a stale one.
             cancelDebounce()
             return
         }
-        scheduleDebounce()
-        // Set AFTER scheduling: scheduleDebounce's
-        // cancelDebounce() clears pendingWindowPause.
-        pendingWindowPause = raw
+        if raw {
+            // Pausing is debounced: a window entering a
+            // near-maximized state mid-animation (minimize/
+            // maximize zoom) must settle before the renderer
+            // pauses, so window animations do not abruptly
+            // drop wallpaper frames.
+            scheduleDebounce()
+            // Set AFTER scheduling: scheduleDebounce's
+            // cancelDebounce() clears pendingWindowPause.
+            pendingWindowPause = raw
+        } else {
+            // Unpausing is immediate. The moment the
+            // desktop is visible again (the frontmost
+            // window closed or minimized), the renderer
+            // must resume presenting to repaint the
+            // CAMetalLayer — a delayed resume leaves a
+            // black gap on screen.
+            cancelDebounce()
+            windowPause = false
+            update()
+        }
     }
 
     private func scheduleDebounce() {
