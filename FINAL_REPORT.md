@@ -58,9 +58,10 @@ code signature).
 
 ## App icon
 
-`wallpaper engine.png` (1254×1254) → `AppIcon.icns` (all standard sizes,
-built by `build_app_manual.sh` via `sips` + `iconutil`). The old
-`AppIcon.png` / `AppIcon_raw.png` sources were deleted. Menu-bar icon
+`WallpaperEngineMac.png` (1254×1254) → `AppIcon.icns` (all standard
+sizes, built by `build_app_manual.sh` via `sips` + `iconutil`).
+The earlier `AppIcon.png` / `AppIcon_raw.png` and the interim
+`wallpaper engine.png` sources were deleted. Menu-bar icon
 remains `MenuBarIcon.png`.
 
 ## Known limitations (documented, accepted)
