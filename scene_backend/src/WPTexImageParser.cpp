@@ -257,11 +257,20 @@ ImageHeader WPTexImageParser::ParseHeader(const std::string& name) {
         for (int32_t i = 0; i < framecount; i++) {
             SpriteFrame sf;
             sf.imageId = file.ReadInt32();
-            if (sf.imageId < 0) {
-                LOG_ERROR("get neg imageid");
+            // A sprite sheet may reference an image id
+            // that was never emitted (or a negative one,
+            // which cast to usize wraps around). Indexing
+            // imageDatas with such an id throws
+            // std::out_of_range and kills the process.
+            bool validImage = sf.imageId >= 0 &&
+                (usize)sf.imageId < imageDatas.size() &&
+                imageDatas[(usize)sf.imageId].size() >= 2;
+            if (!validImage) {
+                LOG_ERROR("invalid imageid %d (image count %zu)",
+                    sf.imageId, image_count);
             }
-            float spriteWidth  = imageDatas.at((usize)sf.imageId)[0];
-            float spriteHeight = imageDatas.at((usize)sf.imageId)[1];
+            float spriteWidth  = validImage ? imageDatas[(usize)sf.imageId][0] : 1.0f;
+            float spriteHeight = validImage ? imageDatas[(usize)sf.imageId][1] : 1.0f;
 
             sf.frametime = file.ReadFloat();
             if (texs == 1) {
@@ -286,7 +295,9 @@ ImageHeader WPTexImageParser::ParseHeader(const std::string& name) {
             sf.yAxis[0] /= spriteHeight;
             sf.yAxis[1] /= spriteHeight;
             sf.rate = sf.height / sf.width;
-            header.spriteAnim.AppendFrame(sf);
+            if (validImage) {
+                header.spriteAnim.AppendFrame(sf);
+            }
         }
     } else {
         i32 mipmap_count = file.ReadInt32();

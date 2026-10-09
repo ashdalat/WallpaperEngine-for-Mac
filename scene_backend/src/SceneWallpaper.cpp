@@ -1,6 +1,8 @@
 #include "SceneWallpaper.hpp"
 #include "SceneWallpaperSurface.hpp"
 
+#include <stdexcept>
+
 #include "Utils/Logging.h"
 #include "Looper/Looper.hpp"
 
@@ -445,7 +447,17 @@ void MainHandler::loadScene() {
             LOG_ERROR("Not supported scene type");
             return;
         }
-        scene = m_scene_parser.Parse(scene_id, scene_src, vfs, *m_sound_manager);
+        scene = nullptr;
+        try {
+            scene = m_scene_parser.Parse(scene_id, scene_src, vfs, *m_sound_manager);
+        } catch (const std::exception& e) {
+            LOG_ERROR("scene parse failed: %s", e.what());
+            return;
+        }
+        if (!scene) {
+            LOG_ERROR("scene parse returned no scene");
+            return;
+        }
         scene->vfs.swap(pVfs);
     }
 
