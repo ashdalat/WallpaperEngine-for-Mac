@@ -122,6 +122,7 @@ WallpaperEngineMac/
     ├── GalleryWindowController.swift  # NSWindow hosting GalleryView
     ├── SettingsView.swift             # SwiftUI settings (Steam path, playback, power)
     ├── SettingsWindowController.swift
+    ├── WallpaperPropertiesView.swift  # Panel phải: metadata + user properties wallpaper + mục Hiển thị (rotation/flip/position)
     └── PreviewWindowController.swift  # Cửa sổ preview nổi (reuse WallpaperRenderer)
 ```
 
@@ -160,6 +161,43 @@ Steam Library ──scan──▶ WallpaperLibrary ──▶ GalleryView (SwiftU
 | Plasma desktop widget | `DesktopWallpaperWindow` @ `CGWindowLevelForKey(.desktopWindow)` | ✅ |
 | Đa màn hình | `DesktopWindowManager` — 1 window/renderer mỗi `NSScreen`, key = CGDisplayID | ✅ |
 | `Scene.qml` | `DesktopSceneView` + `SceneRendererBridge` — engine wallpaper-scene-renderer (Vulkan) dịch qua MoltenVK (Metal). Cần build `scene_backend/` trước, xem [§3](#3-build--chạy-thử) | ✅ |
+| Waywallen `DisplayLayoutControls` (rotation, flip, location) | `WallpaperPropertiesView` — mục **Hiển thị** (xem [§2.1](#21-cài-đặt-hiển--xoay--lật--vị-trí)) | ✅ |
+
+### 2.1. Cài đặt hiển thị — xoay / lật / vị trí
+
+Chọn wallpaper trong Gallery → panel bên phải (**Settings & Info**) → mục **Hiển thị**:
+
+- **Rotation**: Normal / 90° / 180° / 270° (tương đương Waywallen `rotation`).
+- **Flip**: None / Horizontal / Vertical / Both (tương đương Waywallen `flip`).
+- **Position X / Y**: slider 0–100 (50 = căn giữa) + lưới 9 nút
+  (↖ ↑ ↗ / ← • → / ↙ ↓ ↘) để căn nhanh — tương đương Waywallen
+  **Location** (`location_x` / `location_y`).
+- **Áp dụng ngay** cho wallpaper đang chạy, không cần apply lại
+  (qua `UserDefaults.didChangeNotification` observer trong `AppState`
+  — `@AppStorage` bên trong `ObservableObject` không phát
+  `objectWillChange`, nên `onChange` của SwiftUI không chạy nếu
+  không có observer này).
+- **Vị trí chỉ có phòng để trượt khi wallpaper xoay 90°/270°**
+  (phần bounding box xoay thừa ra so với màn hình) — giống hành vi
+  Waywallen; wallpaper cùng tỉ lệ màn hình thì X/Y không làm gì.
+
+**Chi tiết kỹ thuật** (`WallpaperRenderer.applyDisplayTransform`):
+biến đổi đặt trên `sublayerTransform` của một `NSView` container
+(`transformHost`) bao rendered view — **không** biến đổi layer của
+chính rendered view, vì `DesktopSceneView` là layer-hosting
+(`layer = CAMetalLayer()`, engine render swapchain fixed-size qua
+MoltenVK) và backing layer của `DesktopVideoView` chính là
+`AVPlayerLayer` (do `makeBackingLayer()` tạo, owner quản lý geometry).
+Chain affine theo thứ tự áp dụng: center → rotate → flip → uncenter →
+slide. Lưu ý `A.concatenating(B)` áp dụng A **trước** (= B∘A) — viết
+sai thứ tự sẽ đảo dấu translation và đẩy wallpaper ra khỏi màn hình.
+Slide Y bị negate vì layer space là y-up (offsetY=100 = xuống dưới
+màn hình).
+
+> Debug hook (giữ lại để test): `WEM_DEBUG_TRANSFORM="delay,rotation,flip,offsetX,offsetY"`
+> (5 số, cách nhau bởi dấu phẩy) — viết settings vào trong process sau
+> `delay` giây. `defaults write` bên ngoài **không** propagate vào app
+> đang chạy (cfprefsd quirk) nên phải dùng hook này để test.
 
 ---
 
@@ -276,6 +314,14 @@ App ghi log debug ra `~/Library/Logs/WallpaperEngineMac.log` (tự xoá/truncat 
   hardened runtime (sandbox sẽ chặn event tap).
 - **AVPlayer volume/mute**: yêu cầu macOS 10.15+ (deployment target 12.0 thoả mãn);
   hardware decode qua VideoToolbox tự động trên Apple Silicon M1-M4 và Intel.
+- **Color preset (app-level)**: đã nghiên cứu online — Waywallen không có
+  tính năng này (kiểm tra toàn bộ QML/protocol/i18n trong repo), và không
+  tìm thấy tài liệu nào về nó ở Wallpaper Engine gốc trên Windows.
+  Wallpaper tự mang preset màu (user property `color`/`combo`) **đã chạy**
+  trong app. Nếu cần làm lại: macOS hỗ trợ Core Image filter trên layer
+  (`CALayer.filters`: `CIColorControls`, `CIHueAdjust`, `CITemperatureAndTint`,
+  `CIColorCube`, `CIPhotoEffect*`) — cần mô tả/screenshot UI Windows để
+  implement đúng hành vi.
 
 ## 6. ROADMAP (future work)
 
