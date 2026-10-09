@@ -132,6 +132,7 @@ public:
             auto stream = wavsen::audio::make_stream(rstd::move(handle), m_desc);
             if (stream) {
                 m_curActive = rstd::move(stream);
+                rstd::log::info("SoundStream: opened '{}'", path.as_str());
                 return;
             }
         }
@@ -221,6 +222,9 @@ Arc<dyn<SceneSoundControl>> SoundParser::Parse(const wpscene::SoundObject& obj, 
     // something toggles it.
     state->playing.store(obj.visible && ! obj.startsilent, Ordering::Release);
     state->volume.store(config.volume, Ordering::Release);
+    rstd::log::info("SoundParser: sound object '{}' id={} paths={} mode={} playing={}",
+              obj.name.as_str(), obj.id, obj.sound.len(),
+              obj.playbackmode.as_str(), obj.visible && ! obj.startsilent);
     auto control = Arc<dyn<SceneSoundControl>>::make(SoundControl(state.clone()));
     auto ss      = Box<SoundStream>::make(
         obj.sound.clone(), vfs, config, rstd::move(state), rstd::move(audio_average));

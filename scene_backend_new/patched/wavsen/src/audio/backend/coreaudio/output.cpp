@@ -1,5 +1,6 @@
 module wavsen.audio.backend.coreaudio.output;
 import rstd;
+import rstd.log;
 import wavsen.ffi.coreaudio;
 
 using namespace rstd::prelude;
@@ -24,6 +25,7 @@ public:
             return empty {};
         });
         if (thread.is_ok()) worker_ = Some(rstd::move(thread).unwrap());
+        rstd::log::info("CoreAudioOutput: worker spawned={}", worker_.is_some());
     }
     ~Impl() {
         {
@@ -86,8 +88,10 @@ public:
         if (status == 0) status = AudioUnitInitialize(unit_);
         if (status != 0) {
             close();
+            rstd::log::warn("CoreAudioOutput: open failed: {}", i32(status));
             return Err(Error { ErrorKind::NativeFailure, i32(status) });
         }
+        rstd::log::info("CoreAudioOutput: opened default output device {}", device);
         sink_.changed(sink_.context, OutputState::Ready, Error {});
         return Ok(DeviceDesc { u32(2), u32(48000) });
     }
@@ -151,6 +155,12 @@ private:
     }
     static OSStatus on_audio(void* user, AudioUnitRenderActionFlags*, const AudioTimeStamp*, UInt32,
                              UInt32 frames, AudioBufferList* output) {
+        static bool logged_once = false;
+        if (! logged_once) {
+            logged_once = true;
+            rstd::log::info("CoreAudioOutput: first render callback ({} frames, {} buffers)",
+                      frames, output ? output->mNumberBuffers : 0);
+        }
         if (! output) return 0;
         auto& self = *static_cast<Impl*>(user);
         for (UInt32 i = 0; i < output->mNumberBuffers; ++i) {

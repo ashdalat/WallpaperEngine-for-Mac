@@ -108,6 +108,7 @@ private:
             guard->scheduled = true;
         }
         if (schedule && ! as<backend::Output>(native_).dispatch(&drain_callback, this)) {
+            rstd::log::warn("AudioDevice: drain dispatch failed");
             auto guard = commands_.lock().unwrap_unchecked();
             guard->pending.clear();
             guard->scheduled = false;
@@ -117,6 +118,7 @@ private:
     }
     static void drain_callback(void* user) { static_cast<Impl*>(user)->drain(); }
     void        drain() {
+        rstd::log::info("AudioDevice: drain");
         for (;;) {
             Vec<DeviceCommand> batch;
             {
@@ -163,6 +165,8 @@ private:
         scale_end_.store(u64(), Ordering::Relaxed);
     }
     void apply_desired(AudioDeviceDesiredState desired) {
+        rstd::log::info("AudioDevice: apply_desired active={} playing={} gen={}",
+                        desired.active, desired.playing, desired.generation);
         if (desired.generation != desired_.generation) close();
         desired_ = rstd::move(desired);
         if (desired_.volume_scale_revision != scale_revision_) {
@@ -182,8 +186,13 @@ private:
             if (result.is_err()) {
                 close();
                 auto error = rstd::move(result).unwrap_err();
+                rstd::log::warn("AudioDevice: native open failed: {} ({})",
+                          backend::error_name(error.kind), error.native_code);
                 emit(AudioDeviceState::Failed,
                      rstd::format("{} ({})", backend::error_name(error.kind), error.native_code));
+            } else {
+                rstd::log::info("AudioDevice: native output opened ({} ch {} Hz)",
+                          desc().channels, desc().sample_rate);
             }
             return;
         }
@@ -249,6 +258,12 @@ private:
         static_cast<Impl*>(user)->render(output, frames);
     }
     void render(float* output, rstd::uint32_t frames) {
+        static bool logged_once = false;
+        if (! logged_once) {
+            logged_once = true;
+            rstd::log::info("AudioDevice: first render callback ({} frames, {} channels)",
+                      frames, channels_.len());
+        }
         rstd::mem::memset(output, u8(), usize(frames) * usize(2 * sizeof(float)));
         if (desired_.muted) {
             submitted_ += u64(frames);

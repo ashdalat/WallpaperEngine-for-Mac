@@ -1,6 +1,7 @@
 module wavsen.audio;
 
 import rstd;
+import rstd.log;
 import wavsen.audio.core;
 import :mixer;
 
@@ -36,6 +37,8 @@ public:
 
     void apply(u32 fade_ms = u32()) {
         if (! activated || shutting_down) return;
+        rstd::log::info("SoundManager::apply active={} playing={} muted={} gen={}",
+                        ! muted, playing, muted, generation);
         (void)device.apply(AudioDeviceDesiredState {
             .generation            = generation,
             .active                = ! muted,
@@ -52,9 +55,9 @@ public:
     AudioDevice         device;
     AudioClientIdentity identity;
     AudioDeviceState    observed_state { AudioDeviceState::Idle };
-    u64                 generation;
-    u64                 stream_revision;
-    u64                 volume_scale_revision;
+    u64                 generation {};
+    u64                 stream_revision {};
+    u64                 volume_scale_revision {};
     f32                 volume { f32(1.0f) };
     f32                 volume_scale { f32(1.0f) };
     bool                muted {};
@@ -69,6 +72,7 @@ SoundManager::~SoundManager() = default;
 
 void SoundManager::mount(Box<dyn<SoundStreamObject>> ss) {
     auto channel = Box<StreamPullChannel>::make(rstd::move(ss));
+    rstd::log::info("SoundManager: mounting stream");
     (void)impl_->device.mount(Box<dyn<PullChannelObject>>::from_raw(
                                   dyn<PullChannelObject>::from_ptr(rstd::move(channel).into_raw())),
                               impl_->stream_revision);
@@ -84,6 +88,7 @@ void SoundManager::activate(AudioDeviceEventSink sink) {
     impl_->device.set_event_sink(Some(rstd::move(sink)));
     impl_->activated = true;
     ++impl_->generation;
+    rstd::log::info("SoundManager: activate");
     impl_->apply();
 }
 
@@ -112,10 +117,12 @@ bool SoundManager::is_inited() const {
 }
 
 void SoundManager::play() {
+    rstd::log::info("SoundManager::play");
     impl_->playing = true;
     impl_->apply();
 }
 void SoundManager::pause() {
+    rstd::log::info("SoundManager::pause");
     impl_->playing = false;
     impl_->apply();
 }

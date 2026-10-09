@@ -43,6 +43,13 @@ final class DesktopWindowManager: NSObject {
         renderers[key] = renderer
         fputs("WEM: apply renderer for \(item!.title) on screen\n", stderr)
         renderer.load(item: item!, in: window, settings: settings)
+        // The pause policy only fires onChange on a
+        // state transition, so at startup (already
+        // unpaused) resumeAll() never runs and the
+        // scene — and its audio — never got play().
+        // Rendering starts from load(), but the
+        // engine's SoundManager only plays on play().
+        renderer.play()
     }
 
     func pauseAll() {
