@@ -253,7 +253,7 @@ Sau đó:
 | Wallpaper không hiện trên desktop | Đảm bảo không có app wallpaper khác đang chạy. Thử Pause → Resume từ Menu Bar. |
 | Video không có tiếng | Menu Bar → bỏ tick "Mute Audio". Video cần codec được VideoToolbox hỗ trợ (H.264/HEVC mp4 luôn chạy; webm VP9 tuỳ phiên bản macOS). |
 | Video import vào hiển thị đen / không chạy | Video dùng codec AV1 — chỉ Mac M3 trở lên mới decode được. Khi có ffmpeg (Homebrew) app tự chuyển sang H.264 lúc import; nếu không có ffmpeg, app hiển thị thông báo thay vì nền đen. Chuyển thủ công: `ffmpeg -i video.mp4 -c:v h264_videotoolbox -pix_fmt yuv420p out.mp4`. |
-| Chuột không tương tác web wallpaper | Bật "Mouse Input (Web)" trong Settings, sau đó cấp quyền **Accessibility** cho app trong System Settings → Privacy & Security. |
+| Chuột không tương tác web wallpaper | Bật "Mouse Input (Web)" trong Settings, sau đó cấp quyền **Accessibility** cho app trong System Settings → Privacy & Security. App tự hỏi quyền khi thiếu và tự kích hoạt chuột trong vòng 5 giây sau khi cấp — không cần mở lại app. Kiểm tra log: `grep "mouse event tap" ~/Library/Logs/WallpaperEngineMac.log` (`active` = xong, `unavailable` = chưa cấp quyền). |
 | Web wallpaper nền đen | Một số web wallpaper tự set background — app đã inject CSS `html, body { background: transparent }`; nếu wallpaper dùng canvas opaque thì không trong suốt được. |
 | Build lỗi signing | Project cấu hình `CODE_SIGNING_ALLOWED=NO` để build thử nhanh. Nếu lỗi signing trong Xcode, vào Target → Signing & Capabilities → uncheck "Automatically manage signing". |
 

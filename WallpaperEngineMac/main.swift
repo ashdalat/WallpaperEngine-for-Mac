@@ -17,6 +17,14 @@ let mode: String = {
     return size > 2_000_000 ? "w" : "a"
 }()
 freopen(logFile.path, mode, stderr)
+// freopen re-buffers the stream like fopen
+// (fully buffered, ~4 KB), which would hold
+// debug lines in memory — the scene renderer's
+// startup spam flushes it by accident, but a
+// quiet session would hide lines until the app
+// exits. Keep stderr unbuffered so every line
+// lands in the log immediately.
+setvbuf(stderr, nil, _IONBF, 0)
 
 MainActor.assumeIsolated {
     let app = NSApplication.shared

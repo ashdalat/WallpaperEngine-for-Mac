@@ -111,6 +111,13 @@ final class AppState: ObservableObject {
         }
 
         mouseEventTap.onEvent = { [weak self] event in
+            // Debug: proves whether the tap callback is
+            // serviced at all — if this line never appears
+            // in the log, the event tap itself is dead.
+            if let self = self, self.tapEventLogCount < 10 {
+                self.tapEventLogCount += 1
+                fputs("WEM: tap delivered event type=\(event.type.rawValue)\n", stderr)
+            }
             Task { @MainActor in
                 self?.windowManager.handleMouseEvent(event)
             }
@@ -157,22 +164,32 @@ final class AppState: ObservableObject {
     /// in start() for why a plain didBecomeActive
     /// retry is not enough.
     private var accessibilityPromptShown = false
+    private var tapEventLogCount = 0
+    private var tapIsActive = false
+    private var tapFailureLogged = false
 
     func retryMouseEventTap(prompt: Bool = false) {
         guard settings.mouseInput else { return }
         if mouseEventTap.start() {
-            fputs("WEM: mouse event tap active\n", stderr)
+            if !tapIsActive {
+                fputs("WEM: mouse event tap active\n", stderr)
+                tapIsActive = true
+            }
+            tapFailureLogged = false
             return
         }
-        // The system prompt is modal and the user
-        // may grant the permission on first sight —
-        // prompting again on every retry would be
-        // noise, so ask once per launch.
+        tapIsActive = false
+        // Log once and show the system prompt once
+        // per launch — the 5s timer keeps retrying,
+        // so once the permission is granted the tap
+        // comes up on its own, without a restart.
+        if !tapFailureLogged {
+            tapFailureLogged = true
+            fputs("WEM: mouse event tap unavailable — grant Accessibility permission in System Settings > Privacy & Security > Accessibility\n", stderr)
+        }
         if prompt && !accessibilityPromptShown {
             accessibilityPromptShown = true
             mouseEventTap.ensureAccessibility(prompt: true)
-        } else {
-            fputs("WEM: mouse event tap unavailable — grant Accessibility permission in System Settings > Privacy & Security > Accessibility\n", stderr)
         }
     }
 
