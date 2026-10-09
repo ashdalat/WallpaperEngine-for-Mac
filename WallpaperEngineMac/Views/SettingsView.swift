@@ -37,20 +37,6 @@ struct SettingsView: View {
                 }
                 .onChange(of: state.settings.displayMode) { state.applySettingsChanges() }
 
-                Picker("Rotation", selection: $state.settings.rotation) {
-                    ForEach(DisplayRotation.allCases) { rotation in
-                        Text(rotation.displayName).tag(rotation.rawValue)
-                    }
-                }
-                .onChange(of: state.settings.rotation) { state.applySettingsChanges() }
-
-                Picker("Flip", selection: $state.settings.flip) {
-                    ForEach(DisplayFlip.allCases) { flip in
-                        Text(flip.displayName).tag(flip.rawValue)
-                    }
-                }
-                .onChange(of: state.settings.flip) { state.applySettingsChanges() }
-
                 Toggle("Mute Audio", isOn: $state.settings.muteAudio)
                     .onChange(of: state.settings.muteAudio) { state.applySettingsChanges() }
 

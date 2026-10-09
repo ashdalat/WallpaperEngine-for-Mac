@@ -61,6 +61,7 @@ struct WallpaperPropertiesView: View {
                     Text("The video file will be removed from this Mac. This can't be undone.")
                 }
                 infoSection
+                displaySection
                 settingsSection
             }
             .padding()
@@ -141,6 +142,32 @@ struct WallpaperPropertiesView: View {
     private var typeDescription: String {
         let type = item.project?.type ?? item.type.rawValue
         return "\(item.type.displayName) wallpaper · \(type)"
+    }
+
+    // MARK: - Display
+
+    /// Display transform options (Waywallen-style
+    /// rotation/flip). These live with the wallpaper
+    /// selection, not in the app Settings menu.
+    private var displaySection: some View {
+        GroupBox("Display") {
+            VStack(alignment: .leading, spacing: 10) {
+                Picker("Rotation", selection: $state.settings.rotation) {
+                    ForEach(DisplayRotation.allCases) { rotation in
+                        Text(rotation.displayName).tag(rotation.rawValue)
+                    }
+                }
+                .onChange(of: state.settings.rotation) { state.applySettingsChanges() }
+
+                Picker("Flip", selection: $state.settings.flip) {
+                    ForEach(DisplayFlip.allCases) { flip in
+                        Text(flip.displayName).tag(flip.rawValue)
+                    }
+                }
+                .onChange(of: state.settings.flip) { state.applySettingsChanges() }
+            }
+            .padding(4)
+        }
     }
 
     // MARK: - Settings
