@@ -15,6 +15,8 @@ struct WallpaperPropertiesView: View {
 
     @EnvironmentObject var state: AppState
 
+    @State private var showDeleteConfirm = false
+
     private var properties: [(key: String, property: WEProperty)] {
         guard let properties = item.project?.effectiveProperties else { return [] }
         return properties
@@ -40,10 +42,23 @@ struct WallpaperPropertiesView: View {
                     Text("Settings & Info")
                         .font(.headline)
                     Spacer()
+                    if state.isImportedWallpaper(item) {
+                        Button("Delete…", role: .destructive) {
+                            showDeleteConfirm = true
+                        }
+                    }
                     Button("Set Wallpaper") {
                         state.applyWallpaper(item)
                     }
                     .keyboardShortcut(.defaultAction)
+                }
+                .alert("Delete “\(item.title)”?", isPresented: $showDeleteConfirm) {
+                    Button("Delete", role: .destructive) {
+                        state.deleteWallpaper(item)
+                    }
+                    Button("Cancel", role: .cancel) {}
+                } message: {
+                    Text("The video file will be removed from this Mac. This can't be undone.")
                 }
                 infoSection
                 settingsSection

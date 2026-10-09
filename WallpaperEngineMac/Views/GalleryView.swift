@@ -7,6 +7,9 @@ struct GalleryView: View {
     /// right-hand pane. Single-click selects;
     /// double-click applies.
     @State private var selectedItem: WallpaperItem?
+    /// The wallpaper waiting for the
+    /// delete-confirmation dialog.
+    @State private var deleteCandidate: WallpaperItem?
 
     private let columns = [
         GridItem(.adaptive(minimum: 220), spacing: 16)
@@ -45,9 +48,31 @@ struct GalleryView: View {
                                     Button("Open in Finder") {
                                         NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: item.folderURL.path)
                                     }
+                                    if state.isImportedWallpaper(item) {
+                                        Button("Delete Wallpaper…", role: .destructive) {
+                                            deleteCandidate = item
+                                        }
+                                    }
                                     if state.currentWallpaper?.id == item.id {
                                         Button("Remove Wallpaper") { state.removeWallpaper() }
                                     }
+                                }
+                                .confirmationDialog(
+                                    "Delete this wallpaper?",
+                                    isPresented: Binding(
+                                        get: { deleteCandidate != nil },
+                                        set: { if !$0 { deleteCandidate = nil } }
+                                    ),
+                                    titleVisibility: .visible
+                                ) {
+                                    if let deleteCandidate {
+                                        Button("Delete “\(deleteCandidate.title)”", role: .destructive) {
+                                            state.deleteWallpaper(deleteCandidate)
+                                        }
+                                    }
+                                    Button("Cancel", role: .cancel) {}
+                                } message: {
+                                    Text("The video file will be removed from this Mac. This can't be undone.")
                                 }
                             }
                         }
@@ -160,10 +185,6 @@ struct GalleryView: View {
                 }
                 .buttonStyle(.plain)
             }
-            Button(action: { Task { await state.rescan() } }) {
-                Image(systemName: "arrow.clockwise")
-            }
-            .help("Rescan library")
             if let current = state.currentWallpaper {
                 Button(action: { selectedItem = current }) {
                     Image(systemName: "slider.horizontal.3")

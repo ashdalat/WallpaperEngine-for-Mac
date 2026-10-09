@@ -71,6 +71,14 @@ final class AppState: ObservableObject {
         if ProcessInfo.processInfo.environment["WEM_DEBUG_SETTINGS"] != nil {
             openSettings()
         }
+        // Debug delete hook: WEM_DEBUG_DELETE=id
+        // deletes the wallpaper with that id
+        // once the library has loaded — the
+        // same thing the Delete button does.
+        if let id = ProcessInfo.processInfo.environment["WEM_DEBUG_DELETE"],
+           !id.isEmpty {
+            deleteDebugWallpaper(id)
+        }
 
         NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification,
@@ -219,6 +227,25 @@ final class AppState: ObservableObject {
         }
     }
 
+    /// Deletes the wallpaper with the given id
+    /// once the library has been scanned. Used
+    /// by the WEM_DEBUG_DELETE hook.
+    private func deleteDebugWallpaper(_ id: String) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+            guard let self else { return }
+            if self.library.items.isEmpty {
+                self.deleteDebugWallpaper(id)
+                return
+            }
+            guard let item = self.library.items.first(where: { $0.id == id }) else {
+                fputs("WEM: debug delete: no item with id \(id)\n", stderr)
+                return
+            }
+            fputs("WEM: debug delete \(item.title)\n", stderr)
+            self.deleteWallpaper(item)
+        }
+    }
+
     /// Saves a wallpaper user property (its settings
     /// sheet value) and applies it to the live
     /// wallpaper if that wallpaper is on screen.
@@ -234,6 +261,33 @@ final class AppState: ObservableObject {
         currentWallpaper = nil
         settings.currentWallpaperId = ""
         windowManager.applyToAllScreens(nil, settings: settings)
+    }
+
+    /// True for wallpapers imported with
+    /// "Import Local Video…" — they live in
+    /// the app's own library folder and can
+    /// be deleted. Steam workshop items
+    /// belong to Steam and can't.
+    func isImportedWallpaper(_ item: WallpaperItem) -> Bool {
+        item.folderURL.path.hasPrefix(localWallpapersDirectory().path)
+    }
+
+    /// Deletes an imported wallpaper: removes
+    /// its folder from the local library and
+    /// rescans. If the wallpaper is on screen,
+    /// the desktop is cleared first.
+    func deleteWallpaper(_ item: WallpaperItem) {
+        guard isImportedWallpaper(item) else { return }
+        fputs("WEM: delete \(item.title)\n", stderr)
+        if currentWallpaper?.id == item.id {
+            removeWallpaper()
+        }
+        do {
+            try FileManager.default.removeItem(at: item.folderURL)
+        } catch {
+            fputs("WEM: delete failed: \(error)\n", stderr)
+        }
+        Task { await rescan() }
     }
 
     func togglePause() {
