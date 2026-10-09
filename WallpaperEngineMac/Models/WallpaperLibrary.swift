@@ -5,7 +5,12 @@ final class WallpaperLibrary: ObservableObject {
     @Published var items: [WallpaperItem] = []
     @Published var isScanning = false
     @Published var searchText = ""
-    @Published var enabledTypes: Set<WallpaperType> = [.video, .web]
+    // The whole library is visible by default;
+    // the gallery toolbar buttons narrow it.
+    // Scene wallpapers are the majority on most
+    // libraries, so leaving them out made the
+    // grid look empty.
+    @Published var enabledTypes: Set<WallpaperType> = [.video, .web, .scene]
 
     private var steamRoots: [URL] = []
 
