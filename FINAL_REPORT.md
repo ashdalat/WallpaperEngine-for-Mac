@@ -58,9 +58,11 @@ code signature).
 
 ## App icon
 
-`WallpaperEngineMac.png` (1254×1254) → `AppIcon.icns` (all standard
-sizes, built by `build_app_manual.sh` via `sips` + `iconutil`).
-The earlier `AppIcon.png` / `AppIcon_raw.png` and the interim
+`WallpaperEngineMac.png` (1254×1254, corners pre-rounded to the
+macOS squircle shape) → `AppIcon.icns` (all standard sizes, built
+by `build_app_manual.sh` via `sips` + `iconutil`; macOS Big Sur+
+also applies its own system squircle mask). The earlier
+`AppIcon.png` / `AppIcon_raw.png` and the interim
 `wallpaper engine.png` sources were deleted. Menu-bar icon
 remains `MenuBarIcon.png`.
 
