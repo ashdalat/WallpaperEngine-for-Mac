@@ -4,8 +4,8 @@
 # with clang++, the Swift sources with swiftc (both ship with the
 # Command Line Tools), and packages the .app bundle by hand.
 #
-# Prerequisite: scene_backend/build/install/lib/libwescene-renderer.a
-# (run ./build.sh or bash scene_backend/BuildSceneBackend.sh first).
+# Prerequisite: scene_backend_new/build/install/lib/libwescene-renderer.a
+# (run bash scene_backend_new/BuildSceneBackend.sh first).
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -68,8 +68,32 @@ swiftc \
 echo ">> Packaging WallpaperEngineMac.app..."
 APP="$OUT/WallpaperEngineMac.app"
 rm -rf "$APP"
-mkdir -p "$APP/Contents/MacOS"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$OUT/WallpaperEngineMac" "$APP/Contents/MacOS/WallpaperEngineMac"
+
+# App icon: build the .iconset sizes from AppIcon.png
+# (sips cannot write the "@2x" names directly, so each
+# size goes to a temp file first).
+ICONSET="$OUT/AppIcon.iconset"
+rm -rf "$ICONSET"
+mkdir -p "$ICONSET"
+icon_size() {
+    sips -z "$2" "$2" AppIcon.png --out "$ICONSET/.tmp_$1" >/dev/null
+    mv "$ICONSET/.tmp_$1" "$ICONSET/$1"
+}
+icon_size icon_16x16.png 16
+icon_size icon_16x16@2x.png 32
+icon_size icon_32x32.png 32
+icon_size icon_32x32@2x.png 64
+icon_size icon_128x128.png 128
+icon_size icon_128x128@2x.png 256
+icon_size icon_256x256.png 256
+icon_size icon_256x256@2x.png 512
+icon_size icon_512x512.png 512
+icon_size icon_512x512@2x.png 1024
+iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/AppIcon.icns"
+rm -rf "$ICONSET"
+
 sed -e 's|\$(EXECUTABLE_NAME)|WallpaperEngineMac|g' \
     -e 's|\$(PRODUCT_BUNDLE_IDENTIFIER)|com.wallpaperengine.mac|g' \
     -e 's|\$(PRODUCT_NAME)|WallpaperEngineMac|g' \
