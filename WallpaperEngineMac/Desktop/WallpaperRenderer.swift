@@ -70,6 +70,7 @@ final class WallpaperRenderer: NSObject {
         }
 
         if let renderedView {
+            applyDisplayTransform(to: renderedView, settings: settings)
             window.contentView?.addSubview(renderedView)
         }
     }
@@ -106,6 +107,29 @@ final class WallpaperRenderer: NSObject {
         webView?.setMouseEnabled(settings.mouseInput)
         sceneView?.setMouseEnabled(settings.mouseInput)
         sceneView?.updateSettings(settings)
+        if let renderedView {
+            applyDisplayTransform(to: renderedView, settings: settings)
+        }
+    }
+
+    /// Applies the display rotation/flip settings to the
+    /// rendered view's layer. The layer transform is the
+    /// same for every renderer kind (scene's CAMetalLayer,
+    /// the player layer, the web view), so one helper
+    /// covers all of them. Rotation and flip are composed
+    /// the way Waywallen does it: rotate first, then flip
+    /// in screen space — `scaledBy` then `rotated(by:)`
+    /// concatenates with the rotation applied first.
+    private func applyDisplayTransform(to view: NSView, settings: AppSettings) {
+        view.wantsLayer = true
+        let rotation = DisplayRotation(rawValue: settings.rotation) ?? .normal
+        let flip = DisplayFlip(rawValue: settings.flip) ?? .none
+        var transform = CGAffineTransform(
+            scaleX: flip.scaleX, y: flip.scaleY)
+        if rotation.angle != 0 {
+            transform = transform.rotated(by: rotation.angle)
+        }
+        view.layer?.setAffineTransform(transform)
     }
 
     func handleMouseEvent(_ event: CGEvent, window: NSWindow) {

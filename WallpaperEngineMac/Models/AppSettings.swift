@@ -58,13 +58,79 @@ enum DisplayMode: Int, CaseIterable, Identifiable {
     }
 }
 
+enum DisplayRotation: Int, CaseIterable, Identifiable {
+    case normal = 0
+    case cw90
+    case cw180
+    case cw270
+
+    var id: Int { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .normal: return "Normal"
+        case .cw90: return "90° Clockwise"
+        case .cw180: return "180°"
+        case .cw270: return "270° Clockwise"
+        }
+    }
+
+    /// Clockwise rotation, in radians. CoreGraphics
+    /// measures positive angles counter-clockwise.
+    var angle: CGFloat {
+        switch self {
+        case .normal: return 0
+        case .cw90: return -.pi / 2
+        case .cw180: return .pi
+        case .cw270: return .pi / 2
+        }
+    }
+}
+
+enum DisplayFlip: Int, CaseIterable, Identifiable {
+    case none = 0
+    case horizontal
+    case vertical
+    case both
+
+    var id: Int { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .none: return "None"
+        case .horizontal: return "Horizontal"
+        case .vertical: return "Vertical"
+        case .both: return "Both"
+        }
+    }
+
+    var scaleX: CGFloat {
+        switch self {
+        case .horizontal, .both: return -1
+        default: return 1
+        }
+    }
+
+    var scaleY: CGFloat {
+        switch self {
+        case .vertical, .both: return -1
+        default: return 1
+        }
+    }
+}
+
 @MainActor
 final class AppSettings: ObservableObject {
     @AppStorage("steamPath") var steamPath: String = ""
     @AppStorage("pauseMode") var pauseMode: Int = PauseMode.focusOrMax.rawValue
     @AppStorage("displayMode") var displayMode: Int = DisplayMode.crop.rawValue
+    @AppStorage("rotation") var rotation: Int = DisplayRotation.normal.rawValue
+    @AppStorage("flip") var flip: Int = DisplayFlip.none.rawValue
     @AppStorage("volume") var volume: Double = 0.5
-    @AppStorage("muteAudio") var muteAudio: Bool = true
+    // Wallpaper Engine plays wallpaper audio by
+    // default; muting by default made every
+    // wallpaper silently "not play audio".
+    @AppStorage("muteAudio") var muteAudio: Bool = false
     @AppStorage("mouseInput") var mouseInput: Bool = false
     @AppStorage("pauseOnBattery") var pauseOnBattery: Bool = false
     @AppStorage("pauseBatteryPercent") var pauseBatteryPercent: Int = 20
