@@ -9,6 +9,10 @@ import Foundation
 /// tap exists, the tap is dead.
 private var tapCallbackCount = 0
 
+/// Debug counter: how many disable
+/// notifications the tap has received.
+private var tapDisableLogCount = 0
+
 final class MouseEventTap {
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
@@ -36,9 +40,42 @@ final class MouseEventTap {
             stop()
             return false
         }
-        guard eventTap == nil else { return true }
+        guard eventTap == nil else {
+            // Belt and braces: make sure the tap
+            // is enabled. The window server can
+            // disable it (see the callback) and a
+            // disabled tap delivers nothing, so the
+            // retry timer re-enables it every pass.
+            CGEvent.tapEnable(tap: eventTap!, enable: true)
+            return true
+        }
 
         let callback: CGEventTapCallBack = { _, type, event, refcon in
+            // Out of band notifications: the window
+            // server disabled the tap — it timed out,
+            // or the user toggled the permission in
+            // System Settings. Re-enable it, the
+            // standard recovery for event taps, or it
+            // stays disabled and no further events
+            // arrive (granting the permission again
+            // does not bring a disabled tap back).
+            if type == .tapDisabledByTimeout
+                || type == .tapDisabledByUserInput {
+                if let refcon = refcon {
+                    let owner = Unmanaged<MouseEventTap>
+                        .fromOpaque(refcon)
+                        .takeUnretainedValue()
+                    if let eventTap = owner.eventTap {
+                        CGEvent.tapEnable(
+                            tap: eventTap, enable: true)
+                    }
+                }
+                if tapDisableLogCount < 10 {
+                    tapDisableLogCount += 1
+                    fputs("WEM: tap disabled (type=\(type.rawValue)) — re-enabled\n", stderr)
+                }
+                return nil
+            }
             if tapCallbackCount < 10 {
                 tapCallbackCount += 1
                 fputs("WEM: tap callback fired type=\(type.rawValue)\n", stderr)
