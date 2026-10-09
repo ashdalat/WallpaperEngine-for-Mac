@@ -1,0 +1,136 @@
+[package]
+name = "vrento"
+version = "0.1.0"
+authors = ["hypengw <hypengwip@gmail.com>"]
+license = "MIT OR Apache-2.0"
+
+[lib]
+name = "vrento"
+module = "vrento.vulkan"
+archive = "vrento"
+sources = [
+  "src/Scene/Runtime.cppm",
+  "src/Scene/Node.cppm",
+  "src/Scene/Identity.cppm",
+  "src/Scene/Material.cppm",
+  "src/Scene/Camera.cppm",
+  "src/Types/Vertex.cppm",
+  "src/Scene/Geometry.cppm",
+  "src/Scene/Geometry.cpp",
+  "src/Renderer/DrawBuffer.cppm",
+  "src/Renderer/DrawBuffer.cpp",
+  "src/Uniform/Value.cppm",
+  "src/Uniform/Value.cpp",
+  "src/Uniform/Source.cppm",
+  "src/Uniform/Buffer.cppm",
+  "src/Uniform/Buffer.cpp",
+  "src/Uniform/Binding.cppm",
+  "src/Uniform/Binding.cpp",
+  "src/Trace.cppm",
+  "src/Resource/Image.cppm",
+  "src/Resource/VideoPlayback.cppm",
+  "src/Types/Graphics.cppm",
+  "src/Types/Shader.cppm",
+  "src/Types/Texture.cppm",
+  "src/RenderGraph/DependencyGraph.cpp",
+  "src/RenderGraph/DependencyGraph.cppm",
+  "src/RenderGraph/Pass.cppm",
+  "src/RenderGraph/PassNode.cpp",
+  "src/RenderGraph/PassNode.cppm",
+  "src/RenderGraph/RGraph.cppm",
+  "src/RenderGraph/RenderGraph.cpp",
+  "src/RenderGraph/RenderGraph.cppm",
+  "src/RenderGraph/TexNode.cpp",
+  "src/RenderGraph/TexNode.cppm",
+  "src/Resource/Barrier.cppm",
+  "src/Resource/Buffer.cppm",
+  "src/Resource/BufferRegistry.cppm",
+  "src/Resource/Catalog.cppm",
+  "src/Resource/Descriptor.cppm",
+  "src/Resource/Error.cppm",
+  "src/Resource/External.cppm",
+  "src/Resource/Graphics.cppm",
+  "src/Resource/Handle.cppm",
+  "src/Resource/Lifetime.cppm",
+  "src/Resource/Owner.cppm",
+  "src/Resource/Plan.cppm",
+  "src/Resource/Policy.cppm",
+  "src/Resource/Prepared.cppm",
+  "src/Resource/Registry.cppm",
+  "src/Resource/Resource.cppm",
+  "src/Resource/ResourceKey.cppm",
+  "src/Resource/Shader.cppm",
+  "src/Resource/ShaderRegistry.cppm",
+  "src/Resource/State.cppm",
+  "src/Resource/System.cppm",
+  "src/Resource/Texture.cppm",
+  "src/Resource/TextureRegistry.cppm",
+  "src/Vulkan/BufferManager.cpp",
+  "src/Vulkan/Device.cpp",
+  "src/Vulkan/GraphicsPipeline.cpp",
+  "src/Vulkan/Instance.cpp",
+  "src/Vulkan/Parameters.cpp",
+  "src/Vulkan/PipelineLayout.cppm",
+  "src/Vulkan/ShaderCompile.cppm",
+  "src/Vulkan/Swapchain.cpp",
+  "src/Vulkan/TextureCache.cpp",
+  "src/Vulkan/Vulkan.cppm",
+]
+
+[[test]]
+name = "foundation"
+sources = ["tests/foundation.cpp"]
+
+[[test]]
+name = "external-swapchain"
+sources = ["tests/external_swapchain.cpp"]
+
+[[test]]
+name = "extension-names"
+sources = ["tests/extension_names.cpp"]
+
+[[test]]
+name = "uniform"
+sources = ["tests/uniform.cpp"]
+
+[[test]]
+name = "pipeline-layout"
+sources = ["tests/pipeline_layout.cpp"]
+
+[[test]]
+name = "geometry"
+sources = ["tests/geometry.cpp"]
+
+[[test]]
+name = "draw-buffer"
+sources = ["tests/draw_buffer.cpp"]
+
+[[test]]
+name = "node"
+sources = ["tests/node.cpp"]
+
+[[test]]
+name = "material"
+sources = ["tests/material.cpp"]
+
+[[test]]
+name = "camera"
+sources = ["tests/camera.cpp"]
+
+[[test]]
+name = "scene-identity"
+sources = ["tests/scene_identity.cpp"]
+
+[usage]
+options = [
+  "-Wextra",
+  "-Wno-missing-field-initializers",
+  "-Wno-gnu-zero-variadic-macro-arguments",
+]
+
+[dependencies]
+rstd-std = { version = "0.1.0", pub = true }
+rstd-cppstd = { version = "0.1.0", pub = true }
+rstd-log = { version = "0.1.0", pub = true }
+vvk = { version = "0.1.0", pub = true }
+wavsen = { git = "https://github.com/hypengw/wavsen.git" }

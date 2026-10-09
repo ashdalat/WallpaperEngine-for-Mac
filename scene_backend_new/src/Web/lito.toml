@@ -1,0 +1,58 @@
+[package]
+name = "owe-web"
+version.workspace = true
+
+[lib]
+name = "owe-web"
+module = "weweb"
+archive = "owe-web"
+sources = [
+  "Web.cppm",
+  "DmaBufFrame.cppm",
+  "Manifest.cppm",
+  "BrowserHost.cppm",
+  "Cef.cppm",
+  "CefInternal.cppm",
+  "Manifest.cpp",
+  "UserProperties.cpp",
+  "AppHandler.cpp",
+  "ClientHandler.cpp",
+  "OsrRenderHandler.cpp",
+  "BrowserHost.cpp",
+]
+
+[usage]
+public-include-directories = ["."]
+options = [
+  "-Wextra",
+  "-Wno-missing-field-initializers",
+  "-Wno-gnu-zero-variadic-macro-arguments",
+]
+
+[dependencies.owe-core]
+workspace = true
+pub = true
+
+[dependencies.rstd-std]
+workspace = true
+pub = true
+
+[dependencies.rstd-cppstd]
+workspace = true
+pub = true
+
+[external-dependencies.cmake.cef]
+workspace = true
+condition = 'target.os == "linux"'
+targets = [
+  { name = "libcef_lib", visibility = "public" },
+  { name = "libcef_dll_wrapper", visibility = "public" },
+]
+
+[external-dependencies.cmake.cef-macos]
+workspace = true
+condition = 'target.os == "macos"'
+targets = [
+  { name = "libcef_lib", pub = true },
+  { name = "libcef_dll_wrapper", pub = true },
+]

@@ -1,0 +1,35 @@
+[dependencies]
+
+[dependencies.rstd-dlopn]
+pub = true
+version = "0.1.0"
+
+[dependencies.rstd-log]
+version = "0.1.0"
+
+[dependencies.rstd-std]
+pub = true
+version = "0.1.0"
+
+[dev-dependencies]
+
+[dev-dependencies.rstd-test]
+version = "0.1.0"
+
+[lib]
+archive = "vvk"
+module = "vvk"
+name = "vvk"
+
+[package]
+authors = ["hypengw <hypengwip@gmail.com>"]
+license = "MIT OR Apache-2.0"
+name = "vvk"
+version = "0.1.0"
+
+[[test]]
+name = "vvk-memory-tests"
+sources = ["tests/main.cpp", "tests/memory.cpp", "tests/memory_vulkan.cpp", "tests/memory_import.cpp", "tests/dispatch.cpp", "tests/format.cpp"]
+
+[usage]
+public-include-directories = ["include"]

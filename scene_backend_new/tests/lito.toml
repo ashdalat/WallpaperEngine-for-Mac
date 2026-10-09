@@ -1,0 +1,186 @@
+[package]
+name = "owe-tests"
+version.workspace = true
+
+[lib]
+name = "owe-test-support"
+module = "wescene.testing"
+archive = "owe-test-support"
+sources = [
+  "src/lib.cppm",
+  "src/JsonBuilder.cppm",
+  "src/PkgHeader.cppm",
+  "src/SceneParseProbe.cppm",
+  "src/SceneKeys.cppm",
+  "src/Corpus.cppm",
+]
+
+[[bin]]
+name = "wescene-test"
+sources = ["src/bin/wescene_test.cpp"]
+
+[[bin]]
+name = "owe-scene-audio-response-dump"
+sources = ["src/bin/scene_audio_response_dump.cpp"]
+
+[[test]]
+name = "audio-tests"
+sources = [
+  "tests/main.cpp",
+  "tests/audio/audio_response_tests.cpp",
+  "tests/audio/fft_tests.cpp",
+  "tests/audio/scene_audio_response_tests.cpp",
+]
+
+[[test]]
+name = "cli-tests"
+sources = ["tests/core/cli_tests.cpp"]
+
+[[test]]
+name = "core-tests"
+sources = [
+  "tests/main.cpp",
+  "tests/core/json_adapter_tests.cpp",
+  "tests/core/sha_tests.cpp",
+  "tests/core/load_bench_tests.cpp",
+  "tests/core/vfs_tests.cpp",
+]
+
+[[test]]
+name = "parser-tests"
+sources = [
+  "tests/main.cpp",
+  "tests/parser/image_parser_tests.cpp",
+  "tests/parser/material_parse_tests.cpp",
+  "tests/parser/mdl_mesh_tests.cpp",
+  "tests/parser/shader_lex_tests.cpp",
+]
+
+[[test]]
+name = "render-resource-tests"
+sources = [
+  "tests/main.cpp",
+  "tests/render-resource/buffer_resolver_tests.cpp",
+  "tests/render-resource/render_graph_debug_tests.cpp",
+  "tests/render-resource/render_resource_request_tests.cpp",
+  "tests/render-resource/resource_model_tests.cpp",
+  "tests/render-resource/resource_registry_tests.cpp",
+]
+
+[[test]]
+name = "scene-runtime-tests"
+sources = [
+  "tests/main.cpp",
+  "tests/scene-runtime/host_callback_tests.cpp",
+  "tests/scene-runtime/timer_tests.cpp",
+  "tests/scene-runtime/particle_system_tests.cpp",
+  "tests/scene-runtime/scene_resource_index_tests.cpp",
+  "tests/scene-runtime/scene_runtime_tests.cpp",
+  "tests/scene-runtime/scene_user_property_tests.cpp",
+  "tests/scene-runtime/text_geometry_tests.cpp",
+]
+
+[[test]]
+name = "version-corpus-tests"
+sources = [
+  "tests/main.cpp",
+  "tests/version-corpus/deep_version_tests.cpp",
+  "tests/version-corpus/version_tests.cpp",
+]
+
+[[test]]
+name = "scene-parse-tests"
+sources = ["tests/main.cpp", "tests/scene-parse/scene_parse_tests.cpp"]
+
+[[test]]
+name = "scene-schema-tests"
+sources = ["tests/main.cpp", "tests/scene-schema/scene_schema_tests.cpp"]
+
+[[test]]
+name = "script-runtime-tests"
+sources = ["tests/main.cpp", "tests/script-runtime/script_runtime_tests.cpp"]
+
+[[test]]
+name = "shader-parse-tests"
+sources = ["tests/main.cpp", "tests/shader-parse/shader_parse_tests.cpp"]
+
+[[test]]
+name = "tex-schema-tests"
+sources = ["tests/main.cpp", "tests/tex-schema/tex_schema_tests.cpp"]
+
+[[test]]
+name = "web-state-tests"
+sources = [
+  "tests/main.cpp",
+  "tests/web/state_tests.cpp",
+]
+
+[dev-dependencies.owe-web]
+workspace = true
+
+[usage]
+public-definitions = [
+  'WAYWALLEN_WORKSHOP_DIR="workshop"',
+  'WAYWALLEN_ASSETS_DIR="assets"',
+  'WAYWALLEN_FIXTURE_DIR="tests/fixtures"',
+  'WAYWALLEN_DEFAULTPROJECT_DIR="defaultprojects"',
+]
+options = [
+  "-Wextra",
+  "-Wno-missing-field-initializers",
+  "-Wno-gnu-zero-variadic-macro-arguments",
+]
+
+[dependencies.owe-core]
+workspace = true
+pub = true
+
+[dependencies.owe-audio]
+workspace = true
+pub = true
+
+[dependencies.owe-scene]
+workspace = true
+pub = true
+
+[dependencies.owe-vulkan]
+workspace = true
+pub = true
+
+[dependencies.rstd-std]
+workspace = true
+pub = true
+
+[dependencies.rstd-cppstd]
+workspace = true
+pub = true
+
+[dependencies.rstd-json]
+workspace = true
+pub = true
+
+[dependencies.rstd-log]
+workspace = true
+pub = true
+
+[dependencies.rstd-argparse]
+workspace = true
+pub = true
+
+[dependencies.rstd-bench]
+workspace = true
+pub = true
+
+[dependencies.rstd-test]
+workspace = true
+pub = true
+
+[dependencies.wavsen]
+workspace = true
+pub = true
+
+[dependencies.vvk]
+workspace = true
+
+[dependencies.spirv-reflect]
+workspace = true

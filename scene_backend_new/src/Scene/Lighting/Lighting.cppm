@@ -1,0 +1,79 @@
+module;
+
+export module wescene.scene:lighting;
+import eigen;
+import rstd;
+import :visibility;
+
+using namespace rstd::prelude;
+
+// SceneNode lives in the primary interface unit of wescene.scene. SceneLight
+// only needs a raw observation pointer here; ownership is carried by the
+// scene tree.
+export namespace owe
+{
+
+class SceneNode;
+
+enum class SceneLightType : rstd::uint8_t
+{
+    Point       = 0,
+    Spot        = 1,
+    Directional = 2
+};
+
+class SceneLight {
+public:
+    struct Desc {
+        SceneLightType  type { SceneLightType::Point };
+        Eigen::Vector3f color { 1.0f, 1.0f, 1.0f };
+        float           radius { 0.0f };
+        float           intensity { 1.0f };
+        float           exponent { 1.0f };
+        float           attenuation { 0.0f };
+        float           mindistance { 0.0f };
+        // Cone angle cosines. Identity (1.0) = no falloff.
+        float inner_cone_cos { 1.0f };
+        float outer_cone_cos { 1.0f };
+        float light_source_size { 0.0f };
+        float cascade_distances[3] { 0.0f, 0.0f, 0.0f };
+        bool  cast_shadow { false };
+        bool  cast_volumetrics { false };
+    };
+
+    explicit SceneLight(const Desc& d)
+        : m_desc(d), m_premultiplied_color(d.color * d.intensity * d.radius * d.radius) {}
+    ~SceneLight() = default;
+
+    const Desc&     desc() const { return m_desc; }
+    SceneLightType  type() const { return m_desc.type; }
+    Eigen::Vector3f color() const { return m_desc.color * m_desc.intensity; }
+    float           radius() const { return m_desc.radius; }
+    SceneNode*      node() const { return m_node; }
+    // Legacy uniform G_LCP layout (color * intensity * radius²) consumed by
+    // shaders that bind g_LightsColorPremultiplied.
+    Eigen::Vector3f premultipliedColor() const { return m_premultiplied_color; }
+
+    void setNode(SceneNode* node) { m_node = node; }
+
+    ref<str> visibleUserKey() const { return m_visible_user_binding.key.as_str(); }
+    void     setVisibleUserKey(String key) {
+        m_visible_user_binding = SceneUserVisibilityBinding { .key = rstd::move(key) };
+    }
+    const SceneUserVisibilityBinding& visibleUserBinding() const { return m_visible_user_binding; }
+    void                              setVisibleUserBinding(SceneUserVisibilityBinding binding) {
+        m_visible_user_binding = rstd::move(binding);
+    }
+    bool runtimeVisible() const { return m_runtime_visible; }
+    void setRuntimeVisible(bool v) { m_runtime_visible = v; }
+
+private:
+    Desc            m_desc;
+    Eigen::Vector3f m_premultiplied_color { Eigen::Vector3f::Zero() };
+    SceneNode*      m_node { nullptr };
+
+    SceneUserVisibilityBinding m_visible_user_binding {};
+    bool                       m_runtime_visible { true };
+};
+
+} // namespace owe

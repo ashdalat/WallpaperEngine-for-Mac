@@ -1,0 +1,7 @@
+build/
+build-*/
+/.lito/
+/lito.lock
+.cache/
+compile_commands.json
+.vscode/

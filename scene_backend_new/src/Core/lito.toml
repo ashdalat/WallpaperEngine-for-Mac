@@ -1,0 +1,58 @@
+[package]
+name = "owe-core"
+version.workspace = true
+source-root = "../.."
+
+[lib]
+name = "owe-core"
+module = "owe.core"
+archive = "owe-core"
+sources = [
+  "src/Core/Cli.cppm",
+  "src/Core/Core.cppm",
+  "src/Core/Fft.cppm",
+  "src/Core/Fft.cpp",
+  "src/Core/Fs.cppm",
+  "src/Core/Fs/Fs.cppm",
+  "src/Core/IO/Binary.cppm",
+  "src/Core/Json.cppm",
+  "src/Core/Json.cpp",
+  "src/Core/UserProperty.cppm",
+  "src/Core/UserProperty.cpp",
+  "src/Core/eigen.cppm",
+]
+
+[usage]
+public-include-directories = ["third_party", "src", "src/Core"]
+public-definitions = ["FT_SIZEOF_LONG=8"]
+options = [
+  "-Wextra",
+  "-Wno-missing-field-initializers",
+  "-Wno-gnu-zero-variadic-macro-arguments",
+]
+threads = true
+system-libraries = ["dl"]
+
+[dependencies.rstd-std]
+workspace = true
+pub = true
+
+[dependencies.rstd-cppstd]
+workspace = true
+pub = true
+
+[dependencies.rstd-json]
+workspace = true
+pub = true
+
+[dependencies.rstd-log]
+workspace = true
+pub = true
+
+[dependencies.rstd-argparse]
+workspace = true
+pub = true
+
+[external-dependencies.cmake.eigen]
+workspace = true
+targets = [{ name = "Eigen3::Eigen", pub = true }]

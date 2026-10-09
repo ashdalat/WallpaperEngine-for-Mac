@@ -1,0 +1,1987 @@
+{
+  "pkg": {
+    "file_count": 94,
+    "has_scene_json": true,
+    "version": "PKGV0021"
+  },
+  "puppets": [
+    {
+      "anim_tracks": [
+        {
+          "bone_track_count": 11,
+          "fps": 60.0,
+          "id": 1046,
+          "length": 180,
+          "mode": 0,
+          "moved_bones": [
+            {
+              "a": false,
+              "i": 0,
+              "p": true,
+              "s": false
+            }
+          ],
+          "name": "动画 1",
+          "total_bone_frames": 1991
+        },
+        {
+          "bone_track_count": 11,
+          "fps": 60.0,
+          "id": 1068,
+          "length": 240,
+          "mode": 0,
+          "moved_bones": [
+            {
+              "a": false,
+              "i": 2,
+              "p": true,
+              "s": false
+            },
+            {
+              "a": false,
+              "i": 3,
+              "p": true,
+              "s": false
+            },
+            {
+              "a": false,
+              "i": 4,
+              "p": true,
+              "s": false
+            },
+            {
+              "a": false,
+              "i": 5,
+              "p": true,
+              "s": false
+            },
+            {
+              "a": false,
+              "i": 6,
+              "p": true,
+              "s": false
+            },
+            {
+              "a": false,
+              "i": 7,
+              "p": true,
+              "s": false
+            },
+            {
+              "a": false,
+              "i": 8,
+              "p": true,
+              "s": false
+            },
+            {
+              "a": false,
+              "i": 9,
+              "p": true,
+              "s": false
+            },
+            {
+              "a": false,
+              "i": 10,
+              "p": true,
+              "s": false
+            }
+          ],
+          "name": "动画 2",
+          "total_bone_frames": 2651
+        }
+      ],
+      "anims": 2,
+      "attachment_count": 0,
+      "attachments": [],
+      "bone_tree": [
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -439.0563049316406
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            -431.93255615234375,
+            25.872175216674805,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -91.95372009277344
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            -466.14306640625,
+            26.167526245117188,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            213.49661254882813
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            -472.5924377441406,
+            28.162384033203125,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            224.60533142089844
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            -482.9843444824219,
+            29.73096466064453,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            220.44277954101563
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            -462.893798828125,
+            28.029359817504883,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            131.37998962402344
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            -473.5799255371094,
+            26.346256256103516,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            134.16818237304688
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            -469.3397216796875,
+            22.96094512939453,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            340.1397476196289
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            -462.23675537109375,
+            29.652585983276367,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            170.10400390625
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            -470.2042236328125,
+            39.103065490722656,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            315.2822265625
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": false,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            415.33350372314453
+          ]
+        }
+      ],
+      "bones": 11,
+      "index_count": 7952,
+      "mat_json_file": "materials/HUANG.json",
+      "mdla": 6,
+      "mdls": 3,
+      "mdlv": 21,
+      "ok": true,
+      "part_count": 11,
+      "parts": [
+        {
+          "id": 6,
+          "size": 438,
+          "start": 0
+        },
+        {
+          "id": 1,
+          "size": 9135,
+          "start": 438
+        },
+        {
+          "id": 0,
+          "size": 0,
+          "start": 9573
+        },
+        {
+          "id": 2,
+          "size": 630,
+          "start": 9573
+        },
+        {
+          "id": 3,
+          "size": 591,
+          "start": 10203
+        },
+        {
+          "id": 4,
+          "size": 609,
+          "start": 10794
+        },
+        {
+          "id": 5,
+          "size": 606,
+          "start": 11403
+        },
+        {
+          "id": 10,
+          "size": 1206,
+          "start": 12009
+        },
+        {
+          "id": 7,
+          "size": 495,
+          "start": 13215
+        },
+        {
+          "id": 8,
+          "size": 429,
+          "start": 13710
+        },
+        {
+          "id": 9,
+          "size": 9717,
+          "start": 14139
+        }
+      ],
+      "path": "/models/HUANG_puppet.mdl",
+      "vert_extra_count": 4243,
+      "vertex_count": 4243
+    },
+    {
+      "anim_tracks": [
+        {
+          "bone_track_count": 41,
+          "fps": 60.0,
+          "id": 86,
+          "length": 360,
+          "mode": 0,
+          "moved_bones": [
+            {
+              "a": true,
+              "i": 15,
+              "p": true,
+              "s": true
+            },
+            {
+              "a": true,
+              "i": 16,
+              "p": true,
+              "s": true
+            },
+            {
+              "a": false,
+              "i": 17,
+              "p": true,
+              "s": true
+            },
+            {
+              "a": true,
+              "i": 18,
+              "p": true,
+              "s": false
+            },
+            {
+              "a": true,
+              "i": 19,
+              "p": true,
+              "s": true
+            },
+            {
+              "a": false,
+              "i": 21,
+              "p": true,
+              "s": true
+            },
+            {
+              "a": true,
+              "i": 22,
+              "p": true,
+              "s": true
+            },
+            {
+              "a": false,
+              "i": 23,
+              "p": true,
+              "s": true
+            },
+            {
+              "a": false,
+              "i": 24,
+              "p": true,
+              "s": false
+            },
+            {
+              "a": false,
+              "i": 25,
+              "p": true,
+              "s": true
+            },
+            {
+              "a": false,
+              "i": 26,
+              "p": true,
+              "s": false
+            },
+            {
+              "a": false,
+              "i": 27,
+              "p": true,
+              "s": false
+            },
+            {
+              "a": true,
+              "i": 35,
+              "p": true,
+              "s": false
+            },
+            {
+              "a": true,
+              "i": 36,
+              "p": true,
+              "s": false
+            }
+          ],
+          "name": "动画 1",
+          "total_bone_frames": 14801
+        },
+        {
+          "bone_track_count": 41,
+          "fps": 60.0,
+          "id": 421,
+          "length": 180,
+          "mode": 0,
+          "moved_bones": [
+            {
+              "a": false,
+              "i": 1,
+              "p": true,
+              "s": false
+            },
+            {
+              "a": false,
+              "i": 2,
+              "p": true,
+              "s": false
+            },
+            {
+              "a": true,
+              "i": 11,
+              "p": true,
+              "s": false
+            },
+            {
+              "a": true,
+              "i": 13,
+              "p": true,
+              "s": false
+            },
+            {
+              "a": false,
+              "i": 37,
+              "p": true,
+              "s": true
+            },
+            {
+              "a": true,
+              "i": 38,
+              "p": true,
+              "s": true
+            },
+            {
+              "a": false,
+              "i": 39,
+              "p": true,
+              "s": false
+            },
+            {
+              "a": true,
+              "i": 40,
+              "p": true,
+              "s": false
+            }
+          ],
+          "name": "动画 2",
+          "total_bone_frames": 7421
+        },
+        {
+          "bone_track_count": 41,
+          "fps": 60.0,
+          "id": 647,
+          "length": 180,
+          "mode": 0,
+          "moved_bones": [
+            {
+              "a": true,
+              "i": 11,
+              "p": true,
+              "s": false
+            },
+            {
+              "a": true,
+              "i": 13,
+              "p": true,
+              "s": false
+            }
+          ],
+          "name": "动画 3",
+          "total_bone_frames": 7421
+        }
+      ],
+      "anims": 3,
+      "attachment_count": 1,
+      "attachments": [
+        {
+          "name": "YAN"
+        }
+      ],
+      "bone_tree": [
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            35.358154296875,
+            -51.684326171875,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -138.81048583984375
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            760.0929565429688,
+            -906.309814453125,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            161.9971923828125
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            706.4434814453125,
+            -997.6040649414063,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            679.1570739746094
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            743.649658203125,
+            -170.69189453125,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -1584.0748291015625
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            643.682861328125,
+            -143.6021728515625,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -1539.4793701171875
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            702.1581420898438,
+            -232.67044067382813,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -188.0755615234375
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            673.4271240234375,
+            -161.90866088867188,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -358.617919921875
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            715.951416015625,
+            -227.75173950195313,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            177.07763671875
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            582.3609008789063,
+            -182.08935546875,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -753.07373046875
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            705.8245849609375,
+            -166.72494506835938,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            6.80694580078125
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            588.839111328125,
+            -341.4231872558594,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            149.6749267578125
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            732.1204833984375,
+            -206.2891845703125,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -73.24755859375
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            36.46028518676758
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            759.5316162109375,
+            -282.2618713378906,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            588.095947265625
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -791.4659423828125
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            100.37713623046875,
+            -340.3018798828125,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.070549137890339,
+            0.9240803644061089,
+            1.0,
+            441.070068359375
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            92.8782958984375,
+            -345.4083251953125,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0638308227062225,
+            0.9318068325519562,
+            1.0,
+            462.60667419433594
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            101.93499755859375,
+            -357.07806396484375,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            0.977044390514493,
+            1.0224403869360685,
+            1.0,
+            480.8000030517578
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            97.43328857421875,
+            -355.45880126953125,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            439.4880065917969
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            99.78219604492188,
+            -352.1231384277344,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            463.9678649902344
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            434.32763671875
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            1282.0693359375,
+            -309.7483825683594,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -482.94029998779297
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            1267.0693359375,
+            -303.80706787109375,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -494.6581268310547
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            1293.535400390625,
+            -291.8164367675781,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -527.3789291381836
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            1266.8812255859375,
+            -309.4271545410156,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -535.56103515625
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            1272.963134765625,
+            -314.4949951171875,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -436.56263732910156
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            692.1566772460938,
+            -168.6957244873047,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            30.554443359375
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            694.7489013671875,
+            -164.0232391357422,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -254.5533447265625
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            678.7347412109375,
+            -154.1654052734375,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -1356.8682556152344
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            502.7313232421875,
+            -315.634033203125,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -873.5266418457031
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            491.25494384765625,
+            -325.07733154296875,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -1100.8900756835938
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            744.4177856445313,
+            -105.69195556640625,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -1183.6348266601563
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            677.8158569335938,
+            -143.79925537109375,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -1090.5899047851563
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            741.83349609375,
+            -201.36441040039063,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -353.6742935180664
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            422.2958068847656,
+            -103.8104248046875,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -319.72906494140625
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            731.81201171875,
+            -209.06443786621094,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            33.181640625
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            482.4036865234375,
+            -283.4940185546875,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -53.0482177734375
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -464.218017578125
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            634.8067016601563,
+            -1253.2044677734375,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            394.0426025390625
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": true,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            -227.45654296875
+          ]
+        },
+        {
+          "anim_parent": 4294967295,
+          "bind_parent": 4294967295,
+          "centroid_offset": [
+            727.717529296875,
+            -861.0308837890625,
+            0.0
+          ],
+          "has_file_skin_pivot": true,
+          "has_sim_json": false,
+          "name": "",
+          "transform_col_sums": [
+            1.0,
+            1.0,
+            1.0,
+            441.3876953125
+          ]
+        }
+      ],
+      "bones": 41,
+      "index_count": 15127,
+      "mat_json_file": "materials/RENWU.json",
+      "mdla": 6,
+      "mdls": 3,
+      "mdlv": 21,
+      "ok": true,
+      "part_count": 41,
+      "parts": [
+        {
+          "id": 29,
+          "size": 1971,
+          "start": 0
+        },
+        {
+          "id": 28,
+          "size": 1704,
+          "start": 1971
+        },
+        {
+          "id": 30,
+          "size": 1725,
+          "start": 3675
+        },
+        {
+          "id": 4,
+          "size": 1086,
+          "start": 5400
+        },
+        {
+          "id": 32,
+          "size": 2934,
+          "start": 6486
+        },
+        {
+          "id": 31,
+          "size": 2058,
+          "start": 9420
+        },
+        {
+          "id": 6,
+          "size": 1128,
+          "start": 11478
+        },
+        {
+          "id": 3,
+          "size": 1233,
+          "start": 12606
+        },
+        {
+          "id": 8,
+          "size": 1854,
+          "start": 13839
+        },
+        {
+          "id": 34,
+          "size": 1017,
+          "start": 15693
+        },
+        {
+          "id": 1,
+          "size": 918,
+          "start": 16710
+        },
+        {
+          "id": 7,
+          "size": 1968,
+          "start": 17628
+        },
+        {
+          "id": 2,
+          "size": 1869,
+          "start": 19596
+        },
+        {
+          "id": 40,
+          "size": 210,
+          "start": 21465
+        },
+        {
+          "id": 0,
+          "size": 75,
+          "start": 21675
+        },
+        {
+          "id": 11,
+          "size": 942,
+          "start": 21750
+        },
+        {
+          "id": 12,
+          "size": 0,
+          "start": 22692
+        },
+        {
+          "id": 38,
+          "size": 777,
+          "start": 22692
+        },
+        {
+          "id": 9,
+          "size": 1821,
+          "start": 23469
+        },
+        {
+          "id": 10,
+          "size": 4953,
+          "start": 25290
+        },
+        {
+          "id": 5,
+          "size": 1314,
+          "start": 30243
+        },
+        {
+          "id": 13,
+          "size": 1128,
+          "start": 31557
+        },
+        {
+          "id": 14,
+          "size": 0,
+          "start": 32685
+        },
+        {
+          "id": 15,
+          "size": 810,
+          "start": 32685
+        },
+        {
+          "id": 16,
+          "size": 726,
+          "start": 33495
+        },
+        {
+          "id": 36,
+          "size": 222,
+          "start": 34221
+        },
+        {
+          "id": 17,
+          "size": 873,
+          "start": 34443
+        },
+        {
+          "id": 18,
+          "size": 588,
+          "start": 35316
+        },
+        {
+          "id": 19,
+          "size": 798,
+          "start": 35904
+        },
+        {
+          "id": 20,
+          "size": 0,
+          "start": 36702
+        },
+        {
+          "id": 21,
+          "size": 891,
+          "start": 36702
+        },
+        {
+          "id": 22,
+          "size": 906,
+          "start": 37593
+        },
+        {
+          "id": 35,
+          "size": 135,
+          "start": 38499
+        },
+        {
+          "id": 23,
+          "size": 867,
+          "start": 38634
+        },
+        {
+          "id": 24,
+          "size": 528,
+          "start": 39501
+        },
+        {
+          "id": 25,
+          "size": 1074,
+          "start": 40029
+        },
+        {
+          "id": 27,
+          "size": 777,
+          "start": 41103
+        },
+        {
+          "id": 37,
+          "size": 192,
+          "start": 41880
+        },
+        {
+          "id": 39,
+          "size": 687,
+          "start": 42072
+        },
+        {
+          "id": 33,
+          "size": 1956,
+          "start": 42759
+        },
+        {
+          "id": 26,
+          "size": 666,
+          "start": 44715
+        }
+      ],
+      "path": "/models/RENWU_puppet.mdl",
+      "vert_extra_count": 8146,
+      "vertex_count": 8146
+    }
+  ],
+  "scene": {
+    "error": "[json.exception.type_error.302] type must be boolean, but is object",
+    "parsed": false
+  },
+  "textures": [
+    {
+      "compo1": 0,
+      "compo2": 0,
+      "compo3": 0,
+      "count": 1,
+      "format": 4,
+      "height": 1024,
+      "image_type": 13,
+      "is_sprite": false,
+      "mag_filter": 0,
+      "map_height": 795,
+      "map_width": 1789,
+      "min_filter": 0,
+      "mipmap_larger": false,
+      "mipmap_pow2": false,
+      "ok": true,
+      "path": "/materials/HUANG.tex",
+      "sprite_frames": 0,
+      "texb": 3,
+      "texi": 1,
+      "texs": 0,
+      "texv": 5,
+      "width": 2048,
+      "wrap_s": 0,
+      "wrap_t": 0
+    },
+    {
+      "compo1": 0,
+      "compo2": 0,
+      "compo3": 0,
+      "count": 1,
+      "format": 4,
+      "height": 4096,
+      "image_type": 13,
+      "is_sprite": false,
+      "mag_filter": 0,
+      "map_height": 3000,
+      "map_width": 4000,
+      "min_filter": 0,
+      "mipmap_larger": false,
+      "mipmap_pow2": false,
+      "ok": true,
+      "path": "/materials/RENWU.tex",
+      "sprite_frames": 0,
+      "texb": 3,
+      "texi": 1,
+      "texs": 0,
+      "texv": 5,
+      "width": 4096,
+      "wrap_s": 0,
+      "wrap_t": 0
+    },
+    {
+      "compo1": 0,
+      "compo2": 0,
+      "compo3": 0,
+      "count": 1,
+      "format": 4,
+      "height": 32,
+      "image_type": -1,
+      "is_sprite": false,
+      "mag_filter": 0,
+      "map_height": 32,
+      "map_width": 32,
+      "min_filter": 0,
+      "mipmap_larger": false,
+      "mipmap_pow2": true,
+      "ok": true,
+      "path": "/materials/effects/waterflowphase.tex",
+      "sprite_frames": 0,
+      "texb": 3,
+      "texi": 1,
+      "texs": 0,
+      "texv": 5,
+      "width": 32,
+      "wrap_s": 1,
+      "wrap_t": 1
+    },
+    {
+      "compo1": 0,
+      "compo2": 0,
+      "compo3": 0,
+      "count": 1,
+      "format": 6,
+      "height": 1500,
+      "image_type": -1,
+      "is_sprite": false,
+      "mag_filter": 0,
+      "map_height": 1500,
+      "map_width": 2000,
+      "min_filter": 0,
+      "mipmap_larger": false,
+      "mipmap_pow2": false,
+      "ok": true,
+      "path": "/materials/masks/foliagesway_mask_1188e903.tex",
+      "sprite_frames": 0,
+      "texb": 3,
+      "texi": 1,
+      "texs": 0,
+      "texv": 5,
+      "width": 2000,
+      "wrap_s": 0,
+      "wrap_t": 0
+    },
+    {
+      "compo1": 0,
+      "compo2": 0,
+      "compo3": 0,
+      "count": 1,
+      "format": 6,
+      "height": 351,
+      "image_type": -1,
+      "is_sprite": false,
+      "mag_filter": 0,
+      "map_height": 351,
+      "map_width": 894,
+      "min_filter": 0,
+      "mipmap_larger": false,
+      "mipmap_pow2": false,
+      "ok": true,
+      "path": "/materials/masks/pulse__mask_10d0d88a.tex",
+      "sprite_frames": 0,
+      "texb": 3,
+      "texi": 1,
+      "texs": 0,
+      "texv": 5,
+      "width": 894,
+      "wrap_s": 0,
+      "wrap_t": 0
+    },
+    {
+      "compo1": 0,
+      "compo2": 0,
+      "compo3": 0,
+      "count": 1,
+      "format": 6,
+      "height": 1500,
+      "image_type": -1,
+      "is_sprite": false,
+      "mag_filter": 0,
+      "map_height": 1500,
+      "map_width": 2000,
+      "min_filter": 0,
+      "mipmap_larger": false,
+      "mipmap_pow2": false,
+      "ok": true,
+      "path": "/materials/masks/pulse__mask_48862c3b.tex",
+      "sprite_frames": 0,
+      "texb": 3,
+      "texi": 1,
+      "texs": 0,
+      "texv": 5,
+      "width": 2000,
+      "wrap_s": 0,
+      "wrap_t": 0
+    },
+    {
+      "compo1": 0,
+      "compo2": 0,
+      "compo3": 0,
+      "count": 1,
+      "format": 6,
+      "height": 1500,
+      "image_type": -1,
+      "is_sprite": false,
+      "mag_filter": 0,
+      "map_height": 1500,
+      "map_width": 2000,
+      "min_filter": 0,
+      "mipmap_larger": false,
+      "mipmap_pow2": false,
+      "ok": true,
+      "path": "/materials/masks/pulse__mask_89dbf865.tex",
+      "sprite_frames": 0,
+      "texb": 3,
+      "texi": 1,
+      "texs": 0,
+      "texv": 5,
+      "width": 2000,
+      "wrap_s": 0,
+      "wrap_t": 0
+    },
+    {
+      "compo1": 0,
+      "compo2": 0,
+      "compo3": 0,
+      "count": 1,
+      "format": 6,
+      "height": 256,
+      "image_type": -1,
+      "is_sprite": false,
+      "mag_filter": 0,
+      "map_height": 256,
+      "map_width": 1920,
+      "min_filter": 0,
+      "mipmap_larger": false,
+      "mipmap_pow2": true,
+      "ok": true,
+      "path": "/materials/masks/pulse__mask_a59703be.tex",
+      "sprite_frames": 0,
+      "texb": 3,
+      "texi": 1,
+      "texs": 0,
+      "texv": 5,
+      "width": 1920,
+      "wrap_s": 0,
+      "wrap_t": 0
+    },
+    {
+      "compo1": 0,
+      "compo2": 0,
+      "compo3": 0,
+      "count": 1,
+      "format": 5,
+      "height": 1080,
+      "image_type": -1,
+      "is_sprite": false,
+      "mag_filter": 0,
+      "map_height": 1080,
+      "map_width": 1920,
+      "min_filter": 0,
+      "mipmap_larger": false,
+      "mipmap_pow2": false,
+      "ok": true,
+      "path": "/materials/masks/waterflow_mask_03f49de6.tex",
+      "sprite_frames": 0,
+      "texb": 3,
+      "texi": 1,
+      "texs": 0,
+      "texv": 5,
+      "width": 1920,
+      "wrap_s": 0,
+      "wrap_t": 0
+    },
+    {
+      "compo1": 0,
+      "compo2": 0,
+      "compo3": 0,
+      "count": 1,
+      "format": 6,
+      "height": 1500,
+      "image_type": -1,
+      "is_sprite": false,
+      "mag_filter": 0,
+      "map_height": 1500,
+      "map_width": 2000,
+      "min_filter": 0,
+      "mipmap_larger": false,
+      "mipmap_pow2": false,
+      "ok": true,
+      "path": "/materials/masks/waterwaves_mask_13499454.tex",
+      "sprite_frames": 0,
+      "texb": 3,
+      "texi": 1,
+      "texs": 0,
+      "texv": 5,
+      "width": 2000,
+      "wrap_s": 0,
+      "wrap_t": 0
+    },
+    {
+      "compo1": 0,
+      "compo2": 0,
+      "compo3": 0,
+      "count": 1,
+      "format": 6,
+      "height": 1500,
+      "image_type": -1,
+      "is_sprite": false,
+      "mag_filter": 0,
+      "map_height": 1500,
+      "map_width": 2000,
+      "min_filter": 0,
+      "mipmap_larger": false,
+      "mipmap_pow2": false,
+      "ok": true,
+      "path": "/materials/masks/waterwaves_mask_32506d6d.tex",
+      "sprite_frames": 0,
+      "texb": 3,
+      "texi": 1,
+      "texs": 0,
+      "texv": 5,
+      "width": 2000,
+      "wrap_s": 0,
+      "wrap_t": 0
+    },
+    {
+      "compo1": 0,
+      "compo2": 0,
+      "compo3": 0,
+      "count": 1,
+      "format": 6,
+      "height": 1500,
+      "image_type": -1,
+      "is_sprite": false,
+      "mag_filter": 0,
+      "map_height": 1500,
+      "map_width": 2000,
+      "min_filter": 0,
+      "mipmap_larger": false,
+      "mipmap_pow2": false,
+      "ok": true,
+      "path": "/materials/masks/waterwaves_mask_644109ca.tex",
+      "sprite_frames": 0,
+      "texb": 3,
+      "texi": 1,
+      "texs": 0,
+      "texv": 5,
+      "width": 2000,
+      "wrap_s": 0,
+      "wrap_t": 0
+    },
+    {
+      "compo1": 0,
+      "compo2": 0,
+      "compo3": 0,
+      "count": 1,
+      "format": 6,
+      "height": 1500,
+      "image_type": -1,
+      "is_sprite": false,
+      "mag_filter": 0,
+      "map_height": 1500,
+      "map_width": 2000,
+      "min_filter": 0,
+      "mipmap_larger": false,
+      "mipmap_pow2": false,
+      "ok": true,
+      "path": "/materials/masks/waterwaves_mask_7960f885.tex",
+      "sprite_frames": 0,
+      "texb": 3,
+      "texi": 1,
+      "texs": 0,
+      "texv": 5,
+      "width": 2000,
+      "wrap_s": 0,
+      "wrap_t": 0
+    },
+    {
+      "compo1": 0,
+      "compo2": 0,
+      "compo3": 0,
+      "count": 1,
+      "format": 6,
+      "height": 1500,
+      "image_type": -1,
+      "is_sprite": false,
+      "mag_filter": 0,
+      "map_height": 1500,
+      "map_width": 2000,
+      "min_filter": 0,
+      "mipmap_larger": false,
+      "mipmap_pow2": false,
+      "ok": true,
+      "path": "/materials/masks/waterwaves_mask_d2bf0f41.tex",
+      "sprite_frames": 0,
+      "texb": 3,
+      "texi": 1,
+      "texs": 0,
+      "texv": 5,
+      "width": 2000,
+      "wrap_s": 0,
+      "wrap_t": 0
+    },
+    {
+      "compo1": 0,
+      "compo2": 0,
+      "compo3": 0,
+      "count": 1,
+      "format": 4,
+      "height": 2048,
+      "image_type": 13,
+      "is_sprite": false,
+      "mag_filter": 0,
+      "map_height": 1080,
+      "map_width": 1920,
+      "min_filter": 0,
+      "mipmap_larger": false,
+      "mipmap_pow2": false,
+      "ok": true,
+      "path": "/materials/workshop/2098390419/clouds2.tex",
+      "sprite_frames": 0,
+      "texb": 3,
+      "texi": 1,
+      "texs": 0,
+      "texv": 5,
+      "width": 2048,
+      "wrap_s": 0,
+      "wrap_t": 0
+    },
+    {
+      "compo1": 0,
+      "compo2": 0,
+      "compo3": 0,
+      "count": 1,
+      "format": 4,
+      "height": 128,
+      "image_type": -1,
+      "is_sprite": false,
+      "mag_filter": 0,
+      "map_height": 128,
+      "map_width": 128,
+      "min_filter": 0,
+      "mipmap_larger": false,
+      "mipmap_pow2": true,
+      "ok": true,
+      "path": "/materials/workshop/2914579837/particle/[CITYPNG.COM]Golden Sparkle Light Star HD PNG-128.tex",
+      "sprite_frames": 0,
+      "texb": 3,
+      "texi": 1,
+      "texs": 0,
+      "texv": 5,
+      "width": 128,
+      "wrap_s": 0,
+      "wrap_t": 0
+    },
+    {
+      "compo1": 0,
+      "compo2": 0,
+      "compo3": 0,
+      "count": 1,
+      "format": 4,
+      "height": 4096,
+      "image_type": 13,
+      "is_sprite": false,
+      "mag_filter": 0,
+      "map_height": 2160,
+      "map_width": 3840,
+      "min_filter": 0,
+      "mipmap_larger": false,
+      "mipmap_pow2": false,
+      "ok": true,
+      "path": "/materials/图层 1.tex",
+      "sprite_frames": 0,
+      "texb": 3,
+      "texi": 1,
+      "texs": 0,
+      "texv": 5,
+      "width": 4096,
+      "wrap_s": 0,
+      "wrap_t": 0
+    },
+    {
+      "compo1": 0,
+      "compo2": 0,
+      "compo3": 0,
+      "count": 1,
+      "format": 2,
+      "height": 496,
+      "image_type": -1,
+      "is_sprite": false,
+      "mag_filter": 0,
+      "map_height": 489,
+      "map_width": 3840,
+      "min_filter": 0,
+      "mipmap_larger": true,
+      "mipmap_pow2": false,
+      "ok": true,
+      "path": "/materials/图层 5.tex",
+      "sprite_frames": 0,
+      "texb": 3,
+      "texi": 1,
+      "texs": 0,
+      "texv": 5,
+      "width": 3840,
+      "wrap_s": 0,
+      "wrap_t": 0
+    }
+  ],
+  "workshop_dir": "3400879974"
+}

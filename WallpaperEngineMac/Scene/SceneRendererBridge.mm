@@ -1,18 +1,10 @@
 #import "SceneRendererBridge.h"
 
-// VK_EXT_metal_surface is the supported way to create a Vulkan
-// surface from a CAMetalLayer. Define the platform guard before
-// any Vulkan header so vulkan_core.h pulls in vulkan_metal.h
-// with the VkMetalSurfaceCreateInfoEXT struct and the
-// vkCreateMetalSurfaceEXT declaration.
-#define VK_USE_PLATFORM_METAL_EXT 1
-
-// The engine's public API (compiled into libwescene-renderer.a).
-#include "SceneWallpaper.hpp"
-#include "SceneWallpaperSurface.hpp"
-
-#include <memory>
-#include <string>
+// The engine's C API (compiled into libwescene-renderer.a
+// from the open-wallpaper-engine sources — see
+// scene_backend_new/). The engine itself is C++20
+// modules; this file only talks to the C bridge.
+#include "wescene_bridge.h"
 
 // MoltenVK logging — surface creation failures are silent
 // at the default log level, so turn it up while debugging.
@@ -35,11 +27,8 @@ static void enableMoltenVKLogging() {
     }
 }
 
-using wallpaper::RenderInitInfo;
-using wallpaper::SceneWallpaper;
-
 @implementation SceneRendererBridge {
-    std::unique_ptr<SceneWallpaper> _scene;
+    void* _bridge;
 }
 
 - (instancetype)initWithMetalLayer:(CAMetalLayer *)metalLayer
@@ -47,111 +36,107 @@ using wallpaper::SceneWallpaper;
                            height:(uint32_t)height {
     self = [super init];
     if (self) {
-        _scene = std::make_unique<SceneWallpaper>();
-        _scene->init();
         enableMoltenVKLogging();
-
-        RenderInitInfo info;
-        info.width = static_cast<uint16_t>(width);
-        info.height = static_cast<uint16_t>(height);
-        info.offscreen = false; // onscreen desktop rendering
-
-        // The engine runs this on its render thread to create
-        // the Vulkan surface that presents into our
-        // CAMetalLayer. vkCreateMetalSurfaceEXT takes a
-        // VkMetalSurfaceCreateInfoEXT struct whose pLayer
-        // field holds the layer — NOT the layer directly.
-        info.surface_info.createSurfaceOp =
-            [metalLayer](VkInstance instance, VkSurfaceKHR *surface) -> VkResult {
-            VkMetalSurfaceCreateInfoEXT createInfo = {};
-            createInfo.sType = VK_STRUCTURE_TYPE_METAL_SURFACE_CREATE_INFO_EXT;
-            createInfo.pLayer = metalLayer;
-            return vkCreateMetalSurfaceEXT(instance, &createInfo, nullptr, surface);
-        };
-
-        // Instance extensions the surface needs. The engine's
-        // GLFW example passes glfwGetRequiredInstanceExtensions,
-        // which always includes VK_KHR_surface plus the platform
-        // surface extension; do the equivalent here.
-        // (VK_KHR_portability_enumeration is deliberately absent:
-        // the engine links libMoltenVK.dylib directly, with no
-        // Vulkan loader, and MoltenVK does not even list that
-        // extension in vkEnumerateInstanceExtensionProperties.)
-        info.surface_info.instanceExts = {
-            "VK_KHR_surface",
-            "VK_EXT_metal_surface",
-        };
-
-        // initVulkan posts the work to the engine's render looper;
-        // it returns immediately.
-        _scene->initVulkan(info);
+        // Engine messages (scene load, shader cache,
+        // parse errors) go through rstd-log; install
+        // the environment logger so RSTD_LOG controls
+        // them. No-op after the first renderer.
+        wescene_bridge_enable_env_logging();
+        _bridge = wescene_bridge_create((__bridge void *)metalLayer,
+                                        width, height);
+        if (_bridge == nullptr) {
+            fputs("WEM: scene renderer init failed\n", stderr);
+        }
     }
     return self;
 }
 
 - (void)dealloc {
-    // ~SceneWallpaper is trivial; the loopers are stopped by
-    // looper::~Looper on the way out.
-    _scene.reset();
+    // ~SceneWallpaper stops the engine's loopers on
+    // the way out.
+    if (_bridge != nullptr) {
+        wescene_bridge_destroy(_bridge);
+        _bridge = nullptr;
+    }
 }
 
 - (void)loadWallpaperAtURL:(NSURL *)contentURL
                  assetsURL:(NSURL *)assetsURL
                  cacheURL:(NSURL *)cacheURL {
-    // Setting "source" and "assets" makes the engine mount the
-    // scene.pkg archive (derived from the scene.json path) over the
-    // assets directory and start loading the scene.
-    _scene->setPropertyString("source", contentURL.path.UTF8String);
-    _scene->setPropertyString("assets", assetsURL.path.UTF8String);
-    _scene->setPropertyString("cache_path", cacheURL.path.UTF8String);
+    if (_bridge == nullptr) return;
+    // The engine mounts the scene.pkg archive (derived
+    // from the scene.json path) over the assets directory
+    // and starts loading the scene.
+    wescene_bridge_load(_bridge,
+                        contentURL.path.UTF8String,
+                        assetsURL.path.UTF8String,
+                        cacheURL.path.UTF8String);
 }
 
 - (void)play {
-    _scene->play();
+    wescene_bridge_play(_bridge);
 }
 
 - (void)pause {
-    _scene->pause();
+    wescene_bridge_pause(_bridge);
 }
 
 - (void)mouseInputX:(double)x y:(double)y {
-    _scene->mouseInput(x, y);
+    wescene_bridge_mouse_input(_bridge, x, y);
 }
 
 - (void)setFps:(int32_t)fps {
-    _scene->setPropertyInt32("fps", fps);
+    wescene_bridge_set_fps(_bridge, static_cast<unsigned>(fps));
 }
 
 - (void)setFillMode:(int32_t)fillMode {
-    _scene->setPropertyInt32("fillmode", fillMode);
+    // 0 = stretch, 1 = aspect fit, 2 = aspect crop —
+    // the engine's FillMode enum order.
+    wescene_bridge_set_fill_mode(_bridge, static_cast<int>(fillMode));
 }
 
 - (void)setSpeed:(float)speed {
-    _scene->setPropertyFloat("speed", speed);
+    wescene_bridge_set_speed(_bridge, speed);
 }
 
 - (void)setVolume:(float)volume {
-    _scene->setPropertyFloat("volume", volume);
+    wescene_bridge_set_volume(_bridge, volume);
 }
 
 - (void)setMuted:(BOOL)muted {
-    _scene->setPropertyBool("muted", muted);
+    wescene_bridge_set_muted(_bridge, muted ? 1 : 0);
 }
 
+// The new engine has no generic property API (the old
+// wallpaper-scene-renderer took untyped setProperty*
+// calls). Nothing in the app calls these yet; keep them
+// as logged no-ops so a future caller is visible.
 - (void)setPropertyString:(NSString *)name value:(NSString *)value {
-    _scene->setPropertyString(name.UTF8String, value.UTF8String);
+    fputs("WEM: setPropertyString is a no-op with the new engine: ",
+          stderr);
+    fputs(name.UTF8String, stderr);
+    fputs("\n", stderr);
 }
 
 - (void)setPropertyBool:(NSString *)name value:(BOOL)value {
-    _scene->setPropertyBool(name.UTF8String, value);
+    fputs("WEM: setPropertyBool is a no-op with the new engine: ",
+          stderr);
+    fputs(name.UTF8String, stderr);
+    fputs("\n", stderr);
 }
 
 - (void)setPropertyInt32:(NSString *)name value:(int32_t)value {
-    _scene->setPropertyInt32(name.UTF8String, value);
+    fputs("WEM: setPropertyInt32 is a no-op with the new engine: ",
+          stderr);
+    fputs(name.UTF8String, stderr);
+    fputs("\n", stderr);
 }
 
 - (void)setPropertyFloat:(NSString *)name value:(float)value {
-    _scene->setPropertyFloat(name.UTF8String, value);
+    fputs("WEM: setPropertyFloat is a no-op with the new engine: ",
+          stderr);
+    fputs(name.UTF8String, stderr);
+    fputs("\n", stderr);
 }
 
 @end

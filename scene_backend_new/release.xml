@@ -1,0 +1,421 @@
+<release version="0.3.0" date="2026-09-25">
+  <description>
+    <p>Added:</p>
+    <ul>
+      <li>Mouse parallax control for scene wallpapers, preserving camera motion and mouse interactions.</li>
+    </ul>
+    <p>Fixes:</p>
+    <ul>
+      <li>Camera path coordinates, animation looping and camera shake transforms.</li>
+      <li>Particle camera-facing orientation and turbulence mask weights.</li>
+      <li>Framebuffer history retention and initial contents for glass materials.</li>
+      <li>Linked texture history and graph dependency cycles.</li>
+      <li>Shadow depth clipping, transparent material depth writes and scripted ambient lighting.</li>
+      <li>Linked image sampling and model material rendering.</li>
+      <li>Puppet texture coordinate scaling and effect masks.</li>
+      <li>Text alignment inheritance and linked text background dependencies.</li>
+      <li>Image alignment and parallax origins when effects are disabled.</li>
+      <li>Effect geometry after runtime toggles and viewport mouse coordinates.</li>
+      <li>Child visibility when switching parent variants.</li>
+      <li>Missing texture reduction scale shader uniform.</li>
+    </ul>
+    <p>Changed:</p>
+    <ul>
+      <li>Move rendering infra to vrento.</li>
+      <li>Migrate more to rstd, vvk and licrypto.</li>
+    </ul>
+  </description>
+</release>
+
+<release version="0.2.10" date="2026-09-12">
+  <description>
+    <p>Added:</p>
+    <ul>
+      <li>Initial macOS scene and web rendering support. #134 by @bigsaltyfishes</li>
+    </ul>
+    <p>Fixes:</p>
+    <ul>
+      <li>Text wrapping at the configured maximum width. #114 by @wehrwolfmann</li>
+      <li>Dangling Eigen expressions in parallax calculations. #135 by @ales-drnz</li>
+      <li>Text layout origin, color blending and linked clock rendering.</li>
+      <li>Puppet animation reference poses, blend weights, rotation order and timing.</li>
+      <li>Animated puppet part draw order and composed puppet proportions.</li>
+      <li>Source animation clip parsing and puppet blend map loading timeouts.</li>
+      <li>Composite backdrop transparency and conditional base texture loading.</li>
+      <li>Legacy shader materials and material property lookup.</li>
+      <li>Animated script property values, dynamic layer contexts and material bindings.</li>
+      <li>Named and initially hidden effects remain accessible to scene scripts.</li>
+      <li>Audio response demand, script timing and particle emission.</li>
+      <li>Particle control point attraction falloff.</li>
+    </ul>
+  </description>
+</release>
+
+<release version="0.2.9" date="2026-08-31">
+  <description>
+    <p>Added:</p>
+    <ul>
+      <li>Russian plugin localization. #119 by @CatSema</li>
+      <li>Localized labels for Workshop filters. #124 by @CatSema</li>
+      <li>Timeline animation events for scene scripts. #111 by @wehrwolfmann</li>
+    </ul>
+    <p>Fixes:</p>
+    <ul>
+      <li>Effect visibility scripts respond to runtime changes. #112 by @wehrwolfmann</li>
+      <li>Perspective scenes handle omitted parallax depth correctly. #125 by @barrence01</li>
+      <li>Dynamic and composed layer parallax routing.</li>
+      <li>Conditional shader combo defaults and SDR bloom rendering.</li>
+      <li>Puppet effect geometry, texture coordinates and texture-channel animations.</li>
+      <li>Composite layer source alignment.</li>
+      <li>Renderer startup audio state synchronization.</li>
+      <li>Localized wallpaper property metadata.</li>
+    </ul>
+    <p>Changed:</p>
+    <ul>
+      <li>Renderer logging follows the host logging control.</li>
+      <li>Animation field bindings use the shared scene animation model.</li>
+    </ul>
+  </description>
+</release>
+<release version="0.2.8" date="2026-08-24">
+  <description>
+    <p>Added:</p>
+    <ul>
+      <li>Localized plugin metadata and configuration labels.</li>
+      <li>Wallpaper property titles follow the user's locale. #109 by @wehrwolfmann</li>
+    </ul>
+    <p>Fixes:</p>
+    <ul>
+      <li>Scene parallax depth routing across image, particle, text and script-driven objects. #116 by @ayasa520</li>
+      <li>Scripted orthographic camera transforms no longer shift scenes into screen corners.</li>
+    </ul>
+    <p>Changed:</p>
+    <ul>
+      <li>Resolve the Waywallen bridge through pkg-config during Lito builds.</li>
+    </ul>
+  </description>
+</release>
+<release version="0.2.6" date="2026-08-19">
+  <description>
+    <p>Fixes:</p>
+    <ul>
+      <li>Lito system CEF integration, symbol stripping and RUNPATH handling.</li>
+    </ul>
+  </description>
+</release>
+<release version="0.2.5" date="2026-08-16">
+  <description>
+    <p>Changed:</p>
+    <ul>
+      <li>Switch to Lito for building, installing and packaging.</li>
+      <li>Move type and content rating filter to multi selectors for waywallen discovery.</li>
+    </ul>
+    <p>Fixes:</p>
+    <ul>
+      <li>VAAPI hardware decoding no longer stalls between frames when looped video restarts.</li>
+      <li>Vulkan hardware decoding no longer intermittently displays stale frames.</li>
+      <li>Missing scene textures use a fallback image instead of suppressing the frame. #96 by @GemeWolf</li>
+      <li>Runtime media thumbnails refresh correctly through image effect chains. #102 by @Waseem27-art</li>
+      <li>NVIDIA crashes caused by oversized cross-stage shader interfaces.</li>
+      <li>Self-referential scene dependencies and stale anonymous buffers across render-graph rebuilds.</li>
+      <li>Audio-response shutdown crashes.</li>
+      <li>Steam library path diagnostics.</li>
+    </ul>
+  </description>
+</release>
+<release version="0.2.3" date="2026-08-09">
+  <description>
+    <p>Added:</p>
+    <ul>
+      <li>Playback-speed controls for video wallpapers.</li>
+      <li>Primitive scene user-property values in scripts.</li>
+      <li>On-demand frame republishing for Waywallen renderer sessions.</li>
+    </ul>
+    <p>Fixes:</p>
+    <ul>
+      <li>User-property image bindings remain alive during runtime updates. #83 by @wehrwolfmann</li>
+      <li>Effective scene clear colors after user-property updates.</li>
+      <li>MDLA v6 multi-curve puppet morph event loading.</li>
+    </ul>
+  </description>
+</release>
+<release version="0.2.2" date="2026-08-05">
+  <description>
+    <p>Changed: Bump up waywallen spawn version.</p>
+    <p>Fixed: Vulkan validation and stability issues in shaders, particle and video textures.</p>
+  </description>
+</release>
+<release version="0.2.1" date="2026-08-04">
+  <description>
+    <p>Added:</p>
+    <ul>
+      <li>Steam Workshop subscription state from local Steam records. #84 by @wehrwolfmann</li>
+      <li>Steam-recorded Workshop item sizes. #86 by @wehrwolfmann</li>
+      <li>Workshop author names in source metadata. #87 by @wehrwolfmann</li>
+      <li>Directional shadow atlas rendering.</li>
+      <li>Script-created layers from configurations and imported Workshop assets.</li>
+    </ul>
+    <p>Fixes:</p>
+    <ul>
+      <li>Scene zoom, tabbed text, hidden text templates, scripted origins and direct text rendering.</li>
+      <li>Video textures, linked layer outputs and render-pass resources across render-graph rebuilds.</li>
+      <li>Layer composition, self-composites, linear-dodge effects, puppet color blending and final resolves.</li>
+      <li>Perspective model cameras, scene lighting, material instances and wrapped animation curves.</li>
+      <li>Script sound volume, WEVector vectorAngle2 and dynamic Workshop layer fanout.</li>
+      <li>Child particle overrides, particle speed scaling and hidden particle updates.</li>
+      <li>Mixed audio-buffer resolutions and short shader-vector defaults.</li>
+      <li>Unavailable image effects and transient visibility updates.</li>
+    </ul>
+    <p>Improved:</p>
+    <ul>
+      <li>Package parser ownership and source organization.</li>
+      <li>Render-target allocation planning and layer-composite resource reuse.</li>
+      <li>Global uniform and pipeline-layout ABI handling.</li>
+      <li>Audio response analysis with FFT history.</li>
+      <li>Shader cache publication through rstd filesystem operations.</li>
+    </ul>
+  </description>
+</release>
+<release version="0.2.0" date="2026-07-25">
+  <description>
+    <p>Added:</p>
+    <ul>
+      <li>Steam Workshop discovery through the Waywallen plugin source. #56 by @WorkingRobot</li>
+      <li>Steam account authentication.</li>
+      <li>Steam Workshop subscription management.</li>
+      <li>Runtime user-property controls in SceneViewer.</li>
+      <li>Script-created dynamic scene layers.</li>
+      <li>Media thumbnail colors for scene scripts.</li>
+      <li>Planar reflection rendering.</li>
+      <li>Legacy 3D material inputs.</li>
+      <li>Waywallen audio spectrum input.</li>
+    </ul>
+    <p>Fixes:</p>
+    <ul>
+      <li>scene: bind all cameraparallax fields to user properties #60 by @ales-drnz</li>
+      <li>scene: stop a sound layer when its layer is hidden #61 by @ales-drnz</li>
+      <li>source: normalize registered Steam library paths #62 by @ales-drnz</li>
+      <li>mirror wrap mode clamping animations to the last keyfram #53 by @NB-Group</li>
+      <li>Child particle mesh capacity, lifecycle, color inheritance and follow anchors.</li>
+      <li>Rope trail sampling and lightning sequencing.</li>
+      <li>Velocity-based and world-space particle trails.</li>
+      <li>Multi-image particle sprite animation.</li>
+      <li>Particle time scaling and warmup stalls.</li>
+      <li>Particle fog under perspective cameras.</li>
+      <li>World-space particle controls and direct-draw shapes.</li>
+      <li>Render target identity during dynamic updates.</li>
+      <li>Nested link texture outputs.</li>
+      <li>Composite layer contents and mip framebuffer history.</li>
+      <li>Dynamic buffer contents and texture binding refresh.</li>
+      <li>Cross-stage shader varyings and uniform defaults.</li>
+      <li>HLSL matrix layout.</li>
+      <li>Full-width semicolons in shaders.</li>
+      <li>Unused material values no longer report missing GLSL uniforms.</li>
+      <li>Copybackground custom effects.</li>
+      <li>Script-driven image alignment and effect draws.</li>
+      <li>Text effect alignment.</li>
+      <li>Puppet geometry alignment and attachment transforms.</li>
+      <li>Model fog eye position and scripted rotation.</li>
+      <li>Renderer bridge shutdown after session loss.</li>
+      <li>Audio device activation ordering.</li>
+      <li>Direct draw shape geometry.</li>
+      <li>SceneViewer event polling with high cpu usage.</li>
+    </ul>
+    <p>Improved:</p>
+    <ul>
+      <li>Render resource preparation.</li>
+      <li>Parallel texture preparation.</li>
+      <li>Shader caching.</li>
+      <li>Particle attribute caching.</li>
+      <li>Batched particle vertex uploads.</li>
+      <li>IO migration to rstd.</li>
+      <li>Vulkan infrastructure migration to vvk.</li>
+    </ul>
+  </description>
+</release>
+<release version="0.1.12" date="2026-07-12">
+  <description>
+    <p>Added:</p>
+    <ul>
+      <li>Text user properties for scene and web wallpapers.</li>
+    </ul>
+    <p>Fixes:</p>
+    <ul>
+      <li>Dynamic and composited text sizing, clipping, glyph blending and effect rendering. #51</li>
+      <li>Image-effect source alignment and spin-effect final composition.</li>
+      <li>Hidden layer link composites and solid layer color blending.</li>
+      <li>Legacy foliage sway rendering.</li>
+      <li>Wallpaper Engine project discovery for non-standard package names. #48</li>
+    </ul>
+  </description>
+</release>
+<release version="0.1.11" date="2026-07-08">
+  <description>
+    <p>Fixes:</p>
+    <ul>
+      <li>Text rendering with dynamic effect targets and degenerate node camera transforms.</li>
+      <li>Audio bar shader compatibility.</li>
+      <li>Runtime image effect visibility from scene scripts.</li>
+      <li>Hidden solid layer link composites.</li>
+      <li>Copybackground, color-blend and transparent previous-effect composition.</li>
+      <li>Hidden particles, rain drag and child particle override inheritance.</li>
+      <li>Media thumbnail image fallback handling.</li>
+      <li>Script safety for unresolved scene layers.</li>
+    </ul>
+  </description>
+</release>
+<release version="0.1.10" date="2026-07-05">
+  <description>
+    <p>Added:</p>
+    <ul>
+      <li>Dynamic wescene audio enable/disable handling for renderer settings and per-wallpaper properties. #44 #47</li>
+    </ul>
+    <p>Fixes:</p>
+    <ul>
+      <li>Copybackground video blend and transparent video texture composition.</li>
+      <li>Initial user-property string parsing after renderer restart. #46</li>
+      <li>Text alpha composition and clock highlight rendering.</li>
+      <li>Node field animations, spin-effect quad centers and calendar text scripts.</li>
+      <li>Atmosphere effect rendering.</li>
+      <li>Looped video texture frame pacing.</li>
+    </ul>
+  </description>
+</release>
+<release version="0.1.9" date="2026-07-03">
+  <description>
+    <p>Added:</p>
+    <ul>
+      <li>MPRIS media events for scene scripts.</li>
+      <li>Script Vec2 object constructor support.</li>
+      <li>Dynamic scene script asset layers for registerAsset/createLayer.</li>
+      <li>Render resource diagnostics and resource-index test coverage.</li>
+    </ul>
+    <p>Fixes:</p>
+    <ul>
+      <li>Vaapi/Vulkan hwdec tex wrong color.</li>
+      <li>Scene-node ownership across parser, render graph and script runtime.</li>
+      <li>Text layer bounds, parallax, render targets, flat colors, effect order, dynamic loading and effect sizing.</li>
+      <li>Visible/user binding handling for image, light, particle and sound objects.</li>
+      <li>Image alpha user bindings and runtime alpha visibility.</li>
+      <li>Image alignment in local geometry.</li>
+      <li>Hidden passthrough, transform, scroll, copybackground and copybackground color-blend final composites.</li>
+      <li>Image effect render target clamping.</li>
+      <li>Particle random frame motion.</li>
+      <li>Material shader constant animations.</li>
+      <li>User-property title images overflowing in the Waywallen Lua source UI.</li>
+    </ul>
+    <p>Improved:</p>
+    <ul>
+      <li>Render resource cache keys and framebuffer/resource reuse diagnostics.</li>
+      <li>Vulkan physical-device warning handling.</li>
+      <li>Renderer test surface by removing obsolete workshop runtime tests.</li>
+    </ul>
+  </description>
+</release>
+<release version="0.1.8" date="2026-06-21">
+  <description>
+    <p>Added:</p>
+    <ul>
+      <li>Project-layer effect rendering.</li>
+      <li>Live image color properties.</li>
+      <li>Scripted perspective parallax.</li>
+      <li>Script vector mix and lengthSqr helpers.</li>
+      <li>Scalar shader user value fanout.</li>
+      <li>Precision-qualified shader uniform parsing.</li>
+      <li>Web wallpaper drm node override.</li>
+      <li>Scene video tex hwdec.</li>
+      <li>CI aarch64.</li>
+    </ul>
+    <p>Fixes:</p>
+    <ul>
+      <li>Web wallpaper on nvidia card #15.</li>
+      <li>Clear-color user bindings.</li>
+      <li>Passthrough image layers.</li>
+      <li>Layered clock reflections.</li>
+      <li>Hidden composelayer sources.</li>
+      <li>MDLV23 mesh alpha scripts.</li>
+      <li>Model effect passes.</li>
+      <li>Puppet replace base poses.</li>
+      <li>Puppet effect clipping masks.</li>
+      <li>Blend attachment state initialization.</li>
+      <li>Script skinned stage rendering.</li>
+      <li>Script camera paths and baselines.</li>
+      <li>Script cursor world coordinates.</li>
+      <li>Particle,text,effect follow anchors.</li>
+      <li>Media thumbnail fallbacks.</li>
+    </ul>
+    <p>Improved:</p>
+    <ul>
+      <li>Compatible shader pass batching.</li>
+      <li>Render-graph ordering for target-local passes.</li>
+      <li>Framebuffer snapshot reuse.</li>
+      <li>Drop vulkan validation errors.</li>
+    </ul>
+  </description>
+</release>
+<release version="0.1.7" date="2026-06-16">
+  <description>
+    <p>Fixed: Camera shake motion.</p>
+    <p>Fixed: Parenting script bone lookup for puppet layers and script-created nodes.</p>
+    <p>Fixed: Particle emitter origin scaling for scaled parent layers.</p>
+    <p>Fixed: Culling and shader uniform regressions affecting layered scene rendering.</p>
+    <p>Fixed: Draw the first frame when paused.</p>
+  </description>
+</release>
+<release version="0.1.6" date="2026-06-14">
+  <description>
+    <p>Added: Waywallen plugin build CI and plugin packages.</p>
+    <p>Added: Camera shake, camera paths and 3D scene/model rendering support.</p>
+    <p>Added: Particle geometry-shader rendering for sprite particles.</p>
+    <p>Changed: Refactored scene document loading so early scene metadata is reused by the full parse path.</p>
+    <p>Changed: Plugin bundle archives now install with plugin.toml at the archive root.</p>
+    <p>Fixed: Legacy user shader values, scripted camera paths, scripted effect transforms and animation stub handling.</p>
+    <p>Fixed: Single puppet animations and MDLV21 puppet animation hierarchy/additive poses.</p>
+    <p>Fixed: Particle emitter ranges, child particles and high-count particle point generation.</p>
+    <p>Fixed: 3D depth rendering and depth ordering for mixed 2D/3D scenes.</p>
+    <p>Fixed: Build and CI dependencies for Clang modules, ALSA, glslang and expat.</p>
+  </description>
+</release>
+<release version="0.1.4" date="2026-06-04">
+  <description>
+    <p>Added: Audio-response support for the Wallpaper Engine web renderer.</p>
+    <p>Changed: Renderer binaries are installed under bin, with the web runtime under bin/weweb.</p>
+    <p>Changed: Renderer component versions are no longer duplicated in plugin manifests.</p>
+  </description>
+</release>
+<release version="0.1.3" date="2026-06-02">
+  <description>
+    <p>Added: Scanning of bundled defaultprojects and user-authored myprojects wallpapers.</p>
+    <p>Added: Perspective scene cameras now follow the scene's camera object, with a lookat fallback.</p>
+    <p>Added: WEVector scripting module, unblocking audio-visualizer wallpapers.</p>
+    <p>Added: Content rating metadata on scanned wallpapers.</p>
+    <p>Changed: Reworked the waywallen plugin layout.</p>
+    <p>Changed: Broader spec-texture name coverage for layer composites and self-links.</p>
+    <p>Fixed: Off-aspect scene wallpapers are no longer stretched.</p>
+    <p>Fixed: Point-sampled (noInterpolation) image layers stay point-sampled through the whole effect chain.</p>
+    <p>Fixed: Cross-stage shader varyings are widened to the wider declared type.</p>
+    <p>Fixed: Dynamic text content render-target width.</p>
+    <p>Fixed: Audio-bar fanout ordering.</p>
+    <p>Fixed: ApplyBlending override and stray shadowAtlas handling.</p>
+    <p>Community: Merged #13 (@burlone0): fix off-aspect scene wallpapers being stretched.</p>
+    <p>Community: Fixed #12: point-art image layers losing their nearest filtering.</p>
+  </description>
+</release>
+<release version="0.1.2" date="2026-05-24">
+  <description>
+    <p>Added: Support for newest puppet (MDLV21) wallpapers, including skinning, submeshes and clip masks.</p>
+    <p>Added: Scripting support for SceneNode, setTimeout, cursor, localStorage, WEMath and createLayer.</p>
+    <p>Added: Audio-reactive shaders driven by the wavsen spectrum.</p>
+    <p>Added: User properties on scene layers, including scripted updates.</p>
+    <p>Added: System and workshop font resolution.</p>
+    <p>Added: A resolution setting.</p>
+    <p>Changed: Switched the shader frontend from DXC to glslang for broader HLSL compatibility.</p>
+    <p>Changed: Audio spectrum bars are now smoother and frame-rate independent.</p>
+    <p>Changed: Text alignment now follows the original horizontalalign / verticalalign fields.</p>
+    <p>Fixed: Particle movement and controlpointattract behavior.</p>
+    <p>Fixed: Rope rendering and link_mouse follow.</p>
+    <p>Fixed: Puppet animation speed on multi-pass layers.</p>
+    <p>Fixed: Various Vulkan synchronization issues.</p>
+    <p>Community: Merged #6 (@Shnimlz): audio-responsive particles and scripted scene user properties.</p>
+  </description>
+</release>

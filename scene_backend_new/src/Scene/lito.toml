@@ -1,0 +1,225 @@
+[package]
+name = "owe-scene"
+version.workspace = true
+source-root = "../.."
+
+[lib]
+name = "owe-scene"
+module = "wescene"
+archive = "owe-scene"
+sources = [
+  "src/Scene/Audio/SceneAudioResponse.cppm",
+  "src/Scene/Audio/SceneAudioResponse.cpp",
+  "src/Scene/Bridge/wescene_bridge.cpp",
+  "src/Scene/Lighting/Lighting.cppm",
+  "src/Scene/LoadBench.cppm",
+  "src/Scene/Particle/Particle.cppm",
+  "src/Scene/Particle/ParticleProgram.cppm",
+  "src/Scene/Pkg/AssetVersion.cppm",
+  "src/Scene/Pkg/Parse/Compat.cppm",
+  "src/Scene/Pkg/Parse/Image/SceneImageObjectParser.cpp",
+  "src/Scene/Pkg/Parse/Image/TexImageParser.cppm",
+  "src/Scene/Pkg/Parse/Image/TexImageParser.cpp",
+  "src/Scene/Pkg/Parse/Particle/ParticleEmitter.cpp",
+  "src/Scene/Pkg/Parse/Particle/ParticleParser.cppm",
+  "src/Scene/Pkg/Parse/Particle/ParticleParser.cpp",
+  "src/Scene/Pkg/Parse/Particle/ParticleRawGenerator.cpp",
+  "src/Scene/Pkg/Parse/Particle/ParticleRuntime.cppm",
+  "src/Scene/Pkg/Parse/Particle/ParticleRuntime.cpp",
+  "src/Scene/Pkg/Parse/Particle/SceneParticleObjectParser.cpp",
+  "src/Scene/Pkg/Parse/Puppet/MdlParser.cppm",
+  "src/Scene/Pkg/Parse/Puppet/MdlParser.cpp",
+  "src/Scene/Pkg/Parse/Puppet/Puppet.cppm",
+  "src/Scene/Pkg/Parse/Puppet/Puppet.cpp",
+  "src/Scene/Pkg/Parse/Puppet/PuppetCompat.cppm",
+  "src/Scene/Pkg/Parse/Scene/SceneAnimationBinding.cpp",
+  "src/Scene/Pkg/Parse/Scene/SceneContext.cppm",
+  "src/Scene/Pkg/Parse/Scene/SceneContext.cpp",
+  "src/Scene/Pkg/Parse/Scene/SceneDynamicAsset.cpp",
+  "src/Scene/Pkg/Parse/Scene/SceneFinalize.cpp",
+  "src/Scene/Pkg/Parse/Scene/SceneGeometryBuilder.cpp",
+  "src/Scene/Pkg/Parse/Scene/SceneMaterialBuilder.cpp",
+  "src/Scene/Pkg/Parse/Scene/SceneObjectExpansion.cpp",
+  "src/Scene/Pkg/Parse/Scene/SceneObjectParsers.cpp",
+  "src/Scene/Pkg/Parse/Scene/SceneParser.cppm",
+  "src/Scene/Pkg/Parse/Scene/SceneParser.cpp",
+  "src/Scene/Pkg/Parse/Scene/ScenePostProcess.cpp",
+  "src/Scene/Pkg/Parse/Scene/SceneScriptBinding.cpp",
+  "src/Scene/Pkg/Parse/Scene/SceneStages.cppm",
+  "src/Scene/Pkg/Parse/Scene/SceneTextObjectParser.cpp",
+  "src/Scene/Pkg/Parse/Shader/ShaderAnnot.cpp",
+  "src/Scene/Pkg/Parse/Shader/ShaderLex.cppm",
+  "src/Scene/Pkg/Parse/Shader/ShaderParser.cppm",
+  "src/Scene/Pkg/Parse/Shader/ShaderParser.cpp",
+  "src/Scene/Pkg/Parse/Sound/SoundParser.cppm",
+  "src/Scene/Pkg/Parse/Sound/SoundParser.cpp",
+  "src/Scene/Pkg/Parse/Uniform/GlobalUniform.cppm",
+  "src/Scene/Pkg/Parse/Uniform/Uniform.cppm",
+  "src/Scene/Pkg/Parse/Uniform/Uniform.cpp",
+  "src/Scene/Pkg/Parse/Uniform/UniformSource.cppm",
+  "src/Scene/Pkg/Parse/Uniform/UniformSource.cpp",
+  "src/Scene/Pkg/Parse/mod.cppm",
+  "src/Scene/Pkg/PkgFs.cppm",
+  "src/Scene/Pkg/PkgFs.cpp",
+  "src/Scene/Pkg/SceneObj/AnimationLayer.cppm",
+  "src/Scene/Pkg/SceneObj/FieldBinding.cppm",
+  "src/Scene/Pkg/SceneObj/FieldBinding.cpp",
+  "src/Scene/Pkg/SceneObj/ImageObject.cppm",
+  "src/Scene/Pkg/SceneObj/ImageObject.cpp",
+  "src/Scene/Pkg/SceneObj/LightObject.cppm",
+  "src/Scene/Pkg/SceneObj/LightObject.cpp",
+  "src/Scene/Pkg/SceneObj/Material.cppm",
+  "src/Scene/Pkg/SceneObj/Material.cpp",
+  "src/Scene/Pkg/SceneObj/MiscObject.cppm",
+  "src/Scene/Pkg/SceneObj/Object.cppm",
+  "src/Scene/Pkg/SceneObj/Object.cpp",
+  "src/Scene/Pkg/SceneObj/ParticleObject.cppm",
+  "src/Scene/Pkg/SceneObj/ParticleObject.cpp",
+  "src/Scene/Pkg/SceneObj/SceneDocument.cppm",
+  "src/Scene/Pkg/SceneObj/SceneDocument.cpp",
+  "src/Scene/Pkg/SceneObj/SoundObject.cppm",
+  "src/Scene/Pkg/SceneObj/VisibilityBinding.cppm",
+  "src/Scene/Pkg/SceneObj/mod.cppm",
+  "src/Scene/Pkg/SpecNames.cppm",
+  "src/Scene/Pkg/mod.cppm",
+  "src/Scene/RenderGraph/RGraph.cppm",
+  "src/Scene/Resource/Registry.cppm",
+  "src/Scene/Resource/Resource.cppm",
+  "src/Scene/Scene/Id.cppm",
+  "src/Scene/Scene/Runtime.cppm",
+  "src/Scene/Scene/Scene.cppm",
+  "src/Scene/Scene/Scene.cpp",
+  "src/Scene/Scene/SceneCamera.cpp",
+  "src/Scene/Scene/SceneNode.cpp",
+  "src/Scene/Scene/SceneNodeLayer.cpp",
+  "src/Scene/Scene/SceneVisibility.cppm",
+  "src/Scene/Scene/Uniform.cppm",
+  "src/Scene/SceneUserProperty.cppm",
+  "src/Scene/SceneUserProperty.cpp",
+  "src/Scene/SceneWallpaper.cppm",
+  "src/Scene/SceneWallpaper.cpp",
+  "src/Scene/Script/Script.cppm",
+  "src/Scene/Script/Script.cpp",
+  "src/Scene/SpecNames.cppm",
+  "src/Scene/Text/Text.cppm",
+  "src/Scene/Text/Text.cpp",
+  "src/Scene/Timer/FrameTimer.cppm",
+  "src/Scene/Timer/FrameTimer.cpp",
+  "src/Scene/Timer/ThreadTimer.cppm",
+  "src/Scene/Timer/ThreadTimer.cpp",
+  "src/Scene/Timer/Timer.cppm",
+  "src/Scene/VulkanRender/BufferResolver.cppm",
+  "src/Scene/VulkanRender/BufferResolver.cpp",
+  "src/Scene/VulkanRender/Pass/CopyPass.cppm",
+  "src/Scene/VulkanRender/Pass/CopyPass.cpp",
+  "src/Scene/VulkanRender/Pass/CustomShaderPass.cppm",
+  "src/Scene/VulkanRender/Pass/CustomShaderPass.cpp",
+  "src/Scene/VulkanRender/Pass/FinPass.cppm",
+  "src/Scene/VulkanRender/Pass/FinPass.cpp",
+  "src/Scene/VulkanRender/Pass/PassCommon.cppm",
+  "src/Scene/VulkanRender/Pass/PrePass.cppm",
+  "src/Scene/VulkanRender/Pass/PrePass.cpp",
+  "src/Scene/VulkanRender/Pass/VulkanPass.cppm",
+  "src/Scene/VulkanRender/PipelineLayout.cppm",
+  "src/Scene/VulkanRender/Program.cppm",
+  "src/Scene/VulkanRender/Resource.cppm",
+  "src/Scene/VulkanRender/SceneToRenderGraph.cpp",
+  "src/Scene/VulkanRender/ShaderReflectionCache.cppm",
+  "src/Scene/VulkanRender/ShaderReflectionCache.cpp",
+  "src/Scene/VulkanRender/UniformBuffer.cppm",
+  "src/Scene/VulkanRender/UniformBuffer.cpp",
+  "src/Scene/VulkanRender/VulkanRender.cppm",
+  "src/Scene/VulkanRender/VulkanRender.cpp",
+]
+
+[usage]
+public-include-directories = [
+  "third_party",
+  "src",
+  "src/Scene",
+  "src/Scene/Scene",
+  "src/Scene/Particle",
+  "src/Scene/Script",
+  "src/Scene/VulkanRender",
+]
+public-definitions = [
+  'WAYWALLEN_WORKSHOP_DIR="workshop"',
+  'WAYWALLEN_ASSETS_DIR="assets"',
+  "FT_SIZEOF_LONG=8",
+]
+options = [
+  "-Wextra",
+  "-Wno-missing-field-initializers",
+  "-Wno-gnu-zero-variadic-macro-arguments",
+]
+
+[dependencies.owe-core]
+workspace = true
+pub = true
+
+[dependencies.vrento]
+workspace = true
+pub = true
+
+[dependencies.owe-audio]
+workspace = true
+pub = true
+
+[dependencies.owe-types]
+workspace = true
+pub = true
+
+[dependencies.owe-utils]
+workspace = true
+pub = true
+
+[dependencies.owe-vulkan]
+workspace = true
+pub = true
+
+[dependencies.rstd-std]
+workspace = true
+pub = true
+
+[dependencies.rstd-cppstd]
+workspace = true
+pub = true
+
+[dependencies.rstd-json]
+workspace = true
+pub = true
+
+[dependencies.rstd-parse]
+workspace = true
+
+[dependencies.rstd-log]
+workspace = true
+pub = true
+
+[dependencies.rstd-argparse]
+workspace = true
+pub = true
+
+[dependencies.rstd-bench]
+workspace = true
+pub = true
+
+[dependencies.wavsen]
+workspace = true
+pub = true
+
+[external-dependencies.cmake.quickjs]
+workspace = true
+targets = [{ name = "qjs", pub = true }]
+
+[external-dependencies.pkg-config.lz4]
+workspace = true
+pub = true
+
+[external-dependencies.pkg-config.fontconfig]
+workspace = true
+pub = true
+
+[external-dependencies.pkg-config.freetype]
+workspace = true
+pub = true

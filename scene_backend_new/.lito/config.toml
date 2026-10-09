@@ -1,0 +1,15 @@
+# Local builds: redirect the dependencies that need macOS
+# patches (see patched/README.md) to the vendored copies
+# instead of the upstream sources.
+
+# vvk ships from the litocpp registry; its loader only knows
+# the MoltenVK SDK's libvulkan.1.dylib name, while Homebrew
+# installs libMoltenVK.dylib. The vendored copy tries both.
+[patch.litocpp]
+vvk = { path = "patched/vvk" }
+
+[patch."https://github.com/hypengw/wavsen.git"]
+wavsen = { path = "patched/wavsen" }
+
+[patch."https://github.com/vecren/vrento.git"]
+vrento = { path = "patched/vrento" }

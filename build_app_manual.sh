@@ -12,11 +12,14 @@ cd "$(dirname "$0")"
 SDK="$(xcrun --show-sdk-path)"
 BREW_PREFIX="$(brew --prefix 2>/dev/null || echo /opt/homebrew)"
 MVK_INCLUDE="$BREW_PREFIX/opt/molten-vk/libexec/include"
-SCENE_LIB="scene_backend/build/install/lib/libwescene-renderer.a"
+# New engine (open-wallpaper-engine). The old catsout
+# engine is still in scene_backend/ for rollback — see
+# scene_backend_new/README.md.
+SCENE_LIB="scene_backend_new/build/install/lib/libwescene-renderer.a"
 OUT="build_manual"
 
 [ -f "$SCENE_LIB" ] || {
-    echo "Scene engine not built yet — run: bash scene_backend/BuildSceneBackend.sh" >&2
+    echo "Scene engine not built yet — run: bash scene_backend_new/BuildSceneBackend.sh" >&2
     exit 1
 }
 command -v swiftc >/dev/null 2>&1 || {
@@ -31,12 +34,7 @@ clang++ -c \
     WallpaperEngineMac/Scene/SceneRendererBridge.mm \
     -o "$OUT/SceneRendererBridge.o" \
     -I WallpaperEngineMac/Scene \
-    -I scene_backend/src \
-    -I scene_backend/third_party \
-    -I scene_backend/third_party/nlohmann/single_include \
-    -I scene_backend/third_party/SPIRV-Reflect \
-    -I scene_backend/third_party/glslang \
-    -I scene_backend/third_party/glslang/SPIRV \
+    -I scene_backend_new/build/install/include \
     -I "$MVK_INCLUDE" \
     -I "$BREW_PREFIX/include" \
     -isysroot "$SDK" \
@@ -58,8 +56,8 @@ swiftc \
     -o "$OUT/WallpaperEngineMac" \
     -target arm64-apple-macos15.0 \
     -sdk "$SDK" \
-    -L scene_backend/build/install/lib -lwescene-renderer \
-    -L "$BREW_PREFIX/lib" -lMoltenVK -llz4 -lc++ \
+    -L scene_backend_new/build/install/lib -lwescene-renderer \
+    -L "$BREW_PREFIX/lib" -lMoltenVK -llz4 -lavformat -lavcodec -lavutil -lswscale -lswresample -lfontconfig -lfreetype -lc++ \
     -Xlinker -rpath -Xlinker "$BREW_PREFIX/lib" \
     -framework Cocoa -framework SwiftUI -framework AppKit -framework Combine \
     -framework QuartzCore -framework Metal -framework IOSurface -framework CoreVideo \

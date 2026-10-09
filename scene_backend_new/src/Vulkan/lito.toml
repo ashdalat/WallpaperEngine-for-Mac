@@ -1,0 +1,66 @@
+[package]
+name = "owe-vulkan"
+version.workspace = true
+
+[lib]
+name = "owe-vulkan"
+module = "wescene.vulkan"
+archive = "owe-vulkan"
+sources = [
+  "ShaderCompile.cppm",
+  "Vulkan.cppm",
+  "Shader.cpp",
+]
+
+[usage]
+public-include-directories = ["."]
+options = [
+  "-Wextra",
+  "-Wno-missing-field-initializers",
+  "-Wno-gnu-zero-variadic-macro-arguments",
+]
+
+[dependencies.owe-core]
+workspace = true
+pub = true
+
+[dependencies.vrento]
+workspace = true
+pub = true
+
+[dependencies.owe-types]
+workspace = true
+pub = true
+
+[dependencies.owe-utils]
+workspace = true
+
+[dependencies.rstd-std]
+workspace = true
+pub = true
+
+[dependencies.rstd-cppstd]
+workspace = true
+pub = true
+
+[dependencies.rstd-log]
+workspace = true
+pub = true
+
+[dependencies.wavsen]
+workspace = true
+
+[dependencies.vvk]
+workspace = true
+pub = true
+
+[dependencies.spirv-reflect]
+workspace = true
+
+[external-dependencies.cmake.glslang]
+workspace = true
+targets = [
+  { name = "glslang::glslang", pub = true },
+  { name = "glslang::SPIRV", pub = true },
+  { name = "glslang::glslang-default-resource-limits", pub = true },
+]

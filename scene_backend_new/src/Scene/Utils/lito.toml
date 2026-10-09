@@ -1,0 +1,46 @@
+[package]
+name = "owe-utils"
+version.workspace = true
+source-root = "../../.."
+
+[lib]
+name = "owe-utils"
+module = "wescene.utils"
+archive = "owe-utils"
+sources = [
+  "src/Scene/Utils/Utils.cppm",
+  "src/Scene/Utils/Algorism.cpp",
+  "src/Scene/Utils/FpsCounter.cpp",
+  "src/Scene/Utils/Sha.cpp",
+]
+
+[usage]
+public-include-directories = ["third_party"]
+options = [
+  "-Wextra",
+  "-Wno-missing-field-initializers",
+  "-Wno-gnu-zero-variadic-macro-arguments",
+]
+
+[dependencies.owe-core]
+workspace = true
+pub = true
+
+[dependencies.licrypto]
+workspace = true
+
+[dependencies.owe-types]
+workspace = true
+pub = true
+
+[dependencies.rstd-std]
+workspace = true
+pub = true
+
+[dependencies.rstd-cppstd]
+workspace = true
+pub = true
+
+[dependencies.rstd-log]
+workspace = true
+pub = true

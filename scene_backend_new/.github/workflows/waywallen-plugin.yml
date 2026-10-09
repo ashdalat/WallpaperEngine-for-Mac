@@ -1,0 +1,144 @@
+name: Build Waywallen Plugin
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (e.g. v0.1.4); leave empty to build the current ref"
+        required: false
+      waywallen_ref:
+        description: "waywallen ref used to build waywallen-bridge"
+        required: false
+        default: main
+
+permissions:
+  contents: write
+
+env:
+  BUILD_TYPE: RelWithDebInfo
+  DIST_DIR: ${{ github.workspace }}/dist
+  INSTALL_DIR: ${{ github.workspace }}/build/waywallen-plugin-install
+  OWE_CONDA_ENV: owe-plugin
+  OWE_CONDA_PREFIX: ${{ github.workspace }}/build/conda-envs/owe-plugin
+  WAYWALLEN_REF: ${{ inputs.waywallen_ref || 'main' }}
+  WAYWALLEN_SRC: ${{ github.workspace }}/build/waywallen-src
+
+jobs:
+  plugin:
+    name: Linux ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-24.04
+            miniconda_arch: x86_64
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+            miniconda_arch: aarch64
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Checkout waywallen bridge
+        uses: actions/checkout@v4
+        with:
+          repository: waywallen/waywallen
+          ref: ${{ inputs.waywallen_ref || 'main' }}
+          path: build/waywallen-src
+
+      - name: Install OS prereqs
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            bzip2 \
+            ca-certificates \
+            curl \
+            file \
+            git \
+            glslang-tools \
+            libasound2t64 \
+            libegl1 \
+            libexpat1-dev \
+            libfontconfig1-dev \
+            libgbm-dev \
+            libgl1 \
+            libgtk-3-0 \
+            libnss3 \
+            libpipewire-0.3-dev \
+            libpulse-dev \
+            libspa-0.2-dev \
+            libxkbcommon0 \
+            pkg-config \
+            xz-utils
+
+      - name: Install Miniconda
+        run: |
+          curl -fsSL -o /tmp/miniconda.sh \
+            https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-${{ matrix.miniconda_arch }}.sh
+          bash /tmp/miniconda.sh -b -p "$HOME/miniconda"
+          echo "$HOME/miniconda/bin" >> "$GITHUB_PATH"
+          echo "$HOME/miniconda/condabin" >> "$GITHUB_PATH"
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ env.OWE_CONDA_PREFIX }}
+          key: owe-plugin-conda-${{ runner.os }}-${{ matrix.arch }}-${{ hashFiles('environment.yml', 'scripts/build_waywallen_plugin.sh') }}
+
+      - name: Build plugin package
+        id: package
+        run: bash ./scripts/build_waywallen_plugin.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: waywallen-plugin-open-wallpaper-engine-${{ matrix.arch }}
+          path: |
+            ${{ steps.package.outputs.zip }}
+            ${{ steps.package.outputs.symbols }}
+
+  release:
+    name: Release
+    runs-on: ubuntu-24.04
+    needs: plugin
+    if: github.event_name == 'push' || startsWith(inputs.tag || '', 'v')
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: waywallen-plugin-open-wallpaper-engine-*
+          path: release-artifacts
+          merge-multiple: true
+
+      - name: Determine release
+        id: rel
+        run: |
+          ref="${{ inputs.tag || github.ref_name }}"
+          echo "tag=$ref" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare release notes
+        id: release-notes
+        uses: hypengw/appstream-release-notes-action@v0.1.0
+        with:
+          file: release.xml
+          version: ${{ steps.rel.outputs.tag }}
+
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.rel.outputs.tag }}
+          artifacts: release-artifacts/*.zip
+          bodyFile: ${{ steps.release-notes.outputs.path }}
+          immutableCreate: true
+          skipIfReleaseExists: true

@@ -1,0 +1,108 @@
+name: Bug report
+description: Report something that is broken or behaves unexpectedly.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened, and what did you expect instead?
+      placeholder: The wallpaper renders incorrectly when...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: List the actions needed to trigger the issue.
+      placeholder: |
+        1. Open the wallpaper
+        2. Change the user property
+    validations:
+      required: true
+
+  - type: dropdown
+    id: renderer
+    attributes:
+      label: Renderer
+      options:
+        - Scene wallpaper
+        - Web wallpaper
+    validations:
+      required: true
+
+  - type: dropdown
+    id: run-mode
+    attributes:
+      label: Run mode
+      options:
+        - Waywallen plugin
+        - Standalone viewer
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: workshop-item
+    attributes:
+      label: Workshop item
+      description: Provide the Steam Workshop item ID or URL, when applicable.
+      placeholder: "1139304621"
+
+  - type: dropdown
+    id: install-source
+    attributes:
+      label: Install source
+      options:
+        - Release plugin archive
+        - Built from source
+        - Distribution package
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Open Wallpaper Engine version
+      description: Use the release version or commit hash.
+      placeholder: v0.2.0
+    validations:
+      required: true
+
+  - type: input
+    id: distro
+    attributes:
+      label: Linux distribution
+      placeholder: Arch Linux, Fedora 43, Ubuntu 24.04, ...
+    validations:
+      required: true
+
+  - type: input
+    id: gpu
+    attributes:
+      label: GPU and driver
+      placeholder: AMD Radeon RX 7800 XT, Mesa 26.1.0
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: |
+        Paste relevant terminal output, crash messages, or journal logs.
+
+        Enable renderer logs before reproducing the issue:
+        ```shell
+        export RSTD_LOG=debug
+        ```
+      render: shell
+
+  - type: textarea
+    id: extra-context
+    attributes:
+      label: Additional context
+      description: Add screenshots, recordings, user properties, or anything else that helps.

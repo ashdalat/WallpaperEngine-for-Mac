@@ -1,0 +1,129 @@
+[package]
+name = "wavsen"
+version = "0.1.0"
+authors = ["hypengw <hypengwip@gmail.com>"]
+license = "MIT OR Apache-2.0"
+
+[lib]
+name = "wavsen"
+module = "wavsen"
+archive = "wavsen"
+# Explicit sources are required on macOS: lito's module-discovery mode only
+# compiles GENERATED source groups, so the apple-native group below (the
+# Metal/CoreAudio .mm files) would never be compiled. Explicit-sources mode
+# compiles both the declared sources and existing source groups. The Pulse
+# backend is omitted: it is only imported under #if !defined(__APPLE__).
+sources = [
+  "src/audio/av_sync.cpp",
+  "src/audio/av_sync.cppm",
+  "src/audio/backend/coreaudio/capture.cpp",
+  "src/audio/backend/coreaudio/capture.cppm",
+  "src/audio/backend/coreaudio/output.cpp",
+  "src/audio/backend/coreaudio/output.cppm",
+  "src/audio/backend/mod.cppm",
+  "src/audio/byte_stream.cppm",
+  "src/audio/capture_window.cppm",
+  "src/audio/capture.cpp",
+  "src/audio/capture.cppm",
+  "src/audio/core.cpp",
+  "src/audio/core.cppm",
+  "src/audio/file.cpp",
+  "src/audio/file.cppm",
+  "src/audio/gain.cppm",
+  "src/audio/mixer.cpp",
+  "src/audio/mixer.cppm",
+  "src/audio/mod.cppm",
+  "src/decode/mod.cpp",
+  "src/decode/mod.cppm",
+  "src/ffi/coreaudio/mod.cppm",
+  "src/ffi/corefoundation/mod.cppm",
+  "src/ffi/corevideo/mod.cppm",
+  "src/ffi/ffmpeg/audio.cppm",
+  "src/ffi/ffmpeg/avcodec.cppm",
+  "src/ffi/ffmpeg/avformat.cppm",
+  "src/ffi/ffmpeg/avutil.cppm",
+  "src/ffi/ffmpeg/mod.cppm",
+  "src/ffi/ffmpeg/owner.cppm",
+  "src/ffi/ffmpeg/swresample.cppm",
+  "src/ffi/ffmpeg/swscale.cppm",
+  "src/lib.cppm",
+  "src/video/apple/mod.cpp",
+  "src/video/apple/mod.cppm",
+  "src/video/mod.cppm",
+  "src/video/presenter.cppm",
+  "src/video/video_decoder.cpp",
+  "src/video/video_decoder.cppm",
+  "src/video/vk_device.cpp",
+  "src/video/vk_device.cppm",
+  "src/video/yuv_to_rgba.cpp",
+  "src/video/yuv_to_rgba.cppm",
+]
+when = [
+  { condition = 'target.os == "macos"', source-groups = ["apple-native"] },
+]
+
+[[when]]
+condition = 'target.os != "macos"'
+
+[when.usage]
+public-definitions = ["WAVSEN_HAS_VAAPI=1"]
+
+[dependencies]
+rstd-core = { version = "0.1.5", pub = true }
+rstd-std = { version = "0.1.5", pub = true }
+rstd-log = "0.1.5"
+rstd-dlopn = "0.1.5"
+vvk = { version = "0.1.0", pub = true }
+
+[external-dependencies.pkg-config]
+libavformat = { module = "libavformat", version = ">= 58", pub = true }
+libavcodec = { module = "libavcodec", version = ">= 58", pub = true }
+libavutil = { module = "libavutil", version = ">= 56", pub = true }
+libswscale = { module = "libswscale", version = ">= 5", pub = true }
+libswresample = { module = "libswresample", version = ">= 3", pub = true }
+libva = { module = "libva", pub = true, condition = 'target.os != "macos"' }
+libva-drm = { module = "libva-drm", pub = true, condition = 'target.os != "macos"' }
+libpulse = { module = "libpulse", version = ">= 14.0", usage = "compile", condition = 'target.os != "macos"' }
+
+[build-tools.glslang]
+path = "glslangValidator"
+
+[source-groups.apple-native]
+sources = [
+  "src/video/apple/metal.mm",
+  "src/audio/backend/coreaudio/process_tap.mm",
+]
+
+[[when]]
+condition = 'target.os == "macos"'
+
+[when.usage]
+frameworks = ["CoreAudio", "AudioToolbox", "CoreFoundation", "Foundation", "CoreVideo", "IOSurface", "Metal"]
+
+[[test]]
+name = "audio-capture-window"
+sources = ["tests/audio_capture_window_tests.cpp"]
+
+[[test]]
+name = "audio-gain"
+sources = ["tests/audio_gain_tests.cpp"]
+
+[[test]]
+name = "audio-backend"
+sources = ["tests/audio_backend_tests.cpp"]
+
+[[test]]
+name = "audio-media"
+sources = ["tests/audio_media_tests.cpp"]
+
+[[test]]
+name = "audio-ownership"
+sources = ["tests/audio_ownership_tests.cpp"]
+
+[[test]]
+name = "decode-owner"
+sources = ["tests/decode_owner_tests.cpp"]
+
+[[test]]
+name = "stream-decoder-rate"
+sources = ["tests/stream_decoder_rate_tests.cpp"]

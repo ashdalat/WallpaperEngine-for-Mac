@@ -1,0 +1,414 @@
+version = 1
+
+[[packages]]
+name = "licrypto"
+version = "0.1.1"
+source = "registry+https://registry.litocpp.org/"
+checksum = "9794ef28b45534d2bac075113f9e75cd3a4c55ff9bca85c06eb20f44f870d505"
+dependencies = [
+  "rstd-std",
+]
+
+[[packages]]
+name = "owe-audio"
+version = "0.3.0"
+dependencies = [
+  "owe-core",
+  "rstd-std",
+]
+
+[[packages]]
+name = "owe-core"
+version = "0.3.0"
+dependencies = [
+  "rstd-argparse",
+  "rstd-cppstd",
+  "rstd-json",
+  "rstd-log",
+  "rstd-std",
+]
+
+[[packages.externals]]
+name = "eigen"
+source = "git+https://gitlab.com/libeigen/eigen.git#bc3b39870ecb690a623a3f49149a358b95c5781d"
+
+[[packages]]
+name = "owe-scene"
+version = "0.3.0"
+dependencies = [
+  "owe-audio",
+  "owe-core",
+  "owe-types",
+  "owe-utils",
+  "owe-vulkan",
+  "rstd-argparse",
+  "rstd-bench",
+  "rstd-cppstd",
+  "rstd-json",
+  "rstd-log",
+  "rstd-parse",
+  "rstd-std",
+  "vrento",
+  "wavsen",
+]
+
+[[packages.externals]]
+name = "quickjs"
+source = "git+https://github.com/quickjs-ng/quickjs.git#3c051980ab7e783dfbfb1c70c014ce5e05ecf24c"
+
+[[packages]]
+name = "owe-sceneviewer"
+version = "0.3.0"
+dependencies = [
+  "owe-core",
+  "owe-scene",
+  "owe-viewer-common",
+  "rstd-log",
+  "vvk",
+]
+
+[[packages]]
+name = "owe-tests"
+version = "0.3.0"
+dependencies = [
+  "owe-audio",
+  "owe-core",
+  "owe-scene",
+  "owe-vulkan",
+  "owe-web",
+  "rstd-argparse",
+  "rstd-bench",
+  "rstd-cppstd",
+  "rstd-json",
+  "rstd-log",
+  "rstd-std",
+  "rstd-test",
+  "spirv-reflect",
+  "vvk",
+  "wavsen",
+]
+
+[[packages]]
+name = "owe-types"
+version = "0.3.0"
+dependencies = [
+  "owe-core",
+  "rstd-std",
+  "vrento",
+]
+
+[[packages]]
+name = "owe-utils"
+version = "0.3.0"
+dependencies = [
+  "licrypto",
+  "owe-core",
+  "owe-types",
+  "rstd-cppstd",
+  "rstd-log",
+  "rstd-std",
+]
+
+[[packages]]
+name = "owe-viewer-common"
+version = "0.3.0"
+dependencies = [
+  "owe-audio",
+  "owe-core",
+  "rstd-argparse",
+  "rstd-cppstd",
+  "rstd-std",
+  "vvk",
+  "wavsen",
+]
+
+[[packages]]
+name = "owe-vulkan"
+version = "0.3.0"
+dependencies = [
+  "owe-core",
+  "owe-types",
+  "owe-utils",
+  "rstd-cppstd",
+  "rstd-log",
+  "rstd-std",
+  "spirv-reflect",
+  "vrento",
+  "vvk",
+  "wavsen",
+]
+
+[[packages.externals]]
+name = "glslang"
+source = "git+https://github.com/KhronosGroup/glslang.git#275822a6261ee689aadb1da5f09a0ec2f058685c"
+
+[[packages]]
+name = "owe-waywallen-plugin"
+version = "0.3.0"
+runtime-dependencies = [
+  "owe-waywallen-scene-renderer",
+  "owe-waywallen-web-renderer",
+]
+
+[[packages]]
+name = "owe-waywallen-producer"
+version = "0.3.0"
+dependencies = [
+  "owe-audio",
+  "rstd-cppstd",
+  "rstd-log",
+  "rstd-std",
+  "vvk",
+]
+
+[[packages]]
+name = "owe-waywallen-scene-renderer"
+version = "0.3.0"
+dependencies = [
+  "owe-core",
+  "owe-scene",
+  "owe-vulkan",
+  "owe-waywallen-producer",
+  "rstd-argparse",
+  "rstd-cppstd",
+  "rstd-log",
+  "rstd-std",
+  "vvk",
+]
+
+[[packages]]
+name = "owe-waywallen-web-renderer"
+version = "0.3.0"
+dependencies = [
+  "owe-audio",
+  "owe-core",
+  "owe-waywallen-producer",
+  "owe-web",
+  "rstd-argparse",
+  "rstd-cppstd",
+  "rstd-log",
+  "rstd-std",
+  "vvk",
+]
+
+[[packages]]
+name = "owe-web"
+version = "0.3.0"
+dependencies = [
+  "owe-core",
+  "rstd-cppstd",
+  "rstd-std",
+]
+
+[[packages.externals]]
+name = "cef"
+source = "archive+https://cef-builds.spotifycdn.com/cef_binary_149.0.4%2Bg2f1bfd8%2Bchromium-149.0.7827.156_linuxarm64_minimal.tar.bz2"
+checksum = "8909a79689eec7b23ed80084b69766952d44e00f9a345832951b32903f8a80a0"
+architectures = [
+  "aarch64",
+]
+
+[[packages.externals]]
+name = "cef"
+source = "archive+https://cef-builds.spotifycdn.com/cef_binary_149.0.4%2Bg2f1bfd8%2Bchromium-149.0.7827.156_linux64_minimal.tar.bz2"
+checksum = "6d43607675e47ed6bfa40d1cfce136d04e7720529f8f1c4435d4ba1dcd1839b2"
+architectures = [
+  "x86_64",
+]
+
+[[packages.externals]]
+name = "cef-macos"
+source = "archive+https://cef-builds.spotifycdn.com/cef_binary_149.0.4%2Bg2f1bfd8%2Bchromium-149.0.7827.156_macosarm64_minimal.tar.bz2"
+checksum = "7eb30795aa583de17ce59ce38a420ef776a9f0412f9fe0e90306bf3dc94b0b62"
+architectures = [
+  "aarch64",
+]
+
+[[packages.externals]]
+name = "cef-macos"
+source = "archive+https://cef-builds.spotifycdn.com/cef_binary_149.0.4%2Bg2f1bfd8%2Bchromium-149.0.7827.156_macosx64_minimal.tar.bz2"
+checksum = "75639ff6181a63194b1aae1c69ad1aa7fc2033dcc92b11554c57844c86f4e4bb"
+architectures = [
+  "x86_64",
+]
+
+[[packages]]
+name = "owe-webviewer"
+version = "0.3.0"
+dependencies = [
+  "owe-audio",
+  "owe-core",
+  "owe-viewer-common",
+  "owe-web",
+  "rstd-argparse",
+  "rstd-cppstd",
+  "vvk",
+  "wavsen",
+]
+
+[[packages]]
+name = "rstd-alloc"
+version = "0.1.5"
+source = "registry+https://registry.litocpp.org/"
+checksum = "8e3634daa9ed08b2be3acd3e19cb9674474157f0a4a3f64f678ddf3d46fd53a4"
+dependencies = [
+  "rstd-core",
+  "rstd-runtime",
+]
+
+[[packages]]
+name = "rstd-argparse"
+version = "0.1.5"
+source = "registry+https://registry.litocpp.org/"
+checksum = "05a8a28f0486829cdb7f5959cb447b09e2af0587a777b2944c06affd0be37215"
+dependencies = [
+  "rstd-std",
+]
+
+[[packages]]
+name = "rstd-basic"
+version = "0.1.5"
+source = "registry+https://registry.litocpp.org/"
+checksum = "01370f952d2a9003c858f644f6e3287e5bf6ac291ab53932f96d59838e481a21"
+
+[[packages]]
+name = "rstd-bench"
+version = "0.1.5"
+source = "registry+https://registry.litocpp.org/"
+checksum = "776c0e21a4a05dfe92eb9da19c7468686646b3cdc6fef920452ec412337a1b91"
+dependencies = [
+  "rstd-std",
+]
+
+[[packages]]
+name = "rstd-core"
+version = "0.1.5"
+source = "registry+https://registry.litocpp.org/"
+checksum = "b50fb94012c1c396ba7dbd8913f64017d2638182a7f0e7ff54a5ac4b1dac91a7"
+dependencies = [
+  "rstd-basic",
+  "rstd-runtime",
+]
+
+[[packages]]
+name = "rstd-cppstd"
+version = "0.1.5"
+source = "registry+https://registry.litocpp.org/"
+checksum = "ab24c7ca004f558865f08d5941a264e039a16360374381a36072ae6fb5f644fa"
+dependencies = [
+  "rstd-std",
+]
+
+[[packages]]
+name = "rstd-dlopn"
+version = "0.1.5"
+source = "registry+https://registry.litocpp.org/"
+checksum = "487b4f73f45e3657487999f957e8109e56feaee40e1be59419fe6d9c778c2c2f"
+dependencies = [
+  "rstd-std",
+]
+
+[[packages]]
+name = "rstd-json"
+version = "0.1.5"
+source = "registry+https://registry.litocpp.org/"
+checksum = "0ec51f0b70af31f4f654d4ab5fe2e829ac15957509b880cb3c30472c58a0574d"
+dependencies = [
+  "rstd-core",
+  "rstd-parse",
+  "rstd-serde",
+  "rstd-std",
+]
+
+[[packages]]
+name = "rstd-log"
+version = "0.1.5"
+source = "registry+https://registry.litocpp.org/"
+checksum = "16888a06489fbae20852946ba95125a2f493e80f9b4e1ed7982afca9aae83672"
+dependencies = [
+  "rstd-core",
+  "rstd-std",
+]
+
+[[packages]]
+name = "rstd-parse"
+version = "0.1.5"
+source = "registry+https://registry.litocpp.org/"
+checksum = "d827faa72b08c90c20ef1d27d69e34af70319cacd6b45926730dfa94afaaf891"
+dependencies = [
+  "rstd-alloc",
+  "rstd-core",
+]
+
+[[packages]]
+name = "rstd-runtime"
+version = "0.1.5"
+source = "registry+https://registry.litocpp.org/"
+checksum = "a5656da29c7df76f999859628e46cb304b3bfeaa221cf70c973063462b29da60"
+dependencies = [
+  "rstd-basic",
+]
+
+[[packages]]
+name = "rstd-serde"
+version = "0.1.5"
+source = "registry+https://registry.litocpp.org/"
+checksum = "0cb1bb19547b959f05b4a07cc8a0cc8dcff9500cf2534ecb3478f5e1363d6840"
+dependencies = [
+  "rstd-alloc",
+]
+
+[[packages]]
+name = "rstd-std"
+version = "0.1.5"
+source = "registry+https://registry.litocpp.org/"
+checksum = "077589ceadc2bdc3e0833fcf45767d25949b8763326ac42ce6026ce3c3c50a2d"
+dependencies = [
+  "rstd-alloc",
+  "rstd-core",
+]
+
+[[packages]]
+name = "rstd-test"
+version = "0.1.5"
+source = "registry+https://registry.litocpp.org/"
+checksum = "6b0b7b73b17fce23c379ea837956a0e3e0143ca647e59e94ce16a82f8f7f06d9"
+dependencies = [
+  "rstd-std",
+]
+
+[[packages]]
+name = "spirv-reflect"
+version = "1.4.321"
+source = "git+https://github.com/hypengw/SPIRV-Reflect.git#355785128c1b6ba808e3a7d0e344814fe6cff502"
+
+[[packages]]
+name = "vrento"
+version = "0.1.0"
+dependencies = [
+  "rstd-cppstd",
+  "rstd-log",
+  "rstd-std",
+  "vvk",
+  "wavsen",
+]
+
+[[packages]]
+name = "vvk"
+version = "0.1.0"
+dependencies = [
+  "rstd-dlopn",
+  "rstd-log",
+  "rstd-std",
+]
+
+[[packages]]
+name = "wavsen"
+version = "0.1.0"
+dependencies = [
+  "rstd-core",
+  "rstd-dlopn",
+  "rstd-log",
+  "rstd-std",
+  "vvk",
+]

@@ -1,0 +1,16 @@
+{
+  "version": "1.4.341",
+  "repository": "https://github.com/KhronosGroup/Vulkan-Docs.git",
+  "commit": "ac8223b312d40a6bc1733fb3490bdcdb5a389d50",
+  "tag": "v1.4.341",
+  "sha256": {
+    "xml/vk.xml": "006807a47518e9ab23ecf7f4c95d936aab477a20d27a9a7ac23cedefb7210178",
+    "xml/video.xml": "4480ab87c8ee6d561376fa83820af1071f85ff7fa1a26b21f521717fa04d5809",
+    "include/vulkan/vulkan.h": "72b952cc6de70ee12d118d3095e80346b42ff01cfc6f2bbb37ec01800eab1da6",
+    "include/vulkan/vk_platform.h": "949d517bb83e1d88fd4f1cef02bd3cb9ab50d44e8354cc68227cf2dccfdd3307"
+  },
+  "header_reference": {
+    "repository": "https://github.com/KhronosGroup/Vulkan-Headers.git",
+    "commit": "b5c8f996196ba4aa6d8f97e52b5d3b6e70f7e4e2"
+  }
+}
