@@ -12,3 +12,6 @@ WallpaperEngineMac.xcodeproj/
 
 # Shareable release output
 Share/
+
+# Unbundled test build output
+build_unbundled/
