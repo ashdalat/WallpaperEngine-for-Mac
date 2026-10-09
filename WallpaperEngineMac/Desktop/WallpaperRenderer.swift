@@ -8,6 +8,16 @@ final class WallpaperRenderer: NSObject {
     private var webView: DesktopWebView?
     private var sceneView: DesktopSceneView?
     private(set) var currentItem: WallpaperItem?
+    /// Layer-backed container the rendered view
+    /// is nested in. The display transform lives
+    /// on this container's sublayerTransform —
+    /// the rendered views host special layers
+    /// (the scene view's CAMetalLayer, the video
+    /// view's AVPlayerLayer backing layer) whose
+    /// geometry their owners manage, so
+    /// transforming those layers directly
+    /// misplaces or blanks them.
+    private var transformHost: NSView?
 
     func load(item: WallpaperItem, in window: NSWindow, settings: AppSettings) {
         unload()
@@ -70,9 +80,28 @@ final class WallpaperRenderer: NSObject {
         }
 
         if let renderedView {
-            applyDisplayTransform(to: renderedView, settings: settings)
-            window.contentView?.addSubview(renderedView)
+            // Plain layer-backed container that
+            // carries the display transform. The
+            // rendered views own special layers
+            // (the scene view's CAMetalLayer, the
+            // video view's AVPlayerLayer backing
+            // layer) whose geometry their owners
+            // manage — transforming those layers
+            // directly misplaces or blanks them.
+            // The container is layer-backed before
+            // the rendered view is added, so the
+            // rendered view's layer is nested under
+            // the container's layer by construction
+            // and the transform composes over the
+            // whole subtree.
+            let host = NSView(frame: frame)
+            host.wantsLayer = true
+            host.autoresizingMask = [.width, .height]
+            host.addSubview(renderedView)
+            window.contentView?.addSubview(host)
+            transformHost = host
         }
+        applyDisplayTransform(settings: settings)
     }
 
     func unload() {
@@ -85,6 +114,8 @@ final class WallpaperRenderer: NSObject {
         sceneView = nil
         renderedView?.removeFromSuperview()
         renderedView = nil
+        transformHost?.removeFromSuperview()
+        transformHost = nil
         currentItem = nil
     }
 
@@ -107,29 +138,75 @@ final class WallpaperRenderer: NSObject {
         webView?.setMouseEnabled(settings.mouseInput)
         sceneView?.setMouseEnabled(settings.mouseInput)
         sceneView?.updateSettings(settings)
-        if let renderedView {
-            applyDisplayTransform(to: renderedView, settings: settings)
-        }
+        applyDisplayTransform(settings: settings)
     }
 
-    /// Applies the display rotation/flip settings to the
-    /// rendered view's layer. The layer transform is the
-    /// same for every renderer kind (scene's CAMetalLayer,
-    /// the player layer, the web view), so one helper
-    /// covers all of them. Rotation and flip are composed
-    /// the way Waywallen does it: rotate first, then flip
-    /// in screen space — `scaledBy` then `rotated(by:)`
-    /// concatenates with the rotation applied first.
-    private func applyDisplayTransform(to view: NSView, settings: AppSettings) {
-        view.wantsLayer = true
+    /// Applies the display rotation/flip/offset
+    /// settings to the container view that hosts
+    /// the rendered view. The transform goes on
+    /// the container's sublayerTransform rather
+    /// than the rendered view's own layer:
+    /// AppKit manages the rendered view's layer
+    /// (the video view's backing layer is the
+    /// AVPlayerLayer, the scene view hosts the
+    /// CAMetalLayer the engine presents into),
+    /// and a direct transform on those layers
+    /// fights that management. sublayerTransform
+    /// composes on top of AppKit's layout — the
+    /// rendered view's layer stays where AppKit
+    /// put it and the whole subtree rotates
+    /// around the container center. Rotation and
+    /// flip are composed the way Waywallen does
+    /// it: rotate first, then flip in screen
+    /// space.
+    private func applyDisplayTransform(settings: AppSettings) {
+        guard let host = transformHost,
+              let layer = host.layer else { return }
         let rotation = DisplayRotation(rawValue: settings.rotation) ?? .normal
         let flip = DisplayFlip(rawValue: settings.flip) ?? .none
-        var transform = CGAffineTransform(
+        let size = host.bounds.size
+        let center = CGPoint(x: size.width / 2, y: size.height / 2)
+        let toOrigin = CGAffineTransform(
+            translationX: -center.x, y: -center.y)
+        let scale = CGAffineTransform(
             scaleX: flip.scaleX, y: flip.scaleY)
-        if rotation.angle != 0 {
-            transform = transform.rotated(by: rotation.angle)
-        }
-        view.layer?.setAffineTransform(transform)
+        let rotate = rotation.angle == 0
+            ? CGAffineTransform.identity
+            : CGAffineTransform(rotationAngle: rotation.angle)
+        let fromOrigin = CGAffineTransform(
+            translationX: center.x, y: center.y)
+        // Waywallen "Location": 50 is centered;
+        // the extremes slide the rotated content
+        // to the screen edges. Only the rotated
+        // bounding box leaves room to slide — an
+        // unrotated view fills the screen. The
+        // host view's layer is y-up, so a
+        // positive Y offset slides down on
+        // screen.
+        let rotatedSize = abs(rotation.angle) == .pi / 2
+            ? CGSize(width: size.height, height: size.width)
+            : size
+        let slackX = max(0, (size.width - rotatedSize.width) / 2)
+        let slackY = max(0, (size.height - rotatedSize.height) / 2)
+        let slide = CGAffineTransform(
+            translationX: (settings.offsetX - 50) / 50 * slackX,
+            y: -(settings.offsetY - 50) / 50 * slackY)
+        // A.concatenating(B) applies A first
+        // (it equals B∘A), so the chain reads
+        // in application order: center → rotate
+        // → flip → uncenter → slide (in screen
+        // space).
+        layer.sublayerTransform = CATransform3DMakeAffineTransform(
+            toOrigin.concatenating(rotate)
+                .concatenating(scale)
+                .concatenating(fromOrigin)
+                .concatenating(slide))
+        // Debug: proves the transform is set and
+        // the rendered view's layer is nested
+        // under the container's layer — if
+        // host-sublayers is 0, sublayerTransform
+        // has nothing to act on.
+        fputs("WEM: display transform set: rotation=\(settings.rotation) flip=\(settings.flip) offset=(\(settings.offsetX), \(settings.offsetY)) host-sublayers=\(layer.sublayers?.count ?? -1) rendered-superlayer=\(String(describing: renderedView?.layer?.superlayer))\n", stderr)
     }
 
     func handleMouseEvent(_ event: CGEvent, window: NSWindow) {

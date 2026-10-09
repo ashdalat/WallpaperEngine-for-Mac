@@ -60,6 +60,18 @@ final class DesktopWindowManager: NSObject {
         renderers.values.forEach { $0.play() }
     }
 
+    /// Pushes settings to the live renderers
+    /// without reloading the wallpaper. Used for
+    /// display transform changes (rotation, flip,
+    /// position) — those are pure layer
+    /// operations, so a reload's black gap and
+    /// scene restart would be pointless cost.
+    func updateSettings(_ settings: AppSettings) {
+        for renderer in renderers.values {
+            renderer.updateSettings(settings)
+        }
+    }
+
     func handleScreenConfigurationChange(settings: AppSettings, current: WallpaperItem?) {
         let activeScreens = Set(NSScreen.screens.map(screenKey))
         let staleKeys = windows.keys.filter { !activeScreens.contains($0) }

@@ -126,6 +126,12 @@ final class AppSettings: ObservableObject {
     @AppStorage("displayMode") var displayMode: Int = DisplayMode.crop.rawValue
     @AppStorage("rotation") var rotation: Int = DisplayRotation.normal.rawValue
     @AppStorage("flip") var flip: Int = DisplayFlip.none.rawValue
+    /// Waywallen "Location" — position offset
+    /// in percent (0...100, 50 = centered).
+    /// Only shifts the content when rotation
+    /// leaves room on screen.
+    @AppStorage("offsetX") var offsetX: Double = 50
+    @AppStorage("offsetY") var offsetY: Double = 50
     @AppStorage("volume") var volume: Double = 0.5
     // Wallpaper Engine plays wallpaper audio by
     // default; muting by default made every

@@ -71,6 +71,29 @@ final class AppState: ObservableObject {
         if ProcessInfo.processInfo.environment["WEM_DEBUG_SETTINGS"] != nil {
             openSettings()
         }
+        // Debug display-transform hook:
+        // WEM_DEBUG_TRANSFORM="delay,rotation,flip,offsetX,offsetY"
+        // writes the display settings in-process
+        // after `delay` seconds — the same write
+        // path the Display pickers and sliders
+        // use, for verifying the UserDefaults
+        // observer without touching the UI.
+        if let spec = ProcessInfo.processInfo.environment["WEM_DEBUG_TRANSFORM"] {
+            let parts = spec.split(separator: ",").compactMap({ Double($0) })
+            if parts.count == 5, parts[0] >= 0 {
+                let delay = parts[0]
+                let values = (rotation: Int(parts[1]), flip: Int(parts[2]),
+                              offsetX: parts[3], offsetY: parts[4])
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                    guard let self else { return }
+                    fputs("WEM: debug transform writing \(values)\n", stderr)
+                    self.settings.rotation = values.rotation
+                    self.settings.flip = values.flip
+                    self.settings.offsetX = values.offsetX
+                    self.settings.offsetY = values.offsetY
+                }
+            }
+        }
         // Debug delete hook: WEM_DEBUG_DELETE=id
         // deletes the wallpaper with that id
         // once the library has loaded — the
@@ -86,6 +109,24 @@ final class AppState: ObservableObject {
             queue: .main
         ) { [weak self] _ in
             self?.handleScreenChange()
+        }
+
+        // Display transform settings (rotation,
+        // flip, position) must reach the live
+        // wallpaper without a reload. @AppStorage
+        // inside an ObservableObject doesn't emit
+        // objectWillChange, so SwiftUI onChange
+        // never fires for these — watch
+        // UserDefaults directly instead: every
+        // write (picker, slider, or `defaults
+        // write`) posts this notification with
+        // the new value already committed.
+        NotificationCenter.default.addObserver(
+            forName: UserDefaults.didChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.applyDisplaySettingsIfChanged()
         }
 
         NSWorkspace.shared.notificationCenter.addObserver(
@@ -336,6 +377,31 @@ final class AppState: ObservableObject {
         fputs("WEM: applySettingsChanges\n", stderr)
         guard let current = currentWallpaper else { return }
         windowManager.applyToAllScreens(current, settings: settings)
+    }
+
+    /// Last-seen display transform values, to
+    /// filter UserDefaults notifications (they
+    /// fire for every defaults write in the
+    /// process, most unrelated to display).
+    private var lastDisplayTransform: (Int, Int, Double, Double)?
+
+    /// Applies display transform settings to
+    /// the live wallpaper when rotation, flip
+    /// or the position offset change. The
+    /// transform is a layer operation, so this
+    /// takes effect instantly — no wallpaper
+    /// reload.
+    private func applyDisplaySettingsIfChanged() {
+        let current = (
+            settings.rotation, settings.flip,
+            settings.offsetX, settings.offsetY)
+        if let last = lastDisplayTransform, last == current {
+            return
+        }
+        lastDisplayTransform = current
+        fputs("WEM: display transform changed: \(current)\n", stderr)
+        guard currentWallpaper != nil else { return }
+        windowManager.updateSettings(settings)
     }
 
     func setMouseInput(_ enabled: Bool) {

@@ -147,8 +147,11 @@ struct WallpaperPropertiesView: View {
     // MARK: - Display
 
     /// Display transform options (Waywallen-style
-    /// rotation/flip). These live with the wallpaper
-    /// selection, not in the app Settings menu.
+    /// rotation/flip/position). These live with
+    /// the wallpaper selection, not in the app
+    /// Settings menu. AppState watches UserDefaults
+    /// for these keys and applies them to the live
+    /// wallpaper instantly — no onChange needed.
     private var displaySection: some View {
         GroupBox("Display") {
             VStack(alignment: .leading, spacing: 10) {
@@ -157,14 +160,41 @@ struct WallpaperPropertiesView: View {
                         Text(rotation.displayName).tag(rotation.rawValue)
                     }
                 }
-                .onChange(of: state.settings.rotation) { state.applySettingsChanges() }
 
                 Picker("Flip", selection: $state.settings.flip) {
                     ForEach(DisplayFlip.allCases) { flip in
                         Text(flip.displayName).tag(flip.rawValue)
                     }
                 }
-                .onChange(of: state.settings.flip) { state.applySettingsChanges() }
+
+                Divider()
+
+                HStack {
+                    Text("Position")
+                    Spacer()
+                    Text("X \(Int(state.settings.offsetX))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text("Y \(Int(state.settings.offsetY))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                HStack {
+                    Text("X")
+                    Slider(value: $state.settings.offsetX, in: 0...100)
+                    Text("Y")
+                    Slider(value: $state.settings.offsetY, in: 0...100)
+                }
+                HStack(spacing: 4) {
+                    ForEach(displayAlignments) { alignment in
+                        Button(alignment.name) {
+                            state.settings.offsetX = alignment.x
+                            state.settings.offsetY = alignment.y
+                        }
+                        .font(.system(size: 11, weight: .semibold))
+                        .frame(maxWidth: .infinity)
+                    }
+                }
             }
             .padding(4)
         }
@@ -461,3 +491,27 @@ struct WallpaperPropertiesView: View {
 private extension String {
     var doubleValue: Double? { Double(self) }
 }
+
+/// One of the nine Waywallen "Align"
+/// positions — a shortcut that sets the
+/// X/Y position offset.
+private struct DisplayAlignment: Identifiable {
+    let name: String
+    let x: Double
+    let y: Double
+    var id: String { name }
+}
+
+/// The align grid, reading order
+/// top-left to bottom-right.
+private let displayAlignments: [DisplayAlignment] = [
+    .init(name: "↖", x: 0, y: 0),
+    .init(name: "↑", x: 50, y: 0),
+    .init(name: "↗", x: 100, y: 0),
+    .init(name: "←", x: 0, y: 50),
+    .init(name: "•", x: 50, y: 50),
+    .init(name: "→", x: 100, y: 50),
+    .init(name: "↙", x: 0, y: 100),
+    .init(name: "↓", x: 50, y: 100),
+    .init(name: "↘", x: 100, y: 100),
+]
