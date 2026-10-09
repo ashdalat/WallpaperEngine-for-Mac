@@ -100,6 +100,11 @@ sed -e 's|\$(EXECUTABLE_NAME)|WallpaperEngineMac|g' \
     -e 's|\$(MACOSX_DEPLOYMENT_TARGET)|15.0|g' \
     WallpaperEngineMac/Info.plist > "$APP/Contents/Info.plist"
 
+# Copy the Homebrew dylibs into the bundle so the
+# .app runs on machines without Homebrew.
+echo ">> Bundling dylibs into the app..."
+bash bundle_dylibs.sh "$APP"
+
 echo ""
 echo ">> Done: ${APP}"
 echo "   Run with: open '${APP}'"

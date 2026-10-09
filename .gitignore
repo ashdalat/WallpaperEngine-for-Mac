@@ -9,3 +9,6 @@ WallpaperEngineMac.xcodeproj/
 # macOS
 .DS_Store
 *.swp
+
+# Shareable release output
+Share/

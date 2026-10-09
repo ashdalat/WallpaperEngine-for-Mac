@@ -91,7 +91,23 @@ Result<void*, Error> create_apple_video_metal_texture(
             if (updated.is_err()) {
                 return Err(rstd::move(updated).unwrap_err());
             }
-            return Ok(previous_metal_texture);
+            // BGRA VideoToolbox frames produce a brand-new MTLTexture on
+            // every update() and release the previous one inside it, so
+            // the handle the caller still holds names a freed object.
+            // Re-key the registry to the texture that is actually alive
+            // and hand that handle back, otherwise the caller imports a
+            // dangling MTLTexture into Vulkan (crash in MoltenVK's
+            // setMTLTexture).
+            void* current = owned.texture.native_handle();
+            if (current == nullptr) {
+                return Err(Error("create_apple_video_metal_texture: update produced no texture"_str));
+            }
+            if (current != previous_metal_texture) {
+                if (auto moved = guard->remove(previous_metal_texture)) {
+                    guard->insert(current, rstd::move(*moved));
+                }
+            }
+            return Ok(current);
         }
     }
 
