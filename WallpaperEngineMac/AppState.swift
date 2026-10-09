@@ -117,11 +117,17 @@ final class AppState: ObservableObject {
         }
         if settings.mouseInput {
             fputs("WEM: mouseInput enabled at startup\n", stderr)
-            if !mouseEventTap.start() {
-                mouseEventTap.ensureAccessibility(prompt: true)
-            } else {
-                fputs("WEM: mouse event tap active\n", stderr)
-            }
+            retryMouseEventTap(prompt: true)
+        }
+
+        // The event tap needs the Accessibility grant, and
+        // an agent app (LSUIElement) never becomes active
+        // when the user returns from System Settings after
+        // granting it — the notification only fires when a
+        // window opens. Retry on a timer until the tap
+        // comes up, so granting the permission is enough.
+        Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
+            self?.retryMouseEventTap()
         }
 
         // The event tap cannot be created without the
@@ -146,16 +152,27 @@ final class AppState: ObservableObject {
     /// is on but the tap is missing. That happens
     /// after every rebuild, because the ad-hoc
     /// signature changes and macOS resets the
-    /// Accessibility grant: the user typically
-    /// grants it in System Settings and switches
-    /// back to the app, so retry (and prompt
-    /// again if it is still missing) then.
-    func retryMouseEventTap() {
+    /// Accessibility grant, and right after the
+    /// user grants the permission — see the timer
+    /// in start() for why a plain didBecomeActive
+    /// retry is not enough.
+    private var accessibilityPromptShown = false
+
+    func retryMouseEventTap(prompt: Bool = false) {
         guard settings.mouseInput else { return }
         if mouseEventTap.start() {
             fputs("WEM: mouse event tap active\n", stderr)
-        } else {
+            return
+        }
+        // The system prompt is modal and the user
+        // may grant the permission on first sight —
+        // prompting again on every retry would be
+        // noise, so ask once per launch.
+        if prompt && !accessibilityPromptShown {
+            accessibilityPromptShown = true
             mouseEventTap.ensureAccessibility(prompt: true)
+        } else {
+            fputs("WEM: mouse event tap unavailable — grant Accessibility permission in System Settings > Privacy & Security > Accessibility\n", stderr)
         }
     }
 
@@ -307,9 +324,8 @@ final class AppState: ObservableObject {
     func setMouseInput(_ enabled: Bool) {
         settings.mouseInput = enabled
         if enabled {
-            if !mouseEventTap.start() {
-                mouseEventTap.ensureAccessibility(prompt: true)
-            }
+            accessibilityPromptShown = false
+            retryMouseEventTap(prompt: true)
         } else {
             mouseEventTap.stop()
         }

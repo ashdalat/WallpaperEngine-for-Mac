@@ -257,6 +257,10 @@ Sau đó:
 | Web wallpaper nền đen | Một số web wallpaper tự set background — app đã inject CSS `html, body { background: transparent }`; nếu wallpaper dùng canvas opaque thì không trong suốt được. |
 | Build lỗi signing | Project cấu hình `CODE_SIGNING_ALLOWED=NO` để build thử nhanh. Nếu lỗi signing trong Xcode, vào Target → Signing & Capabilities → uncheck "Automatically manage signing". |
 
+### Log của app
+
+App ghi log debug ra `~/Library/Logs/WallpaperEngineMac.log` (tự xoá/truncat khi quá ~2 MB). Khi tương tác chuột không hoạt động, kiểm tra dòng `WEM: mouse event tap` trong file này: `active` = tap đã tạo (lỗi nằm ở wallpaper), `unavailable` = chưa có quyền Accessibility — vào System Settings → Privacy & Security → Accessibility, bật/tắt lại WallpaperEngineMac, app tự tạo lại tap trong vòng 5 giây.
+
 ---
 
 ## 5. GIỚI HẠN & GHI CHÚ
