@@ -39,6 +39,27 @@ final class AppState: ObservableObject {
         library.setSteamRoots(steamRoots())
         Task { await rescan() }
 
+        // Debug switch hook: WEM_DEBUG_SWITCH="idA:idB:...:seconds"
+        // applies the wallpapers in order, each after
+        // the delay — reproduces wallpaper switches
+        // (unload + load) outside the gallery, for
+        // diagnosing hangs. WEM_DEBUG_GALLERY=1 also
+        // opens the gallery window, like a real click.
+        if ProcessInfo.processInfo.environment["WEM_DEBUG_GALLERY"] != nil {
+            openGallery()
+        }
+        if let spec = ProcessInfo.processInfo.environment["WEM_DEBUG_SWITCH"] {
+            let parts = spec.split(separator: ":")
+            if parts.count >= 3,
+               let delay = Double(parts[parts.count - 1]) {
+                let ids = parts.dropLast().map(String.init)
+                for (index, id) in ids.enumerated() {
+                    applyDebugWallpaper(
+                        id, delay: 1.5 + Double(index) * delay)
+                }
+            }
+        }
+
         NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification,
             object: nil,
@@ -164,6 +185,25 @@ final class AppState: ObservableObject {
         settings.currentWallpaperId = item.id
         windowManager.applyToAllScreens(item, settings: settings)
         evaluatePause()
+    }
+
+    /// Applies the wallpaper with the given workshop
+    /// id once the library has been scanned. Used
+    /// by the WEM_DEBUG_SWITCH hook.
+    private func applyDebugWallpaper(_ id: String, delay: Double) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+            guard let self else { return }
+            if self.library.items.isEmpty {
+                self.applyDebugWallpaper(id, delay: 0.5)
+                return
+            }
+            if let item = self.library.items.first(where: { $0.id == id }) {
+                fputs("WEM: debug switch applying \(item.title)\n", stderr)
+                self.applyWallpaper(item)
+            } else {
+                fputs("WEM: debug switch: no item with id \(id)\n", stderr)
+            }
+        }
     }
 
     /// Saves a wallpaper user property (its settings

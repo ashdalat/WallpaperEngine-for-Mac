@@ -454,7 +454,13 @@ void SceneRenderController::start() {
     if (! m_rx) rstd::panic { "render mailbox cannot be restarted" };
 
     auto rx     = rstd::move(m_rx.take()).unwrap_unchecked();
-    auto thread = rstd::thread::spawn([this, rx = rstd::move(rx)]() mutable {
+    // Same deep recursion risk as the main
+    // loop: the render pass graph of complex
+    // scenes needs more than the default
+    // 512 KB secondary-thread stack.
+    auto thread = rstd::thread::builder::Builder::make()
+        .stack_size(usize(8 * 1024 * 1024))
+        .spawn([this, rx = rstd::move(rx)]() mutable {
         rstd_info("render loop started");
         while (true) {
             auto received = rx.recv();
@@ -1028,7 +1034,14 @@ void SceneRuntimeController::startMainLoop() {
     if (! m_main_rx) rstd::panic { "main mailbox cannot be restarted" };
 
     auto rx       = rstd::move(m_main_rx.take()).unwrap_unchecked();
-    auto thread   = rstd::thread::spawn([this, rx = rstd::move(rx)]() mutable {
+    // The scene loader recurses deeply (nested
+    // objects, scripts, render-pass graphs); the
+    // default secondary-thread stack (512 KB on
+    // macOS) overflows on large scenes, so the
+    // main loop gets an 8 MB stack.
+    auto thread   = rstd::thread::builder::Builder::make()
+        .stack_size(usize(8 * 1024 * 1024))
+        .spawn([this, rx = rstd::move(rx)]() mutable {
         rstd_info("main loop started");
         while (true) {
             if (m_audio_pause_deadline && Instant::now() >= *m_audio_pause_deadline) {
