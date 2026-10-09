@@ -92,6 +92,15 @@ sed -e 's|\$(EXECUTABLE_NAME)|WallpaperEngineMac|g' \
     -e 's|\$(MACOSX_DEPLOYMENT_TARGET)|15.0|g' \
     WallpaperEngineMac/Info.plist > "$APP/Contents/Info.plist"
 
+# The linker's automatic signature is flagged
+# "linker-signed", which macOS treats as unsigned
+# for TCC — the Accessibility grant would not
+# stick, and the mouse event tap could never be
+# created. Re-sign ad-hoc like the bundled build
+# so the permission persists.
+codesign --force --sign - "$APP/Contents/MacOS/WallpaperEngineMac"
+codesign --force --sign - "$APP"
+
 echo ""
 echo ">> Done (unbundled): ${APP}"
 echo "   Run with: open '${APP}'"
