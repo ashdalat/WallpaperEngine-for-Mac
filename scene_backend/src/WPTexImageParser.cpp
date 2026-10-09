@@ -142,6 +142,16 @@ std::shared_ptr<Image> WPTexImageParser::Parse(const std::string& name) {
         auto& img_slot = img.slots[i_image];
         auto& mipmaps  = img_slot.mipmaps;
 
+        // TEXB0004+ carries the image container type and
+        // an unknown field in front of the mipmap count.
+        // The type moved from the file header (texb 3) to
+        // a per-image field here.
+        ImageType image_type = ImageType::UNKNOWN;
+        if (img.header.extraHeader["texb"].val >= 4) {
+            image_type = static_cast<ImageType>(file.ReadInt32());
+            file.ReadInt32(); // unk, 0
+        }
+
         usize mipmap_count = (usize)std::max<i32>(file.ReadInt32(), 0);
         mipmaps.resize(mipmap_count);
         // load image
@@ -185,7 +195,11 @@ std::shared_ptr<Image> WPTexImageParser::Parse(const std::string& name) {
                 }
             }
             // is image container
-            if (img.header.extraHeader["texb"].val == 3 && img.header.type != ImageType::UNKNOWN) {
+            bool image_container =
+                (img.header.extraHeader["texb"].val == 3 &&
+                 img.header.type != ImageType::UNKNOWN) ||
+                image_type != ImageType::UNKNOWN;
+            if (image_container) {
                 int32_t w, h, n;
                 auto*   data =
                     stbi_load_from_memory((const unsigned char*)result, src_size, &w, &h, &n, 4);
@@ -223,6 +237,11 @@ ImageHeader WPTexImageParser::ParseHeader(const std::string& name) {
         // bypass image data, store width and height
         std::vector<std::vector<float>> imageDatas(image_count);
         for (usize i_image = 0; i_image < image_count; i_image++) {
+            // TEXB0004+ per-image header, see Parse
+            if (header.extraHeader["texb"].val >= 4) {
+                file.ReadInt32(); // image type
+                file.ReadInt32(); // unk, 0
+            }
             int mipmap_count = file.ReadInt32();
             for (int32_t i_mipmap = 0; i_mipmap < mipmap_count; i_mipmap++) {
                 int32_t width  = file.ReadInt32();

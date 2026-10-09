@@ -8,6 +8,7 @@
 #include "SpecTexs.hpp"
 #include "wpscene/WPMaterial.h"
 #include "WPShaderParser.hpp"
+#include <cstring>
 
 using namespace wallpaper;
 
@@ -22,6 +23,60 @@ WPPuppet::PlayMode ToPlayMode(std::string_view m) {
     LOG_ERROR("unknown puppet animation play mode \"%s\"", m.data());
     assert(m == "loop");
     return WPPuppet::PlayMode::Loop;
+}
+
+// MDLV0023 and newer carry a large extra section of unknown
+// layout between the index buffer and the bone section, so the
+// MDLS header no longer sits at the fixed position the parser
+// reads it from. Check that a bone section starting at the
+// current position is valid.
+bool ValidateBoneSection(fs::IBinaryStream& f) {
+    size_t bones_file_end = f.ReadUint32();
+    uint16_t bones_num = f.ReadUint16();
+    f.ReadUint16(); // unk
+    if (bones_num == 0 || bones_num > 4096) return false;
+    if (bones_file_end > (size_t)f.Size()) return false;
+    for (uint i = 0; i < bones_num; i++) {
+        f.ReadStr(); // name
+        f.ReadInt32(); // unk
+        uint32_t parent = f.ReadUint32();
+        if (!(parent < i || parent == 0xFFFFFFFF)) return false;
+        if (f.ReadUint32() != 64) return false; // transform size
+        for (int j = 0; j < 16; j++) f.ReadFloat();
+        std::string sim = f.ReadStr();
+        if (!sim.empty() && sim[0] != '{') return false;
+    }
+    return true;
+}
+
+// Scan forward from the current position for a valid MDLS
+// header. On success the stream is left just after the MDLS
+// header and the version is returned, so the caller re-reads
+// the bone section from there.
+int32_t ScanMDLSVersion(fs::IBinaryStream& f) {
+    idx start = f.Tell();
+    idx end = f.Size();
+    for (idx pos = start; pos + 9 <= end; pos++) {
+        f.SeekSet(pos);
+        char head[9] { 0 };
+        if (f.Read(head, 9) != (usize)9) break;
+        if (std::memcmp(head, "MDLS", 4) != 0) continue;
+        bool digits = true;
+        for (int i = 4; i < 8; i++) {
+            if (head[i] < '0' || head[i] > '9') { digits = false; break; }
+        }
+        if (!digits || head[8] != '\0') continue;
+
+        f.SeekSet(pos);
+        int32_t ver = ReadMDLVesion(f);
+        idx afterHeader = f.Tell();
+        if (ver > 0 && ValidateBoneSection(f)) {
+            f.SeekSet(afterHeader);
+            return ver;
+        }
+    }
+    f.SeekSet(start);
+    return 0;
 }
 } // namespace
 
@@ -108,6 +163,17 @@ bool WPMdlParser::Parse(std::string_view path, fs::VFS& vfs, WPMdl& mdl) {
     }
 
     mdl.mdls = ReadMDLVesion(f);
+
+    // MDLV0023+ inserts an extra section before the bones, so
+    // the MDLS header was not at the expected position. Scan
+    // forward for it and skip the extra section.
+    if (mdl.mdls == 0) {
+        mdl.mdls = ScanMDLSVersion(f);
+        if (mdl.mdls == 0) {
+            LOG_ERROR("mdl: MDLS section not found");
+            return false;
+        }
+    }
 
     size_t bones_file_end = f.ReadUint32();
     (void)bones_file_end;
@@ -211,7 +277,7 @@ bool WPMdlParser::Parse(std::string_view path, fs::VFS& vfs, WPMdl& mdl) {
                 }
             }
         }
-    } while (mdType != "MDLA");
+    } while (mdType != "MDLA" && f.Tell() < f.Size());
     
 
     if(mdType == "MDLA" && mdVersion.length() > 0){
@@ -225,7 +291,7 @@ bool WPMdlParser::Parse(std::string_view path, fs::VFS& vfs, WPMdl& mdl) {
             for (auto& anim : anims) {
                 // there can be a variable number of 32-bit 0s between animations
                 anim.id = 0;
-                while(anim.id == 0){
+                while(anim.id == 0 && f.Tell() < f.Size()){
                     anim.id = f.ReadInt32();
                 }
     
@@ -251,6 +317,12 @@ bool WPMdlParser::Parse(std::string_view path, fs::VFS& vfs, WPMdl& mdl) {
                     uint32_t num       = byte_size / singile_bone_frame;
                     if (byte_size % singile_bone_frame != 0) {
                         LOG_ERROR("wrong bone frame size %d", byte_size);
+                        return false;
+                    }
+                    if (f.Tell() > f.Size() ||
+                        byte_size > (uint32_t)(f.Size() - f.Tell())) {
+                        LOG_ERROR("bone frame size %d exceeds remaining data",
+                                  byte_size);
                         return false;
                     }
                     bframes.frames.resize(num);
