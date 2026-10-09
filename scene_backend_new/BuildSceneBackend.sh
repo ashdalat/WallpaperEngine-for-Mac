@@ -17,13 +17,14 @@
 #   - vrento:     import the wavsen Apple module that
 #                 provides the Metal texture registry
 #
-# Prerequisites: the lito toolchain (built from source
-# at /tmp/lito-repo), Homebrew LLVM 23 (clang + lld),
-# ffmpeg, fontconfig/freetype, glslang and molten-vk.
+# Prerequisites: the lito toolchain (built from
+# source at ~/lito-repo), Homebrew LLVM 23 (clang +
+# lld), ffmpeg, fontconfig/freetype, glslang and
+# molten-vk.
 set -euo pipefail
 cd "$(dirname "$0")"
 
-LITO_BIN="/tmp/lito-repo/build/install/bin"
+LITO_BIN="$HOME/lito-repo/build/install/bin"
 BREW_PREFIX="$(brew --prefix 2>/dev/null || echo /opt/homebrew)"
 
 command -v swiftc >/dev/null 2>&1 || true

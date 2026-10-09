@@ -43,9 +43,13 @@ backend) is kept untouched for rollback.
 ## Rebuilding
 
 `scene_backend_new/BuildSceneBackend.sh` builds the workspace with
-lito (bootstrapped at `/tmp/lito-repo`, brew LLVM + lld on PATH),
+lito (bootstrapped at `~/lito-repo`, brew LLVM + lld on PATH),
 then merges every archive into `build/install/lib/libwescene-renderer.a`
 and installs `src/Scene/Bridge/wescene_bridge.h`.
+
+End users: double-click `Build and Install.command` in the
+project root — it builds both steps and installs the app into
+`/Applications` (Launchpad) with a popup when finished.
 
 Engine logging: the bridge installs rstd-log's `EnvLogger`
 (`wescene_bridge_enable_env_logging()`), so
