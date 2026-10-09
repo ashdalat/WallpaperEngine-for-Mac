@@ -71,14 +71,15 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$OUT/WallpaperEngineMac" "$APP/Contents/MacOS/WallpaperEngineMac"
 
-# App icon: build the .iconset sizes from AppIcon.png
+# App icon: build the .iconset sizes from "wallpaper engine.png"
 # (sips cannot write the "@2x" names directly, so each
 # size goes to a temp file first).
 ICONSET="$OUT/AppIcon.iconset"
 rm -rf "$ICONSET"
 mkdir -p "$ICONSET"
+ICON_SRC="wallpaper engine.png"
 icon_size() {
-    sips -z "$2" "$2" AppIcon.png --out "$ICONSET/.tmp_$1" >/dev/null
+    sips -z "$2" "$2" "$ICON_SRC" --out "$ICONSET/.tmp_$1" >/dev/null
     mv "$ICONSET/.tmp_$1" "$ICONSET/$1"
 }
 icon_size icon_16x16.png 16
