@@ -1,3 +1,4 @@
+import ImageIO
 import SwiftUI
 
 struct WallpaperCardView: View {
@@ -51,10 +52,56 @@ struct WallpaperCardView: View {
     private func loadThumbnail() async {
         guard let url = item.previewURL else { return }
         let image = await Task.detached(priority: .userInitiated) {
-            NSImage(contentsOf: url)
+            Self.previewImage(at: url)
         }.value
         if let image = image {
             thumbnail = image
         }
+    }
+
+    /// Some workshop previews are animated GIFs whose
+    /// first frame is black (the animation fades in).
+    /// SwiftUI renders only the first frame of an
+    /// NSImage, so skip ahead to the first frame that
+    /// actually has content.
+    private static func previewImage(at url: URL) -> NSImage? {
+        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+              CGImageSourceGetCount(source) > 1 else {
+            return NSImage(contentsOf: url)
+        }
+        let count = CGImageSourceGetCount(source)
+        for i in 0..<count {
+            guard let cg = CGImageSourceCreateImageAtIndex(source, i, nil),
+                  frameHasContent(cg) else { continue }
+            return NSImage(
+                cgImage: cg,
+                size: NSSize(width: cg.width, height: cg.height)
+            )
+        }
+        return NSImage(contentsOf: url)
+    }
+
+    private static func frameHasContent(_ cg: CGImage) -> Bool {
+        let w = cg.width, h = cg.height
+        let space = CGColorSpaceCreateDeviceRGB()
+        guard let ctx = CGContext(
+            data: nil, width: w, height: h,
+            bitsPerComponent: 8, bytesPerRow: w * 4,
+            space: space,
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ), let data = ctx.data else { return true }
+        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: w, height: h))
+        let bytes = data.bindMemory(to: UInt8.self, capacity: w * h * 4)
+        var lit = 0, sampled = 0
+        var p = 0
+        while p + 3 < w * h * 4 {
+            if bytes[p + 3] > 12,
+               Int(bytes[p]) + Int(bytes[p + 1]) + Int(bytes[p + 2]) > 32 {
+                lit += 1
+            }
+            sampled += 1
+            p += 16 // every 4th pixel is plenty
+        }
+        return lit * 100 / max(1, sampled) >= 2
     }
 }
