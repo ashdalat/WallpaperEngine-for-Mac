@@ -39,7 +39,7 @@ final class WallpaperPropertyStore: ObservableObject {
     /// value — the state each renderer applies when the
     /// wallpaper loads.
     func values(for item: WallpaperItem) -> [String: String] {
-        guard let properties = item.project?.properties else { return [:] }
+        guard let properties = item.project?.effectiveProperties else { return [:] }
         var values: [String: String] = [:]
         for (key, property) in properties {
             values[key] = value(for: item, key: key, property: property)
@@ -50,7 +50,7 @@ final class WallpaperPropertyStore: ObservableObject {
     /// Removes saved settings for a wallpaper (e.g. after
     /// the wallpaper is deleted from the library).
     func clearValues(for item: WallpaperItem) {
-        guard let properties = item.project?.properties else { return }
+        guard let properties = item.project?.effectiveProperties else { return }
         for key in properties.keys {
             defaults.removeObject(forKey: storageKey(item: item, key: key))
         }

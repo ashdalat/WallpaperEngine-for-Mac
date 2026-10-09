@@ -41,6 +41,23 @@ struct WEProject: Codable {
     static func parse(data: Data) -> WEProject? {
         try? JSONDecoder().decode(WEProject.self, from: data)
     }
+
+    /// The wallpaper's settings table. Scene
+    /// wallpapers authored in Wallpaper Engine's
+    /// scene editor keep their properties under
+    /// "general.properties"; the classic format
+    /// uses a top-level "properties" table. Both
+    /// are honored, the top-level table winning
+    /// on conflicts.
+    var effectiveProperties: [String: WEProperty] {
+        var merged = general?.properties ?? [:]
+        if let topLevel = properties {
+            for (key, property) in topLevel {
+                merged[key] = property
+            }
+        }
+        return merged
+    }
 }
 
 /// Accepts any JSON scalar and keeps its string
@@ -81,6 +98,7 @@ enum WEPropertyControl: String {
     case combo
     case button
     case texture
+    case group
     case unsupported
 }
 
@@ -95,9 +113,12 @@ struct WEProperty: Codable {
     let step: Double?
     // Combo box entries.
     let options: [WEComboOption]?
+    // Conditional visibility, e.g.
+    // "otherProperty.value==true".
+    let condition: String?
 
     enum CodingKeys: String, CodingKey {
-        case order, text, type, value, min, max, step, options
+        case order, text, type, value, min, max, step, options, condition
     }
 
     init(from decoder: Decoder) throws {
@@ -105,6 +126,7 @@ struct WEProperty: Codable {
         order = try? container.decode(Int.self, forKey: .order)
         text = try? container.decode(String.self, forKey: .text)
         type = try? container.decode(String.self, forKey: .type)
+        condition = try? container.decode(String.self, forKey: .condition)
         // Wallpaper Engine writes property values as
         // strings, but checkbox properties are bools
         // and slider properties are numbers. Stringify
@@ -130,33 +152,79 @@ struct WEProperty: Codable {
 
     var control: WEPropertyControl {
         switch type?.lowercased() {
-        case "checkbox": return .checkbox
+        case "checkbox", "bool": return .checkbox
         case "slider": return .slider
         case "color": return .color
         case "textinput", "text": return .text
         case "combo": return .combo
         case "button": return .button
         case "texture", "replacetexture", "scenetexture", "file": return .texture
-        default: return .unsupported
+        case "group": return .group
+        default:
+            // The scene editor's format also has
+            // entries without a type: they carry
+            // author notes (HTML in "text"), not
+            // a control.
+            return type == nil ? .group : .unsupported
         }
     }
 
     var label: String {
-        text?.isEmpty == false ? text! : type ?? "Property"
+        let text = self.text?.isEmpty == false ? self.text! : (type ?? "Property")
+        return stripHTML(text)
+    }
+
+    /// The property's text with HTML markup
+    /// removed — scene-editor labels carry
+    /// <br>, <img>, <a> and friends.
+    var plainText: String {
+        let text = self.text?.isEmpty == false ? self.text! : label
+        return stripHTML(text)
     }
 }
 
+/// Property labels and notes in the scene
+/// editor's format carry HTML markup; keep
+/// the plain text.
+func stripHTML(_ text: String) -> String {
+    var result = text
+    result = result.replacingOccurrences(
+        of: "<img[^>]*>", with: "", options: .regularExpression)
+    result = result.replacingOccurrences(
+        of: "<br\\s*/?>", with: "\n", options: .regularExpression)
+    result = result.replacingOccurrences(
+        of: "</(p|div|center|h[1-6])>", with: "\n",
+        options: .regularExpression)
+    result = result.replacingOccurrences(
+        of: "<[^>]+>", with: "", options: .regularExpression)
+    let entities: [String: String] = [
+        "&amp;": "&", "&lt;": "<", "&gt;": ">",
+        "&quot;": "\"", "&#39;": "'", "&nbsp;": " "
+    ]
+    for (entity, character) in entities {
+        result = result.replacingOccurrences(of: entity, with: character)
+    }
+    let lines = result.split(separator: "\n")
+        .map { $0.trimmingCharacters(in: .whitespaces) }
+        .filter { !$0.isEmpty }
+    return lines.joined(separator: "\n")
+}
+
 /// One entry of a combo property's "options" array.
+/// The scene editor writes the visible text under
+/// "label"; the classic format uses "text".
 struct WEComboOption: Codable {
+    let label: String?
     let text: String?
     let value: String?
 
     enum CodingKeys: String, CodingKey {
-        case text, value
+        case label, text, value
     }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        label = try? container.decode(String.self, forKey: .label)
         text = try? container.decode(String.self, forKey: .text)
         if let string = try? container.decode(String.self, forKey: .value) {
             value = string
@@ -172,6 +240,6 @@ struct WEComboOption: Codable {
     }
 
     var displayText: String {
-        text?.isEmpty == false ? text! : (value ?? "")
+        label ?? text ?? value ?? ""
     }
 }

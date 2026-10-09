@@ -48,7 +48,7 @@ final class WallpaperRenderer: NSObject {
             // again here. The engine's message loop is
             // FIFO: the scene load posted by sv.load()
             // is always applied before these.
-            let properties = item.project?.properties ?? [:]
+            let properties = item.project?.effectiveProperties ?? [:]
             for (key, property) in properties {
                 let value = WallpaperPropertyStore.shared.value(
                     for: item, key: key, property: property)
@@ -116,7 +116,7 @@ final class WallpaperRenderer: NSObject {
         case .scene:
             sceneView?.setUserProperty(key, value: value)
         case .web:
-            guard let property = item.project?.properties?[key] else { return }
+            guard let property = item.project?.effectiveProperties[key] else { return }
             webView?.setUserPropertyValues(
                 [key: value],
                 types: [key: property.type ?? "text"])

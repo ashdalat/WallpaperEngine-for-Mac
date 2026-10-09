@@ -16,14 +16,25 @@ struct WallpaperPropertiesView: View {
     @EnvironmentObject var state: AppState
 
     private var properties: [(key: String, property: WEProperty)] {
-        guard let properties = item.project?.properties else { return [] }
+        guard let properties = item.project?.effectiveProperties else { return [] }
         return properties
             .map { ($0.key, $0.value) }
             .sorted { ($0.property.order ?? 0) < ($1.property.order ?? 0) }
     }
 
+    /// Schemas by key, for evaluating the
+    /// visibility conditions of other properties.
+    private var propertyMap: [String: WEProperty] {
+        Dictionary(properties.map { ($0.key, $0.property) },
+                   uniquingKeysWith: { _, last in last })
+    }
+
     var body: some View {
-        ScrollView {
+        // Reading the revision makes the pane
+        // re-render on every property change, so
+        // conditional settings show and hide.
+        _ = state.propertyRevision
+        return ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 HStack {
                     Text("Settings & Info")
@@ -131,7 +142,9 @@ struct WallpaperPropertiesView: View {
             GroupBox("Settings") {
                 VStack(alignment: .leading, spacing: 10) {
                     ForEach(properties, id: \.key) { entry in
-                        propertyRow(entry.key, entry.property)
+                        if isVisible(entry.key, entry.property) {
+                            propertyRow(entry.key, entry.property)
+                        }
                     }
                 }
                 .padding(4)
@@ -217,8 +230,23 @@ struct WallpaperPropertiesView: View {
                     browseTexture(key, property)
                 }
             }
+        case .group:
+            // The scene editor's group entries are
+            // section headers, not controls.
+            Text(property.plainText)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .padding(.top, 6)
         case .text:
-            textRow(key, property)
+            if property.value?.isEmpty ?? true {
+                // "text" properties without a value
+                // are author notes, not inputs.
+                Text(property.plainText)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else {
+                textRow(key, property)
+            }
         case .unsupported:
             HStack {
                 Text(property.label)
@@ -238,6 +266,33 @@ struct WallpaperPropertiesView: View {
                 .textFieldStyle(.roundedBorder)
                 .frame(width: 200)
         }
+    }
+
+    /// Wallpaper Engine only shows a setting once
+    /// its condition holds, e.g. "shu.value==true"
+    /// or a bare "shu.value" (true when the
+    /// referenced checkbox is on).
+    private func isVisible(_ key: String,
+                           _ property: WEProperty) -> Bool {
+        guard let condition = property.condition?
+                .trimmingCharacters(in: .whitespacesAndNewlines),
+              !condition.isEmpty else { return true }
+        guard let dot = condition.firstIndex(of: ".") else { return true }
+        let depKey = String(condition[..<dot])
+        var rest = String(condition[condition.index(after: dot)...])
+        guard rest.hasPrefix("value") else { return true }
+        rest = String(rest.dropFirst("value".count))
+        guard let depProperty = propertyMap[depKey] else { return true }
+        let depValue = WallpaperPropertyStore.shared.value(
+            for: item, key: depKey, property: depProperty)
+        if rest.isEmpty { return depValue == "true" }
+        if rest.hasPrefix("==") {
+            return depValue == String(rest.dropFirst(2))
+        }
+        if rest.hasPrefix("!=") {
+            return depValue != String(rest.dropFirst(2))
+        }
+        return true
     }
 
     // MARK: - Bindings

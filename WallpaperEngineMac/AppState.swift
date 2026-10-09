@@ -7,6 +7,9 @@ final class AppState: ObservableObject {
     @Published var currentWallpaper: WallpaperItem?
     @Published var isPaused = false
     @Published var isScanning = false
+    /// Bumped on every wallpaper-property change so
+    /// views re-evaluate conditional settings.
+    @Published private(set) var propertyRevision = 0
 
     @Published var settings = AppSettings()
     @Published var library = WallpaperLibrary()
@@ -168,6 +171,7 @@ final class AppState: ObservableObject {
     /// wallpaper if that wallpaper is on screen.
     func setWallpaperProperty(_ item: WallpaperItem, key: String, value: String) {
         WallpaperPropertyStore.shared.setValue(value, for: item, key: key)
+        propertyRevision += 1
         if currentWallpaper?.id == item.id {
             windowManager.setUserProperty(key: key, value: value, for: item)
         }

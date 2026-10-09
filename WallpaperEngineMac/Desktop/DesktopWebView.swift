@@ -88,7 +88,7 @@ final class DesktopWebView: NSView, WKNavigationDelegate {
     }
 
     private func applyGeneralProperties() {
-        guard let properties = item?.project?.general?.properties, !properties.isEmpty else { return }
+        guard let properties = item?.project?.effectiveProperties, !properties.isEmpty else { return }
         let js = "if (window.wallpaperPropertyListener) { wallpaperPropertyListener.applyGeneralProperties(\(propertiesJSON(properties))); }"
         webView?.evaluateJavaScript(js)
     }
@@ -98,7 +98,7 @@ final class DesktopWebView: NSView, WKNavigationDelegate {
     /// defaults, so read them from the property store.
     private func applyUserProperties() {
         guard let item = item,
-              let properties = item.project?.properties,
+              let properties = item.project?.effectiveProperties,
               !properties.isEmpty else { return }
         let values = WallpaperPropertyStore.shared.values(for: item)
         setUserPropertyValues(values, types: propertyTypes(properties))
