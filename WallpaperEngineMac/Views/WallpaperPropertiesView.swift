@@ -176,9 +176,22 @@ struct WallpaperPropertiesView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-                Slider(value: sliderBinding(key, property),
-                       in: sliderRange(property),
-                       step: sliderStep(property))
+                if sliderTickCount(property) <= 1000 {
+                    Slider(value: sliderBinding(key, property),
+                           in: sliderRange(property),
+                           step: sliderStep(property))
+                } else {
+                    // A discrete SwiftUI slider draws
+                    // one tick mark per step. With the
+                    // tiny steps some wallpapers use
+                    // (0...180 at 0.001 = 180,000
+                    // marks) the slider's tick-mark
+                    // layout never converges and the
+                    // window spins at 100% CPU, so
+                    // those render as continuous.
+                    Slider(value: sliderBinding(key, property),
+                           in: sliderRange(property))
+                }
             }
         case .color:
             HStack {
@@ -326,6 +339,17 @@ struct WallpaperPropertiesView: View {
 
     private func sliderStep(_ property: WEProperty) -> Double {
         property.step ?? 0.01
+    }
+
+    /// How many discrete steps the slider's
+    /// range holds — i.e. how many tick marks
+    /// a discrete SwiftUI slider would draw.
+    private func sliderTickCount(_ property: WEProperty) -> Int {
+        let min = property.min ?? 0
+        let max = property.max ?? 1
+        let step = property.step ?? 0.01
+        guard step > 0, max > min else { return 0 }
+        return Int((max - min) / step)
     }
 
     private func sliderValue(_ key: String, _ property: WEProperty) -> Double {

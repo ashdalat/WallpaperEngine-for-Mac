@@ -64,9 +64,38 @@ struct GalleryView: View {
         }
         .frame(minWidth: 760, minHeight: 520)
         .onAppear {
+            fputs("WEM: gallery onAppear\n", stderr)
             if state.library.items.isEmpty {
                 Task { await state.rescan() }
             }
+            applyDebugSelection()
+        }
+    }
+
+    /// Debug hook (WEM_DEBUG_SELECT=id):
+    /// select the wallpaper with that id in
+    /// the gallery once the library has loaded
+    /// — the same thing a single click on its
+    /// card does, which renders the settings
+    /// pane. Used to reproduce settings-pane
+    /// layout problems without clicking.
+    private func applyDebugSelection() {
+        guard let id = ProcessInfo.processInfo.environment["WEM_DEBUG_SELECT"],
+              !id.isEmpty else { return }
+        fputs("WEM: debug select armed for \(id)\n", stderr)
+        // GalleryView is a struct, so the
+        // closure captures a copy — no weak.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
+            if state.library.items.isEmpty {
+                applyDebugSelection()
+                return
+            }
+            guard let item = state.library.items.first(where: { $0.id == id }) else {
+                fputs("WEM: debug select: no item with id \(id)\n", stderr)
+                return
+            }
+            fputs("WEM: debug select \(item.title)\n", stderr)
+            selectedItem = item
         }
     }
 
