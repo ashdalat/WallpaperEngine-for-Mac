@@ -3,6 +3,8 @@ import SwiftUI
 struct GalleryView: View {
     @EnvironmentObject var state: AppState
 
+    @State private var settingsItem: WallpaperItem?
+
     private let columns = [
         GridItem(.adaptive(minimum: 220), spacing: 16)
     ]
@@ -23,6 +25,9 @@ struct GalleryView: View {
                                 }
                                 .contextMenu {
                                     Button("Preview") { state.preview(item) }
+                                    Button("Settings & Info…") {
+                                        settingsItem = item
+                                    }
                                     Button("Open in Finder") {
                                         NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: item.folderURL.path)
                                     }
@@ -37,6 +42,11 @@ struct GalleryView: View {
             }
         }
         .frame(minWidth: 760, minHeight: 520)
+        .sheet(item: $settingsItem) { item in
+            WallpaperPropertiesView(item: item)
+                .environmentObject(state)
+                .padding()
+        }
         .onAppear {
             if state.library.items.isEmpty {
                 Task { await state.rescan() }
@@ -82,6 +92,12 @@ struct GalleryView: View {
                 Image(systemName: "arrow.clockwise")
             }
             .help("Rescan library")
+            if let current = state.currentWallpaper {
+                Button(action: { settingsItem = current }) {
+                    Image(systemName: "slider.horizontal.3")
+                }
+                .help("Settings for “\(current.title)”")
+            }
         }
         .padding()
     }

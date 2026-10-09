@@ -86,6 +86,14 @@ final class DesktopWindowManager: NSObject {
         }
     }
 
+    /// Forwards a user property change to every screen
+    /// showing `item` (a wallpaper set to all screens).
+    func setUserProperty(key: String, value: String, for item: WallpaperItem) {
+        for renderer in renderers.values {
+            renderer.setUserProperty(key, value: value, for: item)
+        }
+    }
+
     private func screenKey(_ screen: NSScreen) -> String {
         let number = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber
         return number.map { "\($0.intValue)" } ?? UUID().uuidString

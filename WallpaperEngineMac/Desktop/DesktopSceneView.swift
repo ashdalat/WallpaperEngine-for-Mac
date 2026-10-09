@@ -70,6 +70,13 @@ final class DesktopSceneView: NSView {
         bridge?.setVolume(Float(settings.volume))
     }
 
+    /// Applies one Wallpaper Engine user property to the
+    /// running scene (shader uniforms, textures, clear
+    /// color). See the project.json "properties" table.
+    func setUserProperty(_ key: String, value: String) {
+        bridge?.setUserProperty(key, value: value)
+    }
+
     // MARK: - Mouse forwarding
 
     func handleMouseEvent(_ event: CGEvent, window: NSWindow) {

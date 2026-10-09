@@ -128,6 +128,16 @@ final class AppState: ObservableObject {
         evaluatePause()
     }
 
+    /// Saves a wallpaper user property (its settings
+    /// sheet value) and applies it to the live
+    /// wallpaper if that wallpaper is on screen.
+    func setWallpaperProperty(_ item: WallpaperItem, key: String, value: String) {
+        WallpaperPropertyStore.shared.setValue(value, for: item, key: key)
+        if currentWallpaper?.id == item.id {
+            windowManager.setUserProperty(key: key, value: value, for: item)
+        }
+    }
+
     func removeWallpaper() {
         currentWallpaper = nil
         settings.currentWallpaperId = ""

@@ -48,6 +48,13 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setVolume:(float)volume;
 - (void)setMuted:(BOOL)muted;
 
+/// Applies one Wallpaper Engine user property (from the
+/// project.json "properties" table) to the scene: shader
+/// uniforms, textures, clear color. `value` is the wire
+/// string form, e.g. "0.5" (slider), "true"/"false"
+/// (checkbox), "0.2 0.4 0.9" (color).
+- (void)setUserProperty:(NSString *)key value:(NSString *)value;
+
 /// Generic property passthrough.
 - (void)setPropertyString:(NSString *)name value:(NSString *)value;
 - (void)setPropertyBool:(NSString *)name value:(BOOL)value;

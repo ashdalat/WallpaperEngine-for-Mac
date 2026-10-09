@@ -93,10 +93,35 @@ final class DesktopWebView: NSView, WKNavigationDelegate {
         webView?.evaluateJavaScript(js)
     }
 
+    /// Wallpaper Engine applies the saved user property
+    /// values when a wallpaper loads, not the authored
+    /// defaults, so read them from the property store.
     private func applyUserProperties() {
-        guard let properties = item?.project?.properties, !properties.isEmpty else { return }
-        let js = "if (window.wallpaperPropertyListener) { wallpaperPropertyListener.applyUserProperties(\(propertiesJSON(properties))); }"
+        guard let item = item,
+              let properties = item.project?.properties,
+              !properties.isEmpty else { return }
+        let values = WallpaperPropertyStore.shared.values(for: item)
+        setUserPropertyValues(values, types: propertyTypes(properties))
+    }
+
+    /// Pushes user property updates to the page — the
+    /// same call Wallpaper Engine makes when the user
+    /// changes a setting in its UI.
+    func setUserPropertyValues(_ values: [String: String],
+                                  types: [String: String]) {
+        guard !values.isEmpty else { return }
+        var json: [String: [String: String]] = [:]
+        for (key, value) in values {
+            json[key] = ["value": value, "type": types[key] ?? "text"]
+        }
+        guard let data = try? JSONSerialization.data(withJSONObject: json),
+              let str = String(data: data, encoding: .utf8) else { return }
+        let js = "if (window.wallpaperPropertyListener) { wallpaperPropertyListener.applyUserProperties(\(str)); }"
         webView?.evaluateJavaScript(js)
+    }
+
+    private func propertyTypes(_ properties: [String: WEProperty]) -> [String: String] {
+        properties.mapValues { $0.type ?? "text" }
     }
 
     private func propertiesJSON(_ properties: [String: WEProperty]) -> String {

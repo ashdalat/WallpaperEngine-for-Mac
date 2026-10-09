@@ -191,4 +191,16 @@ void wescene_bridge_set_muted(void* bridge, int muted)
     state->scene->setMuted(state->muted);
 }
 
+void wescene_bridge_set_user_property(void* bridge,
+                                            const char* key,
+                                            const char* value)
+{
+    auto* state = static_cast<BridgeState*>(bridge);
+    if (state == nullptr) return;
+    // setUserPropertyRaw copies the strings (it posts
+    // them as MainMsg::SetUserProperty), so the
+    // temporaries only have to outlive this call.
+    state->scene->setUserPropertyRaw(make_string(key), make_string(value));
+}
+
 } // extern "C"

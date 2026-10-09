@@ -55,6 +55,20 @@ void wescene_bridge_set_speed(void* bridge, float speed);
 void wescene_bridge_set_volume(void* bridge, float volume);
 void wescene_bridge_set_muted(void* bridge, int muted);
 
+// Applies one Wallpaper Engine user property (the
+// "properties" table of project.json). `key` is the
+// property name, `value` its value in wire form —
+// the string form project.json uses: "0.5" for a
+// slider, "true"/"false" for a checkbox,
+// "0.2 0.4 0.9" for a color. The engine merges the
+// value with the property's schema from the scene
+// and applies it to shader uniforms, textures and
+// the clear color, exactly like Wallpaper Engine
+// does when the user changes a setting.
+void wescene_bridge_set_user_property(void* bridge,
+                                            const char* key,
+                                            const char* value);
+
 #ifdef __cplusplus
 }
 #endif

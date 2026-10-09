@@ -43,6 +43,17 @@ final class WallpaperRenderer: NSObject {
             sv.autoresizingMask = [.width, .height]
             sv.setMouseEnabled(settings.mouseInput)
             sv.load(item: item, assetsURL: dirs.assets, cacheURL: dirs.cache, settings: settings)
+            // applyToAllScreens replaces renderers, so
+            // saved user property values must be pushed
+            // again here. The engine's message loop is
+            // FIFO: the scene load posted by sv.load()
+            // is always applied before these.
+            let properties = item.project?.properties ?? [:]
+            for (key, property) in properties {
+                let value = WallpaperPropertyStore.shared.value(
+                    for: item, key: key, property: property)
+                sv.setUserProperty(key, value: value)
+            }
             sceneView = sv
             renderedView = sv
         case .unknown:
@@ -93,6 +104,25 @@ final class WallpaperRenderer: NSObject {
     func handleMouseEvent(_ event: CGEvent, window: NSWindow) {
         webView?.handleMouseEvent(event, window: window)
         sceneView?.handleMouseEvent(event, window: window)
+    }
+
+    /// Applies one user property change to the running
+    /// wallpaper. Only the renderer for `item` is
+    /// touched, so a settings edit on one wallpaper
+    /// cannot disturb another.
+    func setUserProperty(_ key: String, value: String, for item: WallpaperItem) {
+        guard currentItem?.id == item.id else { return }
+        switch item.type {
+        case .scene:
+            sceneView?.setUserProperty(key, value: value)
+        case .web:
+            guard let property = item.project?.properties?[key] else { return }
+            webView?.setUserPropertyValues(
+                [key: value],
+                types: [key: property.type ?? "text"])
+        case .video, .unknown:
+            break
+        }
     }
 
     // MARK: - Scene wallpaper support
