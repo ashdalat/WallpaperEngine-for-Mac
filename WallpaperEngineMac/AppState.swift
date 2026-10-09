@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import SwiftUI
 
 @MainActor
@@ -18,8 +19,20 @@ final class AppState: ObservableObject {
     private var galleryWindowController: GalleryWindowController?
     private var settingsWindowController: SettingsWindowController?
     private var previewControllers: [PreviewWindowController] = []
+    private var cancellables: Set<AnyCancellable> = []
 
     func start() {
+        // settings and library are nested ObservableObjects;
+        // forward their changes so views observing AppState
+        // re-render when filters, search text or settings change
+        // (otherwise only a full rescan triggers an update).
+        settings.objectWillChange
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &cancellables)
+        library.objectWillChange
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &cancellables)
+
         library.setSteamRoots(steamRoots())
         Task { await rescan() }
 
