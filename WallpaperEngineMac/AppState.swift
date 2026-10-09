@@ -1,4 +1,5 @@
 import AppKit
+import AVFoundation
 import Combine
 import SwiftUI
 
@@ -58,6 +59,14 @@ final class AppState: ObservableObject {
                         id, delay: 1.5 + Double(index) * delay)
                 }
             }
+        }
+        // Debug import hook: WEM_DEBUG_IMPORT=path
+        // imports the video at that path through
+        // the same pipeline as "Import Local
+        // Video…", without the file panel.
+        if let path = ProcessInfo.processInfo.environment["WEM_DEBUG_IMPORT"],
+           !path.isEmpty {
+            importAndApply([URL(fileURLWithPath: path)])
         }
 
         NotificationCenter.default.addObserver(
@@ -162,6 +171,7 @@ final class AppState: ObservableObject {
     func rescan() async {
         isScanning = true
         library.setSteamRoots(steamRoots())
+        library.setExtraDirectories([localWallpapersDirectory()])
         await library.scan()
         fputs("WEM: scan done, items=\(library.items.count)\n", stderr)
         isScanning = false
@@ -288,11 +298,102 @@ final class AppState: ObservableObject {
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
         panel.prompt = "Select"
-        panel.message = "Select your Steam library folder (contains steamapps/)"
+        panel.message = "Select a Steam library folder (contains steamapps/), or a folder of wallpapers copied anywhere"
         if panel.runModal() == .OK, let url = panel.url {
             settings.steamPath = url.path
             Task { await rescan() }
         }
+    }
+
+    // MARK: - Local video import
+
+    /// "Import Local Video…": copies the
+    /// picked videos into the app's own
+    /// library, writes a project.json for
+    /// each (so they show up in the gallery
+    /// like any other wallpaper) and applies
+    /// the first one.
+    func importLocalVideo() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = true
+        panel.allowedFileTypes = [
+            "mp4", "mov", "m4v", "mkv", "webm", "avi", "mpg", "mpeg"
+        ]
+        panel.prompt = "Import"
+        panel.message = "Choose videos to use as wallpapers"
+        guard panel.runModal() == .OK, !panel.urls.isEmpty else { return }
+        fputs("WEM: import \(panel.urls.count) video(s)\n", stderr)
+        importAndApply(panel.urls)
+    }
+
+    /// Rescans after copying videos and
+    /// applies the first import. Used by
+    /// the import dialog and the
+    /// WEM_DEBUG_IMPORT hook.
+    private func importAndApply(_ urls: [URL]) {
+        Task {
+            let ids = await importVideos(urls)
+            await rescan()
+            // Apply the first import so the
+            // result is on screen right away.
+            if let first = ids.first,
+               let item = library.items.first(where: { $0.id == first }) {
+                applyWallpaper(item)
+            }
+        }
+    }
+
+    /// Copies `urls` into the local wallpapers
+    /// directory and returns the ids of the
+    /// created wallpaper folders.
+    private func importVideos(_ urls: [URL]) async -> [String] {
+        await Task.detached(priority: .userInitiated) { () -> [String] in
+            let fm = FileManager.default
+            let base = localWallpapersDirectory()
+            try? fm.createDirectory(
+                at: base, withIntermediateDirectories: true)
+            var ids: [String] = []
+            for url in urls {
+                let title = url.deletingPathExtension().lastPathComponent
+                let slug = slugified(title)
+                var folder = base.appendingPathComponent(slug)
+                var suffix = 1
+                while fm.fileExists(atPath: folder.path) {
+                    folder = base.appendingPathComponent("\(slug)-\(suffix)")
+                    suffix += 1
+                }
+                do {
+                    try fm.createDirectory(
+                        at: folder, withIntermediateDirectories: true)
+                    try fm.copyItem(
+                        at: url,
+                        to: folder.appendingPathComponent(url.lastPathComponent))
+                } catch {
+                    fputs("WEM: import failed \(url.lastPathComponent): \(error)\n",
+                          stderr)
+                    continue
+                }
+                let project: [String: Any] = [
+                    "title": title,
+                    "type": "video",
+                    "file": url.lastPathComponent
+                ]
+                if let data = try? JSONSerialization.data(
+                    withJSONObject: project,
+                    options: [.prettyPrinted, .sortedKeys]) {
+                    try? data.write(
+                        to: folder.appendingPathComponent("project.json"))
+                }
+                generateVideoPreview(
+                    videoURL: folder.appendingPathComponent(url.lastPathComponent),
+                    folder: folder)
+                ids.append(folder.lastPathComponent)
+                fputs("WEM: imported \(title)\n", stderr)
+            }
+            return ids
+        }.value
     }
 
     private func handlePowerChange(onBattery: Bool, percent: Int) {
@@ -305,4 +406,43 @@ final class AppState: ObservableObject {
         fputs("WEM: screen parameters changed\n", stderr)
         windowManager.handleScreenConfigurationChange(settings: settings, current: currentWallpaper)
     }
+}
+
+/// Directory where videos imported with
+/// "Import Local Video…" are stored —
+/// the app's own library, independent of
+/// the Steam path.
+private func localWallpapersDirectory() -> URL {
+    let appSupport = FileManager.default
+        .urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+    return appSupport.appendingPathComponent("WallpaperEngineMac/Local")
+}
+
+/// Turns a file name into a safe
+/// folder name ("My Clip 4K!" -> "my-clip-4k").
+private func slugified(_ name: String) -> String {
+    let slug = name.lowercased()
+        .components(separatedBy: CharacterSet.alphanumerics.inverted)
+        .joined(separator: "-")
+        .trimmingCharacters(in: CharacterSet(charactersIn: "-"))
+    return slug.isEmpty ? "video" : slug
+}
+
+/// Extracts a JPEG preview frame from a
+/// video for the gallery card.
+private func generateVideoPreview(videoURL: URL, folder: URL) {
+    let asset = AVAsset(url: videoURL)
+    guard asset.isPlayable else { return }
+    let generator = AVAssetImageGenerator(asset: asset)
+    generator.appliesPreferredTrackTransform = true
+    generator.requestedTimeToleranceBefore = .zero
+    generator.requestedTimeToleranceAfter = .zero
+    let duration = CMTimeGetSeconds(asset.duration)
+    let seconds = duration.isFinite && duration > 2 ? duration / 2 : 1
+    guard let cgImage = try? generator.copyCGImage(
+        at: CMTime(seconds: seconds, preferredTimescale: 600),
+        actualTime: nil) else { return }
+    let rep = NSBitmapImageRep(cgImage: cgImage)
+    guard let jpeg = rep.representation(using: .jpeg, properties: [:]) else { return }
+    try? jpeg.write(to: folder.appendingPathComponent("preview.jpg"))
 }

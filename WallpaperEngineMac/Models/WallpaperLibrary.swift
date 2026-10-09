@@ -13,6 +13,10 @@ final class WallpaperLibrary: ObservableObject {
     @Published var enabledTypes: Set<WallpaperType> = [.video, .web, .scene]
 
     private var steamRoots: [URL] = []
+    /// Extra directories scanned directly for
+    /// wallpaper folders — the app's own local
+    /// imports (imported videos) live here.
+    private var extraDirectories: [URL] = []
 
     var filteredItems: [WallpaperItem] {
         items.filter { item in
@@ -25,14 +29,29 @@ final class WallpaperLibrary: ObservableObject {
         steamRoots = roots
     }
 
+    func setExtraDirectories(_ directories: [URL]) {
+        extraDirectories = directories
+    }
+
     func scan() async {
         isScanning = true
         let roots = steamRoots
+        let extras = extraDirectories
         let scanned = await Task.detached(priority: .userInitiated) { () -> [WallpaperItem] in
             var items: [WallpaperItem] = []
             let dirs = SteamPathManager.workshopContentDirectories(steamRoots: roots)
                 + SteamPathManager.defaultProjectsDirectories(steamRoots: roots)
                 + SteamPathManager.myProjectsDirectories(steamRoots: roots)
+                // The library path may point straight
+                // at a folder of wallpapers (a copied
+                // workshop folder, for instance) instead
+                // of a full Steam install, so scan the
+                // roots themselves too. Wallpaper roots
+                // have no project.json in their own
+                // subfolders, so a real Steam root just
+                // contributes nothing here.
+                + roots
+                + extras
             for dir in dirs {
                 items.append(contentsOf: Self.scanDirectory(dir))
             }

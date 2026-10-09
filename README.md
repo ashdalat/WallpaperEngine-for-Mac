@@ -69,10 +69,10 @@ tạm dừng thông minh, và tối ưu pin.
 - `MouseGrabber`: hook chuột toàn cục, forward vào web wallpaper (tương đương macOS: CGEventTap).
 - Volume fade dần (300ms) khi play/pause để tránh tiếng "pop".
 
-### 1.2. Ứng dụng macOS mẫu (`Dynamic Wallpaper.saver`)
+### 1.2. Cơ chế hiển thị nền trên macOS
 
-Là một **Screen Saver bundle** (`CFBundlePackageType: BNDL`, `NSPrincipalClass: DongtaiScreenSaverView`).
-Cơ chế hiển thị nền desktop trên macOS được tái tạo trong project này bằng AppKit:
+Cơ chế hiển thị nền desktop trên macOS được tái tạo trong project này bằng AppKit
+(một cửa sổ ở desktop level, không phải Screen Saver bundle):
 
 ```swift
 window.level = NSWindow.Level(Int(CGWindowLevelForKey(.desktopWindow)))  // level 0
@@ -243,7 +243,7 @@ Sau đó:
 | Vấn đề | Nguyên nhân / Khắc phục |
 |---|---|
 | Gallery rỗng | Steam path chưa đúng — dùng Settings → Browse chọn thư mục chứa `steamapps/`. Kiểm tra thư mục `steamapps/workshop/content/431960/<id>/project.json` tồn tại. |
-| Wallpaper không hiện trên desktop | Đảm bảo không có app wallpaper khác đang chạy (Dynamic Wallpaper, Wallpaper Engine…). Thử Pause → Resume từ Menu Bar. |
+| Wallpaper không hiện trên desktop | Đảm bảo không có app wallpaper khác đang chạy (Wallpaper Engine…). Thử Pause → Resume từ Menu Bar. |
 | Video không có tiếng | Menu Bar → bỏ tick "Mute Audio". Video cần codec được VideoToolbox hỗ trợ (H.264/HEVC mp4 luôn chạy; webm VP9/AV1 tuỳ phiên bản macOS). |
 | Chuột không tương tác web wallpaper | Bật "Mouse Input (Web)" trong Settings, sau đó cấp quyền **Accessibility** cho app trong System Settings → Privacy & Security. |
 | Web wallpaper nền đen | Một số web wallpaper tự set background — app đã inject CSS `html, body { background: transparent }`; nếu wallpaper dùng canvas opaque thì không trong suốt được. |

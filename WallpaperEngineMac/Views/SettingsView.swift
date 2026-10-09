@@ -5,15 +5,15 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
-            Section("Steam Workshop") {
+            Section("Library") {
                 HStack {
-                    TextField("Steam library path", text: $state.settings.steamPath)
+                    TextField("Library path", text: $state.settings.steamPath)
                     Button("Browse…") { state.chooseSteamPath() }
                 }
                 Button("Rescan Library") {
                     Task { await state.rescan() }
                 }
-                Text("Default: ~/Library/Application Support/Steam")
+                Text("A Steam library folder (contains steamapps/), or any folder of wallpapers — copy it anywhere and pick it here.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -57,6 +57,11 @@ struct SettingsView: View {
             }
 
             Section("About") {
+                HStack {
+                    Text("Made by")
+                    Spacer()
+                    Text("ZCode").foregroundStyle(.secondary)
+                }
                 HStack {
                     Text("Current wallpaper")
                     Spacer()

@@ -127,6 +127,10 @@ struct GalleryView: View {
             TextField("Search", text: $state.library.searchText)
                 .textFieldStyle(.roundedBorder)
                 .frame(width: 200)
+            Button(action: { state.importLocalVideo() }) {
+                Label("Import Video", systemImage: "film")
+            }
+            .help("Import a video from this Mac as a wallpaper")
             ForEach(WallpaperType.allCases.filter { $0 != .unknown }, id: \.self) { type in
                 Button(action: {
                     if state.library.enabledTypes.contains(type) {

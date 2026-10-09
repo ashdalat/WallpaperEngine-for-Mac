@@ -117,6 +117,18 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             keyEquivalent: "g"
         ).withTarget(self))
 
+        menu.addItem(NSMenuItem(
+            title: "Import Local Video…",
+            action: #selector(importLocalVideo),
+            keyEquivalent: "i"
+        ).withTarget(self))
+
+        menu.addItem(NSMenuItem(
+            title: "Settings…",
+            action: #selector(openSettings),
+            keyEquivalent: ","
+        ).withTarget(self))
+
         menu.addItem(.separator())
 
         let screensItem = NSMenuItem(
@@ -174,6 +186,10 @@ final class MenuBarController: NSObject, NSMenuDelegate {
 
     @objc private func openGallery() {
         appState.openGallery()
+    }
+
+    @objc private func importLocalVideo() {
+        appState.importLocalVideo()
     }
 
     @objc private func openSettings() {
