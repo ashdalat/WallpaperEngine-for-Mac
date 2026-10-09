@@ -22,8 +22,11 @@ struct GalleryView: View {
                 // Two panes: the wallpaper grid on
                 // the left, the settings & info of
                 // the selected wallpaper on the
-                // right (drag the divider to resize).
-                HSplitView {
+                // right. (A plain HStack, not an
+                // HSplitView: HSplitView collapses
+                // the right pane to zero width when
+                // the left is a ScrollView.)
+                HStack(spacing: 0) {
                     ScrollView {
                         LazyVGrid(columns: columns, spacing: 16) {
                             ForEach(state.library.filteredItems) { item in
@@ -50,16 +53,12 @@ struct GalleryView: View {
                         }
                         .padding()
                     }
+                    .frame(minWidth: 300, maxWidth: .infinity)
 
-                    if let selectedItem {
-                        WallpaperPropertiesView(item: selectedItem)
-                            .environmentObject(state)
-                            .frame(minWidth: 300, idealWidth: 340, maxWidth: .infinity)
-                    } else {
-                        Text("Select a wallpaper to see its settings")
-                            .foregroundStyle(.secondary)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    }
+                    Divider()
+
+                    rightPane
+                        .frame(minWidth: 300, idealWidth: 340, maxWidth: 420)
                 }
             }
         }
@@ -68,6 +67,20 @@ struct GalleryView: View {
             if state.library.items.isEmpty {
                 Task { await state.rescan() }
             }
+        }
+    }
+
+    /// The settings & info of the selected
+    /// wallpaper — the right-hand pane.
+    @ViewBuilder
+    private var rightPane: some View {
+        if let selectedItem {
+            WallpaperPropertiesView(item: selectedItem)
+                .environmentObject(state)
+        } else {
+            Text("Select a wallpaper to see its settings")
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 
