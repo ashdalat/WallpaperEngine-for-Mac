@@ -96,6 +96,7 @@ struct GalleryView: View {
             }
             fputs("WEM: debug select \(item.title)\n", stderr)
             selectedItem = item
+            state.applyWallpaper(item)
         }
     }
 
@@ -131,6 +132,14 @@ struct GalleryView: View {
                 Label("Import Video", systemImage: "film")
             }
             .help("Import a video from this Mac as a wallpaper")
+            Button(action: { Task { await state.rescan() } }) {
+                Label("Rescan", systemImage: "arrow.clockwise")
+            }
+            .help("Scan the library folders again")
+            Button(action: { state.openSettings() }) {
+                Label("Settings", systemImage: "gearshape")
+            }
+            .help("App settings (library path, playback, pause)")
             ForEach(WallpaperType.allCases.filter { $0 != .unknown }, id: \.self) { type in
                 Button(action: {
                     if state.library.enabledTypes.contains(type) {

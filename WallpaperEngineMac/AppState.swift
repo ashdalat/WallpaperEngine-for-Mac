@@ -68,6 +68,9 @@ final class AppState: ObservableObject {
            !path.isEmpty {
             importAndApply([URL(fileURLWithPath: path)])
         }
+        if ProcessInfo.processInfo.environment["WEM_DEBUG_SETTINGS"] != nil {
+            openSettings()
+        }
 
         NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification,
@@ -375,10 +378,32 @@ final class AppState: ObservableObject {
                           stderr)
                     continue
                 }
+                let copiedURL = folder.appendingPathComponent(url.lastPathComponent)
+                var videoFile = url.lastPathComponent
+                // Codecs the wallpaper window
+                // can't render (AV1 on anything
+                // older than an M3, for example)
+                // play with a black screen, so
+                // convert them when an ffmpeg is
+                // available.
+                if let codec = VideoCodecSupport
+                    .codecName(videoURL: copiedURL),
+                   !VideoCodecSupport.isSupported(codec) {
+                    fputs("WEM: \(title) uses \(VideoCodecSupport.displayName(codec)), which this Mac cannot render\n", stderr)
+                    if VideoCodecSupport.transcodeToH264(
+                        videoURL: copiedURL,
+                        outputURL: folder.appendingPathComponent("video-h264.mp4")) {
+                        try? fm.removeItem(at: copiedURL)
+                        videoFile = "video-h264.mp4"
+                        fputs("WEM: converted \(title) to H.264\n", stderr)
+                    } else {
+                        fputs("WEM: no ffmpeg or conversion failed — keeping original (it will show a notice instead of playing)\n", stderr)
+                    }
+                }
                 let project: [String: Any] = [
                     "title": title,
                     "type": "video",
-                    "file": url.lastPathComponent
+                    "file": videoFile
                 ]
                 if let data = try? JSONSerialization.data(
                     withJSONObject: project,
@@ -387,7 +412,7 @@ final class AppState: ObservableObject {
                         to: folder.appendingPathComponent("project.json"))
                 }
                 generateVideoPreview(
-                    videoURL: folder.appendingPathComponent(url.lastPathComponent),
+                    videoURL: folder.appendingPathComponent(videoFile),
                     folder: folder)
                 ids.append(folder.lastPathComponent)
                 fputs("WEM: imported \(title)\n", stderr)

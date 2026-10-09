@@ -123,12 +123,6 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             keyEquivalent: "i"
         ).withTarget(self))
 
-        menu.addItem(NSMenuItem(
-            title: "Settings…",
-            action: #selector(openSettings),
-            keyEquivalent: ","
-        ).withTarget(self))
-
         menu.addItem(.separator())
 
         let screensItem = NSMenuItem(

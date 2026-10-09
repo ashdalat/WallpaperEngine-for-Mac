@@ -22,6 +22,13 @@ final class WallpaperRenderer: NSObject {
                 renderedView = makePlaceholderView(message: "Video file not found.")
                 break
             }
+            if let codec = VideoCodecSupport
+                .codecName(videoURL: url),
+               !VideoCodecSupport.isSupported(codec) {
+                renderedView = makePlaceholderView(
+                    message: "This video uses \(VideoCodecSupport.displayName(codec)), which this Mac cannot play. Convert it to H.264 to use it as a wallpaper.")
+                break
+            }
             let vv = DesktopVideoView(frame: frame)
             vv.autoresizingMask = [.width, .height]
             vv.load(url: url, displayMode: displayMode, volume: settings.volume, muted: settings.muteAudio)

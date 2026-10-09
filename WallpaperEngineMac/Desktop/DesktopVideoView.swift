@@ -39,6 +39,17 @@ final class DesktopVideoView: NSView {
             player.play()
         }
         player.play()
+        fputs("WEM: video load \(url.lastPathComponent)\n", stderr)
+        // Playback can fail silently (unsupported
+        // codec, truncated file) and leave a black
+        // layer — surface the player status so the
+        // cause is visible in the console log.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak player] in
+            guard let player else { return }
+            let status = player.currentItem?.status.rawValue ?? -1
+            let error = player.currentItem?.error?.localizedDescription ?? "none"
+            fputs("WEM: video status=\(status) rate=\(player.rate) error=\(error)\n", stderr)
+        }
     }
 
     func play() {

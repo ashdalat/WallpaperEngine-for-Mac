@@ -16,7 +16,7 @@ import CoreGraphics
 /// Keeping the renderer presenting at all
 /// times repairs any purge within one
 /// frame (~33 ms at 30 fps) so it never
-/// becomes visible. We do the same.
+/// becomes visible.
 final class PausePolicy {
     private(set) var isPaused: Bool = false
     private var manualPause = false

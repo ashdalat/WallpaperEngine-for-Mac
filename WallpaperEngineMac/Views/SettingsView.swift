@@ -58,9 +58,9 @@ struct SettingsView: View {
 
             Section("About") {
                 HStack {
-                    Text("Made by")
+                    Text("Made using")
                     Spacer()
-                    Text("ZCode").foregroundStyle(.secondary)
+                    Text("ZCode Ling 3.1 Flash").foregroundStyle(.secondary)
                 }
                 HStack {
                     Text("Current wallpaper")
@@ -80,6 +80,13 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
+        // The hosting controller sizes the
+        // window to the content's minimum —
+        // a Form's minimum height is zero,
+        // which collapsed the window to its
+        // title bar. Pin a minimum height so
+        // the window keeps a usable size.
         .frame(width: 540)
+        .frame(minHeight: 480)
     }
 }
