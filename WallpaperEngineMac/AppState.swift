@@ -355,7 +355,7 @@ final class AppState: ObservableObject {
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
         panel.prompt = "Select"
-        panel.message = "Select a Steam library folder (contains steamapps/), or a folder of wallpapers copied anywhere"
+        panel.message = "Select the Steam library folder — the one containing steamapps/workshop/content/431960 (the wallpapers) and steamapps/common/wallpaper_engine/assets (Shared Assets, ~85 MB). Or select any folder of wallpapers copied anywhere."
         if panel.runModal() == .OK, let url = panel.url {
             settings.steamPath = url.path
             Task { await rescan() }

@@ -13,9 +13,20 @@ struct SettingsView: View {
                 Button("Rescan Library") {
                     Task { await state.rescan() }
                 }
-                Text("A Steam library folder (contains steamapps/), or any folder of wallpapers — copy it anywhere and pick it here.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Pick the Steam library folder that holds the wallpapers — the one containing:")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text("• steamapps/workshop/content/431960 — the Workshop Content (the wallpapers)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text("• steamapps/common/wallpaper_engine/assets — Shared Assets (~85 MB), used by scene wallpapers")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text("Example: ~/Library/Application Support/Steam — or any folder of wallpapers copied anywhere.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             Section("Playback") {

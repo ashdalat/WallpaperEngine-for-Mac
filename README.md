@@ -229,6 +229,13 @@ cp -R "/đường/dẫn/đến/Frieren_Live_Wallpaper_1080p/"* \
 
 Hoặc dùng menu **Settings → Browse** để trỏ tới thư mục Steam library của bạn.
 
+**Chọn thư mục nào?** Trỏ tới **thư mục Steam library** — thư mục chứa:
+- `steamapps/workshop/content/431960/` — **Thư mục chứa các hình nền (Workshop Content)**: mỗi wallpaper là một thư mục con có `project.json`.
+- `steamapps/common/wallpaper_engine/assets/` — **Thư mục tài nguyên dùng chung (Shared Assets, ~85 MB)**: chứa model/texture mà nhiều scene wallpaper dùng chung.
+- Ví dụ: `~/Library/Application Support/Steam` (hoặc `~/SteamLibrary`, `~/Games/Steam`…).
+
+Không có Steam cũng không sao: chỉ cần **copy một thư mục chứa các wallpaper** (thư mục con có `project.json`) tới bất kỳ đâu (ví dụ Desktop) rồi trỏ **Settings → Browse** vào đó — app quét trực tiếp thư mục đó.
+
 Sau đó:
 1. Mở **Gallery** từ Menu Bar (icon 🖻).
 2. Click vào card wallpaper → wallpaper chạy nền desktop.
