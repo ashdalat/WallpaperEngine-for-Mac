@@ -72,7 +72,9 @@ final class AppState: ObservableObject {
             }
         }
         if settings.mouseInput {
-            mouseEventTap.start()
+            if !mouseEventTap.start() {
+                mouseEventTap.ensureAccessibility(prompt: true)
+            }
         }
 
         evaluatePause()
@@ -149,7 +151,9 @@ final class AppState: ObservableObject {
     func setMouseInput(_ enabled: Bool) {
         settings.mouseInput = enabled
         if enabled {
-            mouseEventTap.start()
+            if !mouseEventTap.start() {
+                mouseEventTap.ensureAccessibility(prompt: true)
+            }
         } else {
             mouseEventTap.stop()
         }
