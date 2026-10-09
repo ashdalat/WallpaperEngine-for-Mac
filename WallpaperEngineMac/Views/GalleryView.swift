@@ -3,7 +3,10 @@ import SwiftUI
 struct GalleryView: View {
     @EnvironmentObject var state: AppState
 
-    @State private var settingsItem: WallpaperItem?
+    /// The wallpaper whose settings show in the
+    /// right-hand pane. Single-click selects;
+    /// double-click applies.
+    @State private var selectedItem: WallpaperItem?
 
     private let columns = [
         GridItem(.adaptive(minimum: 220), spacing: 16)
@@ -16,18 +19,26 @@ struct GalleryView: View {
             if state.library.items.isEmpty && !state.isScanning {
                 emptyState
             } else {
-                ScrollView {
-                    LazyVGrid(columns: columns, spacing: 16) {
-                        ForEach(state.library.filteredItems) { item in
-                            WallpaperCardView(item: item)
+                // Two panes: the wallpaper grid on
+                // the left, the settings & info of
+                // the selected wallpaper on the
+                // right (drag the divider to resize).
+                HSplitView {
+                    ScrollView {
+                        LazyVGrid(columns: columns, spacing: 16) {
+                            ForEach(state.library.filteredItems) { item in
+                                WallpaperCardView(
+                                    item: item,
+                                    isSelected: selectedItem?.id == item.id
+                                )
                                 .onTapGesture {
+                                    selectedItem = item
+                                }
+                                .onTapGesture(count: 2) {
                                     state.applyWallpaper(item)
                                 }
                                 .contextMenu {
                                     Button("Preview") { state.preview(item) }
-                                    Button("Settings & Info…") {
-                                        settingsItem = item
-                                    }
                                     Button("Open in Finder") {
                                         NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: item.folderURL.path)
                                     }
@@ -35,18 +46,24 @@ struct GalleryView: View {
                                         Button("Remove Wallpaper") { state.removeWallpaper() }
                                     }
                                 }
+                            }
                         }
+                        .padding()
                     }
-                    .padding()
+
+                    if let selectedItem {
+                        WallpaperPropertiesView(item: selectedItem)
+                            .environmentObject(state)
+                            .frame(minWidth: 300, idealWidth: 340, maxWidth: .infinity)
+                    } else {
+                        Text("Select a wallpaper to see its settings")
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
                 }
             }
         }
         .frame(minWidth: 760, minHeight: 520)
-        .sheet(item: $settingsItem) { item in
-            WallpaperPropertiesView(item: item)
-                .environmentObject(state)
-                .padding()
-        }
         .onAppear {
             if state.library.items.isEmpty {
                 Task { await state.rescan() }
@@ -93,10 +110,10 @@ struct GalleryView: View {
             }
             .help("Rescan library")
             if let current = state.currentWallpaper {
-                Button(action: { settingsItem = current }) {
+                Button(action: { selectedItem = current }) {
                     Image(systemName: "slider.horizontal.3")
                 }
-                .help("Settings for “\(current.title)”")
+                .help("Show settings for “\(current.title)”")
             }
         }
         .padding()

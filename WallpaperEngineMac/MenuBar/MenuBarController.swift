@@ -101,7 +101,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         menu.addItem(volumeItem)
 
         let mouseItem = NSMenuItem(
-            title: "Mouse Input (Web)",
+            title: "Mouse Input",
             action: #selector(toggleMouseInput),
             keyEquivalent: ""
         )
@@ -115,12 +115,6 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             title: "Open Gallery…",
             action: #selector(openGallery),
             keyEquivalent: "g"
-        ).withTarget(self))
-
-        menu.addItem(NSMenuItem(
-            title: "Settings…",
-            action: #selector(openSettings),
-            keyEquivalent: ","
         ).withTarget(self))
 
         menu.addItem(.separator())

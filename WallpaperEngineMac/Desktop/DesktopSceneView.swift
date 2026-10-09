@@ -79,8 +79,20 @@ final class DesktopSceneView: NSView {
 
     // MARK: - Mouse forwarding
 
+    private var mouseEventCount = 0
+
     func handleMouseEvent(_ event: CGEvent, window: NSWindow) {
-        guard mouseEnabled, let bridge = bridge, bounds.width > 0, bounds.height > 0 else { return }
+        guard mouseEnabled, let bridge = bridge, bounds.width > 0, bounds.height > 0 else {
+            if mouseEnabled {
+                fputs("WEM: scene mouse event dropped (no bridge/zero size)\n", stderr)
+            }
+            return
+        }
+
+        mouseEventCount += 1
+        if mouseEventCount < 5 || mouseEventCount % 100 == 0 {
+            fputs("WEM: scene mouse event #\(mouseEventCount)\n", stderr)
+        }
 
         // NSEvent.mouseLocation is in Cocoa screen coordinates
         // (origin at bottom-left).

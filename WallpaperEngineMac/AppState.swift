@@ -72,12 +72,47 @@ final class AppState: ObservableObject {
             }
         }
         if settings.mouseInput {
+            fputs("WEM: mouseInput enabled at startup\n", stderr)
             if !mouseEventTap.start() {
                 mouseEventTap.ensureAccessibility(prompt: true)
+            } else {
+                fputs("WEM: mouse event tap active\n", stderr)
             }
         }
 
+        // The event tap cannot be created without the
+        // Accessibility grant, and every rebuild resets
+        // that grant (the ad-hoc signature changes).
+        // The usual flow is: toggle Mouse Input, grant
+        // it in System Settings, switch back to the
+        // app — retry the tap then, instead of
+        // waiting for the user to toggle again.
+        NotificationCenter.default.addObserver(
+            forName: NSApplication.didBecomeActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.retryMouseEventTap()
+        }
+
         evaluatePause()
+    }
+
+    /// Re-creates the mouse event tap if Mouse Input
+    /// is on but the tap is missing. That happens
+    /// after every rebuild, because the ad-hoc
+    /// signature changes and macOS resets the
+    /// Accessibility grant: the user typically
+    /// grants it in System Settings and switches
+    /// back to the app, so retry (and prompt
+    /// again if it is still missing) then.
+    func retryMouseEventTap() {
+        guard settings.mouseInput else { return }
+        if mouseEventTap.start() {
+            fputs("WEM: mouse event tap active\n", stderr)
+        } else {
+            mouseEventTap.ensureAccessibility(prompt: true)
+        }
     }
 
     var currentPauseMode: PauseMode {

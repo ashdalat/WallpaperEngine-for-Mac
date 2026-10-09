@@ -1,10 +1,11 @@
 import SwiftUI
 
-/// Settings & info sheet for one wallpaper.
+/// Settings & info panel for one wallpaper — the
+/// right-hand pane of the gallery.
 ///
 /// Wallpaper Engine wallpapers describe their own
 /// settings in project.json's "properties" table;
-/// this sheet renders a control for each entry
+/// this view renders a control for each entry
 /// (checkbox, slider, color, combo, text, button,
 /// texture) and shows the wallpaper's metadata.
 /// Changes are saved per wallpaper and applied to
@@ -13,7 +14,6 @@ struct WallpaperPropertiesView: View {
     let item: WallpaperItem
 
     @EnvironmentObject var state: AppState
-    @Environment(\.dismiss) private var dismiss
 
     private var properties: [(key: String, property: WEProperty)] {
         guard let properties = item.project?.properties else { return [] }
@@ -25,13 +25,20 @@ struct WallpaperPropertiesView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
+                HStack {
+                    Text("Settings & Info")
+                        .font(.headline)
+                    Spacer()
+                    Button("Set Wallpaper") {
+                        state.applyWallpaper(item)
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
                 infoSection
                 settingsSection
             }
             .padding()
         }
-        .frame(minWidth: 440, idealWidth: 480, minHeight: 300, maxHeight: 560)
-        .padding(.bottom, -12)
     }
 
     // MARK: - Info

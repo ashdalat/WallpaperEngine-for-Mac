@@ -3,6 +3,7 @@ import SwiftUI
 
 struct WallpaperCardView: View {
     let item: WallpaperItem
+    var isSelected: Bool = false
     @EnvironmentObject var state: AppState
     @State private var thumbnail: NSImage?
 
@@ -22,7 +23,7 @@ struct WallpaperCardView: View {
             .clipped()
             .overlay(
                 RoundedRectangle(cornerRadius: 6)
-                    .stroke(state.currentWallpaper?.id == item.id ? Color.accentColor : Color.clear, lineWidth: 3)
+                    .stroke(borderColor, lineWidth: 3)
             )
 
             Text(item.title)
@@ -57,6 +58,17 @@ struct WallpaperCardView: View {
         if let image = image {
             thumbnail = image
         }
+    }
+
+    /// The current wallpaper gets a full-strength
+    /// accent border, the selected one (whose
+    /// settings show in the side pane) a dimmer
+    /// one, everything else none.
+    private var borderColor: Color {
+        if state.currentWallpaper?.id == item.id {
+            return Color.accentColor
+        }
+        return isSelected ? Color.accentColor.opacity(0.45) : Color.clear
     }
 
     /// Some workshop previews are animated GIFs whose
