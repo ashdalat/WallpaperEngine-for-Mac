@@ -5,10 +5,11 @@
 # ad-hoc. After this the .app runs without Homebrew installed,
 # so the folder can be shared with other people.
 #
-# Usage: bash bundle_dylibs.sh path/to/WallpaperEngineMac.app
+# Usage: bash bundle_dylibs.sh path/to/WallpaperEngineMac.app \
+#                              [path/to/executable]
 set -e
 APP="$1"
-BIN="$APP/Contents/MacOS/WallpaperEngineMac"
+BIN="${2:-$APP/Contents/MacOS/WallpaperEngineMac}"
 FW="$APP/Contents/Frameworks"
 
 [ -f "$BIN" ] || { echo "bundle_dylibs: no binary at $BIN" >&2; exit 1; }
