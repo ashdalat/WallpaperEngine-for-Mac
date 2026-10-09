@@ -151,6 +151,18 @@ void wescene_bridge_mouse_input(void* bridge, double x, double y)
     if (state != nullptr) state->scene->mouseInput(x, y);
 }
 
+void wescene_bridge_mouse_button(void* bridge, int button, int down)
+{
+    auto* state = static_cast<BridgeState*>(bridge);
+    if (state != nullptr) state->scene->mouseButton(button, down != 0);
+}
+
+void wescene_bridge_mouse_enter(void* bridge, int in_window)
+{
+    auto* state = static_cast<BridgeState*>(bridge);
+    if (state != nullptr) state->scene->mouseEnter(in_window != 0);
+}
+
 void wescene_bridge_set_fps(void* bridge, unsigned fps)
 {
     auto* state = static_cast<BridgeState*>(bridge);

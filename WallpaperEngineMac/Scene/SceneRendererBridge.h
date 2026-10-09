@@ -40,6 +40,15 @@ NS_ASSUME_NONNULL_BEGIN
 /// `y` is measured from the TOP of the view (engine convention).
 - (void)mouseInputX:(double)x y:(double)y;
 
+/// Mouse button state. `button` is the CGMouseButton
+/// index (0 = left, 1 = right, 2 = middle).
+- (void)mouseButton:(int)button down:(BOOL)down;
+
+/// Reports the cursor entering/leaving the wallpaper
+/// window. Scenes gate pointer interactions on this
+/// flag, so the host must report changes.
+- (void)mouseEnter:(BOOL)inWindow;
+
 /// Engine property setters. See wallpaper::SceneWallpaper for the
 /// property names/semantics.
 - (void)setFps:(int32_t)fps;          // >= 5

@@ -40,6 +40,10 @@ final class DesktopSceneView: NSView {
         fputs("WEM: scene view load \(width)x\(height)\n", stderr)
         let bridge = SceneRendererBridge(metalLayer: metalLayer, width: width, height: height)
         self.bridge = bridge
+        // The engine starts with the cursor "outside"
+        // — re-sync so the next mouse event reports
+        // the real state.
+        cursorInWindow = false
 
         let displayMode = DisplayMode(rawValue: settings.displayMode) ?? .crop
         bridge.setFillMode(Int32(displayMode.fillModeRawValue))
@@ -80,6 +84,9 @@ final class DesktopSceneView: NSView {
     // MARK: - Mouse forwarding
 
     private var mouseEventCount = 0
+    // Last value reported to the engine via
+    // mouseEnter — only changes are sent.
+    private var cursorInWindow = false
 
     func handleMouseEvent(_ event: CGEvent, window: NSWindow) {
         guard mouseEnabled, let bridge = bridge, bounds.width > 0, bounds.height > 0 else {
@@ -94,6 +101,25 @@ final class DesktopSceneView: NSView {
             fputs("WEM: scene mouse event #\(mouseEventCount)\n", stderr)
         }
 
+        // Interactive scenes need the click itself,
+        // not just the position.
+        switch event.type {
+        case .leftMouseDown:
+            bridge.mouseButton(0, down: true)
+        case .leftMouseUp:
+            bridge.mouseButton(0, down: false)
+        case .rightMouseDown:
+            bridge.mouseButton(1, down: true)
+        case .rightMouseUp:
+            bridge.mouseButton(1, down: false)
+        case .otherMouseDown:
+            bridge.mouseButton(buttonNumber(of: event), down: true)
+        case .otherMouseUp:
+            bridge.mouseButton(buttonNumber(of: event), down: false)
+        default:
+            break
+        }
+
         // NSEvent.mouseLocation is in Cocoa screen coordinates
         // (origin at bottom-left).
         let mouse = NSEvent.mouseLocation
@@ -104,6 +130,22 @@ final class DesktopSceneView: NSView {
         // The engine measures y from the TOP of the view.
         let ny = (1.0 - viewPoint.y / bounds.height).clamped(to: 0...1)
         bridge.mouseInputX(Double(nx), y: Double(ny))
+
+        // The window ignoresMouseEvents (it sits below the
+        // desktop icons), so tracking areas never fire —
+        // derive "cursor in window" from the cursor's
+        // screen instead. Only report changes.
+        let inWindow = window.screen.map {
+            NSMouseInRect(mouse, $0.frame, false)
+        } ?? false
+        if inWindow != cursorInWindow {
+            cursorInWindow = inWindow
+            bridge.mouseEnter(inWindow)
+        }
+    }
+
+    private func buttonNumber(of event: CGEvent) -> Int32 {
+        Int32(clamping: event.getIntegerValueField(.mouseEventButtonNumber))
     }
 }
 

@@ -48,6 +48,17 @@ void wescene_bridge_pause(void* bridge);
 // (0..1, y measured from the top of the view).
 void wescene_bridge_mouse_input(void* bridge, double x, double y);
 
+// Mouse button state. `button` is the CGMouseButton
+// index (0 = left, 1 = right, 2 = middle), `down`
+// non-zero while the button is held.
+void wescene_bridge_mouse_button(void* bridge, int button, int down);
+
+// Whether the cursor is inside the wallpaper window.
+// Scenes gate pointer interactions on this flag —
+// the engine's default is "outside", so the host
+// must report enter/exit.
+void wescene_bridge_mouse_enter(void* bridge, int in_window);
+
 void wescene_bridge_set_fps(void* bridge, unsigned fps);
 // fill_mode: 0 = stretch, 1 = aspect fit, 2 = aspect crop.
 void wescene_bridge_set_fill_mode(void* bridge, int fill_mode);

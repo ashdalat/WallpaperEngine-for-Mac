@@ -85,6 +85,14 @@ static void enableMoltenVKLogging() {
     wescene_bridge_mouse_input(_bridge, x, y);
 }
 
+- (void)mouseButton:(int)button down:(BOOL)down {
+    wescene_bridge_mouse_button(_bridge, button, down ? 1 : 0);
+}
+
+- (void)mouseEnter:(BOOL)inWindow {
+    wescene_bridge_mouse_enter(_bridge, inWindow ? 1 : 0);
+}
+
 - (void)setFps:(int32_t)fps {
     wescene_bridge_set_fps(_bridge, static_cast<unsigned>(fps));
 }
