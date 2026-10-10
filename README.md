@@ -267,6 +267,9 @@ Sau đó:
 3. Menu Bar: Pause/Resume, Remove Wallpaper, Random, Display Mode (Aspect/Crop/Scale),
    Pause Mode, Volume, Mute, Mouse Input (Web).
 4. Context menu trên card: Preview (cửa sổ nổi), Open in Finder, Remove Wallpaper.
+5. **Settings** (Menu Bar → Settings…) có **Launch at Login** (mặc định bật) —
+   đăng ký app vào System Settings → General → Login Items qua
+   `SMAppService.mainApp`, để wallpaper tự chạy lại mỗi lần khởi động máy.
 
 ---
 

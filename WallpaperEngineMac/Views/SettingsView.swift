@@ -5,6 +5,13 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
+            Section("General") {
+                Toggle("Launch at Login", isOn: Binding(
+                    get: { state.settings.launchAtLogin },
+                    set: { state.setLaunchAtLogin($0) }
+                ))
+            }
+
             Section("Library") {
                 HStack {
                     TextField("Library path", text: $state.settings.steamPath)

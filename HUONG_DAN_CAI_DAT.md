@@ -49,7 +49,7 @@ Nhấn vào biểu tượng thanh menu:
 | **Volume** | Âm lượng wallpaper có tiếng |
 | **Mute Audio** | Tắt tiếng |
 | **Mouse Input (Web)** | Cho phép wallpaper web bắt chuột |
-| **Settings…** (`,`) | Cài đặt, gồm **đường dẫn thư mục Steam** |
+| **Settings…** (`,`) | Cài đặt: **Launch at Login** (khởi động cùng hệ thống), đường dẫn thư mục Steam, âm lượng, pause mode… |
 | **Quit Wallpaper Engine** (`q`) | Thoát |
 
 ### Nếu không thấy wallpaper trong Gallery

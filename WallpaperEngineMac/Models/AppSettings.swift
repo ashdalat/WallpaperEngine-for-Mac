@@ -141,4 +141,7 @@ final class AppSettings: ObservableObject {
     @AppStorage("pauseOnBattery") var pauseOnBattery: Bool = false
     @AppStorage("pauseBatteryPercent") var pauseBatteryPercent: Int = 20
     @AppStorage("currentWallpaperId") var currentWallpaperId: String = ""
+    /// Launch the app automatically at
+    /// login (SMAppService.mainApp).
+    @AppStorage("launchAtLogin") var launchAtLogin: Bool = true
 }

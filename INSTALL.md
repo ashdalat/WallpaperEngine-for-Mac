@@ -28,6 +28,7 @@ Two ways to get this:
 - **Click** a wallpaper to set it on all screens.
 - **Right-click** a wallpaper: *Preview*, **Settings & Info…**, *Open in Finder*, *Remove Wallpaper*.
 - The **slider button** in the gallery toolbar opens Settings & Info for the wallpaper currently on screen.
+- **Settings** (menu bar → Settings…) has a **Launch at Login** toggle (on by default) — it registers the app with System Settings → General → Login Items via SMAppService, so the wallpaper restarts with the system.
 - **Settings & Info** shows the wallpaper's metadata (title, type, ID, version, tags, description, folder) plus its own settings from its `project.json` — checkboxes, sliders, color pickers, combos, text fields. Changes are saved per wallpaper and applied immediately. It also has a **Display** section with a flip control (None/Horizontal/Vertical/Both) that applies live to any wallpaper.
 - If the gallery is empty, click **Choose Steam Library…** and select the folder that contains `steamapps/` (the one with `steamapps/workshop/content/431960`).
 

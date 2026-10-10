@@ -1,6 +1,7 @@
 import AppKit
 import AVFoundation
 import Combine
+import ServiceManagement
 import SwiftUI
 
 @MainActor
@@ -25,6 +26,34 @@ final class AppState: ObservableObject {
     private var previewControllers: [PreviewWindowController] = []
     private var cancellables: Set<AnyCancellable> = []
 
+    /// "Launch at Login" — registers (or
+    /// unregisters) the app with Login
+    /// Items via SMAppService.mainApp,
+    /// the same mechanism System Settings
+    /// → General → Login Items shows.
+    func setLaunchAtLogin(_ on: Bool) {
+        settings.launchAtLogin = on
+        applyLaunchAtLogin()
+    }
+
+    private func applyLaunchAtLogin() {
+        let service = SMAppService.mainApp
+        let isRegistered = service.status == .enabled
+        if settings.launchAtLogin, !isRegistered {
+            do {
+                try service.register()
+            } catch {
+                fputs("WEM: SMAppService register failed: \(error)\n", stderr)
+            }
+        } else if !settings.launchAtLogin, isRegistered {
+            do {
+                try service.unregister()
+            } catch {
+                fputs("WEM: SMAppService unregister failed: \(error)\n", stderr)
+            }
+        }
+    }
+
     func start() {
         // settings and library are nested ObservableObjects;
         // forward their changes so views observing AppState
@@ -36,6 +65,12 @@ final class AppState: ObservableObject {
         library.objectWillChange
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
+
+        // Launch at login: sync the
+        // SMAppService registration with
+        // the stored toggle — also what
+        // registers a fresh install.
+        applyLaunchAtLogin()
 
         library.setSteamRoots(steamRoots())
         Task { await rescan() }

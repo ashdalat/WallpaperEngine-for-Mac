@@ -30,6 +30,7 @@ no Windows, no Steam client required at runtime.
 | **Gallery** | SwiftUI grid with thumbnails (preview.jpg/gif), search, type filter, preview window, context menus (Preview / Settings & Info / Reveal in Finder / Remove) |
 | **Menu bar** | Pause/Resume, Random, Remove, Display Mode, Pause Mode, Volume, Mute, Mouse Input toggle, Settings (Steam path) |
 | **Persistence** | Remembers the last wallpaper, per-wallpaper settings, all display settings |
+| **Launch at login** | "Launch at Login" toggle in Settings (default on) — registers via SMAppService, shows in System Settings → General → Login Items |
 | **Self-contained .app** | Bundles MoltenVK, FFmpeg, lz4, fontconfig, freetype, etc. into `Contents/Frameworks/` — runs on a Mac **without Homebrew** |
 
 ## Build & install (from source)
