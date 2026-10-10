@@ -6,8 +6,8 @@
 
 **A native macOS application to run Steam Wallpaper Engine wallpapers directly on your desktop.**
 
-[![macOS](https://img.shields.io/badge/macOS-12.0%2B-black?logo=apple)](https://www.apple.com/macos/)
-[![Apple Silicon & Intel](https://img.shields.io/badge/Architecture-Apple%20Silicon%20%2F%20Intel-blue)]()
+[![macOS](https://img.shields.io/badge/macOS-15.0%2B%20(Sequoia)-black?logo=apple)](https://www.apple.com/macos/)
+[![Apple Silicon](https://img.shields.io/badge/Architecture-Apple%20Silicon%20(arm64)-blue)]()
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-green.svg)](LICENSE)
 [![Release](https://img.shields.io/badge/Release-v1.0.0-orange)](https://github.com/ashdalat/WallpaperEngine-for-Mac/releases)
 
@@ -31,6 +31,11 @@ No Windows virtualization, no Wine/Proton layers, and no Steam runtime client re
 - **Native performance:** Hardware-accelerated decoding via VideoToolbox and 3D Vulkan scene rendering translated directly to Metal via MoltenVK.
 - **Steam integration:** Reads wallpapers directly from your local Steam library (`steamapps/workshop/content/431960/`).
 - **Agent app (`LSUIElement`):** Sits discreetly in your menu bar without cluttering the Dock.
+
+### 📋 System Requirements
+- **Architecture:** Apple Silicon Mac (`arm64` — M1 / M2 / M3 / M4) *(Developed & tested on Apple Silicon M1)*.
+- **Operating System:** macOS 15.0 (Sequoia) or newer.
+- **Steam:** Steam with Wallpaper Engine (AppID `431960`) installed to download workshop wallpapers.
 
 ---
 
@@ -61,6 +66,7 @@ No Windows virtualization, no Wine/Proton layers, and no Steam runtime client re
    *(This is standard for ad-hoc signed open-source macOS software without an Apple Developer subscription).*
 4. **Permissions:**
    - For interactive web wallpapers with mouse tracking, grant **Accessibility** access when prompted in *System Settings → Privacy & Security → Accessibility*.
+
 
 ---
 
