@@ -1,340 +1,110 @@
-# Wallpaper Engine Mac — Ứng dụng hình nền động NATIVE cho macOS
+<div align="center">
 
-Ứng dụng macOS native (Swift / AppKit / SwiftUI) cho phép người dùng chọn và sử dụng trực tiếp
-các hình nền động từ **Steam Wallpaper Engine** (appId `431960`) trên macOS — hỗ trợ đa màn hình,
-tạm dừng thông minh, và tối ưu pin.
+<img src="WallpaperEngineMac.png" alt="Wallpaper Engine Mac Logo" width="128" height="128" style="border-radius: 28px;"/>
+
+# Wallpaper Engine for macOS
+
+**A native macOS application to run Steam Wallpaper Engine wallpapers directly on your desktop.**
+
+[![macOS](https://img.shields.io/badge/macOS-12.0%2B-black?logo=apple)](https://www.apple.com/macos/)
+[![Apple Silicon & Intel](https://img.shields.io/badge/Architecture-Apple%20Silicon%20%2F%20Intel-blue)]()
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-green.svg)](LICENSE)
+[![Release](https://img.shields.io/badge/Release-v1.0.0-orange)](https://github.com/ashdalat/WallpaperEngine-for-Mac/releases)
+
+[Download Prebuilt App](https://github.com/ashdalat/WallpaperEngine-for-Mac/releases/latest) • [Features](#-features) • [Installation](#-installation) • [Build from Source](#-build-from-source) • [Credits](#-credits--acknowledgements)
+
+</div>
 
 ---
 
-## 1. PHÂN TÍCH SOURCE CODE THAM KHẢO
+## 🌟 Overview
 
-### 1.1. Plasma6 Wallpaper Engine Plugin (`plasma6_wallpaper_engine_git_src`)
+**Wallpaper Engine for macOS** is a lightweight, high-performance native macOS agent app (Swift / AppKit / SwiftUI + Metal/MoltenVK C++ backend) that brings your **Steam Wallpaper Engine** (AppID `431960`) collection to macOS.
 
-**Cấu trúc thư mục Wallpaper Engine trên Steam:**
+No Windows virtualization, no Wine/Proton layers, and no Steam runtime client required at runtime.
 
-| Đường dẫn | Nội dung |
+- **Native performance:** Hardware-accelerated decoding via VideoToolbox and 3D Vulkan scene rendering translated directly to Metal via MoltenVK.
+- **Steam integration:** Reads wallpapers directly from your local Steam library (`steamapps/workshop/content/431960/`).
+- **Agent app (`LSUIElement`):** Sits discreetly in your menu bar without cluttering the Dock.
+
+---
+
+## 🚀 Features
+
+| Feature | Description |
 |---|---|
-| `<steam>/steamapps/workshop/content/431960/<workshopId>/` | Wallpaper từ Workshop, mỗi thư mục con = 1 wallpaper |
-| `<steam>/steamapps/common/wallpaper_engine/projects/defaultprojects/` | Wallpaper mặc định |
-| `<steam>/steamapps/common/wallpaper_engine/projects/myprojects/` | Wallpaper tự tạo |
-| `<steam>/steamapps/common/wallpaper_engine/assets/` | Assets cho wallpaper type `scene` |
-| `<steam>/steamapps/common/wallpaper_engine/config.json` | Cấu hình toàn cục (playlists, ...) |
-
-**File `project.json` (được parse trong `WallpaperListModel.qml` — hàm `loadItemFromJson`):**
-
-```json
-{
-    "title": "Frieren",                 // Tiêu đề hiển thị
-    "description": "...",               // Mô tả
-    "file": "ab66f357dd3a68566342c5570be2f859.mp4",  // File nội dung chính
-    "preview": "preview.gif",           // Thumbnail (jpg/gif/png)
-    "type": "video",                    // video | web | scene
-    "contentrating": "Everyone",        // Everyone | Questionable | Mature
-    "tags": ["Anime"],                  // Thẻ phân loại
-    "version": 0,
-    "general": {                        // General properties (schemecolor, fps...)
-        "properties": {
-            "schemecolor": { "order": 0, "text": "ui_browse_properties_scheme_color",
-                             "type": "color", "value": "0 0 0" }
-        }
-    },
-    "properties": {                     // User properties của web wallpaper
-        "myProp": { "order": 0, "text": "...", "type": "text", "value": "..." }
-    }
-}
-```
-
-**Cơ chế render theo loại (`main.qml` — hàm `loadBackend()`):**
-
-- **`video`** → `Mpv.qml` (mpv render qua OpenGL vào QSGTexture, hardware decode) hoặc
-  `QtMultimedia.qml`. Hỗ trợ: `displayMode` (Aspect/Crop/Scale), `speed`, `volume`, `mute`, loop.
-- **`web`** → `QtWebView.qml` (QtWebEngine). Cơ chế giao tiếp JS↔native qua **QWebChannel**:
-  - Object `wpeQml` (WebChannel.id) expose các signal: `sigGeneralProperties`, `sigUserProperties`, `sigAudio`.
-  - Inject script vào `MainWorld` để tạo `window.wpeQml`, `window.wallpaperRegisterAudioListener`.
-  - Web wallpaper gọi `wallpaperPropertyListener.applyGeneralProperties(props)` /
-    `applyUserProperties(props)` — đây là **giao thức chuẩn của Wallpaper Engine** mà app macOS tái tạo
-    trong `DesktopWebView` (inject bridge vào `WKWebView`).
-  - `settings.localContentCanAccessRemoteUrls = true` để load file local
-    (tương đương macOS: `loadFileURL(_:allowingReadAccessTo:)`).
-- **`scene`** → `Scene.qml` (SceneViewer — runtime C++ riêng, render scene 3D Unity-like).
-  **Không thể port sang macOS** (cần runtime riêng của WE).
-
-**Cơ chế tạm dừng (`WindowModel.qml` + `PowerSource.qml` + `main.qml`):**
-
-- `PauseMode`: `Never`, `Any`, `Max`, `Focus`, `FocusOrMax`, `FullScreen` — duyệt
-  `TaskManager.TasksModel` để phát hiện cửa sổ đang focus/maximized/fullscreen.
-- `PowerSource`: đọc `powermanagement` engine — pause khi chạy pin (`NoCharge`/`Discharging`)
-  hoặc pin dưới ngưỡng `PauseBatPercent`.
-- `TTYSwitchMonitor`: pause khi chuyển VT (tương đương macOS: pause khi sleep/lock).
-- `MouseGrabber`: hook chuột toàn cục, forward vào web wallpaper (tương đương macOS: CGEventTap).
-- Volume fade dần (300ms) khi play/pause để tránh tiếng "pop".
-
-### 1.2. Cơ chế hiển thị nền trên macOS
-
-Cơ chế hiển thị nền desktop trên macOS được tái tạo trong project này bằng AppKit
-(một cửa sổ ở desktop level, không phải Screen Saver bundle):
-
-```swift
-window.level = NSWindow.Level(Int(CGWindowLevelForKey(.desktopWindow)))  // level 0
-window.collectionBehavior = [.canJoinAllSpaces, .stationary]
-window.isOpaque = false
-window.backgroundColor = .clear
-window.ignoresMouseEvents = true   // để click xuyên xuống icon desktop
-```
-
-Cửa sổ ở `desktopWindow` level (level 0) nằm **phía trên hình nền hệ thống nhưng phía dưới
-icon desktop và mọi cửa sổ ứng dụng khác** — đúng hành vi của một wallpaper engine.
+| 🎬 **Video Wallpapers** | Hardware-accelerated H.264 & HEVC decode (VideoToolbox), volume & mute control, seamless looping. |
+| 🌐 **Web Wallpapers** | WKWebView engine with full Wallpaper Engine JavaScript bridge (`wallpaperPropertyListener`, custom user properties, mouse event forwarding). |
+| 🎮 **3D Scene Wallpapers** | Native C++ rendering engine (`open-wallpaper-engine`) translated from Vulkan to Metal via MoltenVK, parsing `scene.pkg` (MDL models, puppets, textures, animations). |
+| 🖥️ **Multi-Monitor Support** | Independent wallpaper management across multiple displays with distinct resolutions. |
+| ⏸️ **Smart Pause** | Automatically pause wallpapers when apps are fullscreen, maximized, focused, on battery power, or when the screen is locked/asleep. |
+| 🎛️ **Live Customization** | Dynamic per-wallpaper settings (sliders, color pickers, combos, checkboxes) plus live display controls (Flip Horizontal / Vertical). |
+| 🖼️ **Interactive Gallery** | Modern SwiftUI gallery with search, type filters, live preview window, and context actions. |
+| 🚀 **Launch at Login** | Seamless startup with macOS via `SMAppService` (Login Items). |
+| 📦 **Self-Contained** | Pre-bundled libraries (MoltenVK, FFmpeg, lz4, fontconfig, freetype) — runs out of the box without Homebrew! |
 
 ---
 
-## 2. KIẾN TRÚC DỰ ÁN (Architecture Plan)
+## 📥 Installation
 
-```
-WallpaperEngineMac/
-├── AppDelegate.swift                  # @main, LSUIElement agent app, khởi tạo MenuBar + AppState
-├── AppState.swift                     # Central coordinator (ObservableObject)
-├── Models/
-│   ├── WEProject.swift                # Codable parser cho project.json (title, file, type, preview, tags, general/properties)
-│   ├── WallpaperItem.swift            # Model wallpaper (id, title, type, preview, file)
-│   ├── WallpaperType.swift            # enum video/web/scene/unknown
-│   ├── SteamPathManager.swift         # Discover Steam library, parse libraryfolders.vdf, WE assets dir
-│   ├── WallpaperLibrary.swift         # Async scanner thư mục workshop → [WallpaperItem]
-│   └── AppSettings.swift              # @AppStorage settings + PauseMode/DisplayMode enums
-├── Desktop/
-│   ├── DesktopWallpaperWindow.swift   # NSWindow @ desktopWindow level (level 0)
-│   ├── DesktopWindowManager.swift     # 1 window + 1 renderer MỖI MÀN HÌNH (multi-monitor)
-│   ├── DesktopVideoView.swift         # AVPlayer + AVPlayerLayer (hardware decode M-series/Intel)
-│   ├── DesktopWebView.swift           # WKWebView trong suốt + WE JS bridge + mouse forwarding
-│   ├── DesktopSceneView.swift         # NSView + CAMetalLayer cho wallpaper 3D (scene)
-│   └── WallpaperRenderer.swift        # Factory: chọn backend theo wallpaper type
-├── Scene/
-│   ├── SceneRendererBridge.h/.mm      # Obj-C++ bridge bọc wallpaper::SceneWallpaper (engine C++)
-│   └── (link scene_backend/build/install/lib/libwescene-renderer.a — Vulkan→Metal qua MoltenVK)
-├── Services/
-│   ├── PausePolicy.swift              # PauseMode (Never/Any/Max/Focus/FocusOrMax/FullScreen)
-│   ├── PowerMonitor.swift             # IOKit.ps — battery state & percent
-│   └── MouseEventTap.swift            # CGEventTap listen-only → forward chuột vào WKWebView
-├── MenuBar/
-│   └── MenuBarController.swift        # NSStatusItem: pause, display mode, volume, screens
-└── Views/
-    ├── GalleryView.swift              # SwiftUI gallery grid + search + type filter
-    ├── WallpaperCardView.swift        # Card với thumbnail (preview.jpg/gif) async load
-    ├── GalleryWindowController.swift  # NSWindow hosting GalleryView
-    ├── SettingsView.swift             # SwiftUI settings (Steam path, playback, power)
-    ├── SettingsWindowController.swift
-    ├── WallpaperPropertiesView.swift  # Panel phải: metadata + user properties wallpaper + mục Hiển thị (flip)
-    └── PreviewWindowController.swift  # Cửa sổ preview nổi (reuse WallpaperRenderer)
-```
+### Method 1: Prebuilt App (Recommended)
 
-**Luồng dữ liệu:**
-
-```
-Steam Library ──scan──▶ WallpaperLibrary ──▶ GalleryView (SwiftUI grid)
-                                                │ tap
-                                                ▼
-                                        AppState.applyWallpaper(item)
-                                                │
-                        ┌───────────────────────┴───────────────────────┐
-                        ▼                                               ▼
-              DesktopWindowManager                          PausePolicy / PowerMonitor
-        (per-screen DesktopWallpaperWindow)                 (auto pause/resume)
-                        │
-                        ▼
-              WallpaperRenderer (factory theo type)
-        ┌───────────────┼───────────────┐
-        ▼               ▼               ▼
-   DesktopVideoView  DesktopWebView  DesktopSceneView
-   (AVPlayerLayer)   (WKWebView)     (CAMetalLayer + MoltenVK)
-```
-
-**Ánh xạ tính năng Plasma6 → macOS:**
-
-| Tính năng Plasma6 | macOS implementation | Trạng thái |
-|---|---|---|
-| `Mpv.qml` / `QtMultimedia.qml` | `DesktopVideoView` — AVPlayer/AVPlayerLayer (VideoToolbox hardware decode trên M1-M4 & Intel) | ✅ |
-| `QtWebView.qml` + QWebChannel | `DesktopWebView` — WKWebView + inject `wallpaperPropertyListener` bridge | ✅ |
-| `MouseGrabber` | `MouseEventTap` — CGEventTap listen-only, dispatch MouseEvent vào DOM | ✅ |
-| `WindowModel` (PauseMode) | `PausePolicy` — CGWindowListCopyWindowInfo + NSWorkspace.frontmostApplication | ✅ |
-| `PowerSource` | `PowerMonitor` — IOKit.ps (IOPSCopyPowerSourcesInfo) | ✅ |
-| `TTYSwitchMonitor` | NSApplication.didChangeScreenParametersNotification + lifecycle | ✅ |
-| `WallpaperListModel` | `WallpaperLibrary` (async Task.detached scan) | ✅ |
-| Plasma desktop widget | `DesktopWallpaperWindow` @ `CGWindowLevelForKey(.desktopWindow)` | ✅ |
-| Đa màn hình | `DesktopWindowManager` — 1 window/renderer mỗi `NSScreen`, key = CGDisplayID | ✅ |
-| `Scene.qml` | `DesktopSceneView` + `SceneRendererBridge` — engine wallpaper-scene-renderer (Vulkan) dịch qua MoltenVK (Metal). Cần build `scene_backend/` trước, xem [§3](#3-build--chạy-thử) | ✅ |
-| Waywallen `DisplayLayoutControls` (flip) | `WallpaperPropertiesView` — mục **Hiển thị** (xem [§2.1](#21-cài-đặt-hiển--lật)) | ✅ |
-
-### 2.1. Cài đặt hiển thị — lật
-
-Chọn wallpaper trong Gallery → panel bên phải (**Settings & Info**) → mục **Hiển thị**:
-
-- **Flip**: None / Horizontal / Vertical / Both (tương đương Waywallen `flip`).
-- **Áp dụng ngay** cho wallpaper đang chạy, không cần apply lại
-  (qua `UserDefaults.didChangeNotification` observer trong `AppState`
-  — `@AppStorage` bên trong `ObservableObject` không phát
-  `objectWillChange`, nên `onChange` của SwiftUI không chạy nếu
-  không có observer này).
-
-**Chi tiết kỹ thuật** (`WallpaperRenderer.applyDisplayTransform`):
-biến đổi đặt trên `sublayerTransform` của một `NSView` container
-(`transformHost`) bao rendered view — **không** biến đổi layer của
-chính rendered view, vì `DesktopSceneView` là layer-hosting
-(`layer = CAMetalLayer()`, engine render swapchain fixed-size qua
-MoltenVK) và backing layer của `DesktopVideoView` chính là
-`AVPlayerLayer` (do `makeBackingLayer()` tạo, owner quản lý geometry).
-
-> Rotation và Position (Waywallen rotation/location) vẫn có trong
-> model (`AppSettings`) và vẫn được `applyDisplayTransform` apply
-> (kể cả debug hook `WEM_DEBUG_TRANSFORM`), nhưng không hiện trong UI.
+1. Download the latest release: **[WallpaperEngineMac-v1.0.0-macOS.zip](https://github.com/ashdalat/WallpaperEngine-for-Mac/releases/latest)**.
+2. Unzip and drag `WallpaperEngineMac.app` into your `/Applications` folder.
+3. **First Launch (Gatekeeper):**
+   - Right-click (or Control-click) `WallpaperEngineMac.app` → select **Open** → click **Open** to confirm.
+   *(This is standard for ad-hoc signed open-source macOS software without an Apple Developer subscription).*
+4. **Permissions:**
+   - For interactive web wallpapers with mouse tracking, grant **Accessibility** access when prompted in *System Settings → Privacy & Security → Accessibility*.
 
 ---
 
-## 3. BUILD & CHẠY THỬ
+## 🛠️ Build from Source
 
-### Yêu cầu
-- macOS 12.0+ (Monterey trở lên), Xcode 15+
-- Swift 5.9+
-- [Homebrew](https://brew.sh) + `brew install xcodegen` (XcodeGen)
-- Scene wallpaper (3D): `scene_backend/BuildSceneBackend.sh` tự cài `cmake pkg-config lz4 molten-vk`
-
-### Cách 1: Build tự động (khuyến nghị)
+### Prerequisites
+Ensure you have Xcode Command Line Tools and Homebrew installed:
 
 ```bash
-cd /path/to/WallpaperEngineMac
-chmod +x build.sh
-./build.sh
-# (tự build scene engine trước nếu chưa có:
-#  clone wallpaper-scene-renderer → ApplyMoltenVKPatches.sh
-#  → BuildSceneBackend.sh → libwescene-renderer.a → xcodegen → xcodebuild)
-open build/Build/Products/Debug/WallpaperEngineMac.app
+xcode-select --install
+brew install molten-vk ffmpeg lz4 fontconfig freetype llvm glslang
 ```
 
-### Scene wallpaper (3D) build thủ công
-
+### Compile & Install
 ```bash
-cd scene_backend
-bash BuildSceneBackend.sh
-# → build/install/lib/libwescene-renderer.a
-# Engine: github.com/catsout/wallpaper-scene-renderer (C++20, Vulkan),
-# chạy trên macOS nhờ MoltenVK (Vulkan→Metal).
-# ApplyMoltenVKPatches.sh patch các chỗ Linux-only:
-# dlopen libvulkan.so → libMoltenVK.dylib, bỏ FD external memory
-# extensions (chỉ offscreen path dùng), bật portability extensions.
+git clone https://github.com/ashdalat/WallpaperEngine-for-Mac.git
+cd WallpaperEngine-for-Mac
+
+# 1. Build Scene Backend (MoltenVK Vulkan bridge)
+bash scene_backend_new/BuildSceneBackend.sh
+
+# 2. Build and bundle the macOS Application
+bash build_app_manual.sh
+
+# 3. Install to Applications
+codesign --force --sign - build_manual/WallpaperEngineMac.app
+cp -R build_manual/WallpaperEngineMac.app /Applications/
 ```
 
-> Scene wallpaper cần thư mục shared assets của Wallpaper Engine:
-> `steamapps/common/wallpaper_engine/assets` (copy từ máy Linux sang
-> `~/Library/Application Support/Steam/steamapps/common/wallpaper_engine/assets`,
-> xem `CHUYEN_MAC.md`). Wallpaper self-contained trong `scene.pkg` vẫn chạy mà không cần nó.
+---
 
-### Cách 2: Tạo project trong Xcode thủ công
+## 📖 Usage Guide
 
-1. Xcode → File → New → Project → macOS → App
-   - Product Name: `WallpaperEngineMac`, Interface: **SwiftUI**, Language: **Swift**
-2. Xoá file `ContentView.swift` và `WallpaperEngineMacApp.swift` mặc định.
-3. Kéo toàn bộ thư mục `WallpaperEngineMac/` (trừ `Info.plist` nếu đã có) vào project navigator
-   (chọn "Create groups", target `WallpaperEngineMac`).
-4. Target → Info tab: thêm `Application is agent (UIElement)` = `YES` (key `LSUIElement`).
-   Hoặc dùng file `Info.plist` có sẵn trong project này.
-5. Target → Build Settings → Deployment Target: macOS 12.0.
-6. Cmd+R để build & run.
-
-### Cấp quyền (cho Mouse Input)
-Nếu bật "Mouse Input (Web)", app cần quyền **Accessibility**:
-`System Settings → Privacy & Security → Accessibility → thêm WallpaperEngineMac`.
-(Chỉ cần cho tính năng tương tác chuột với web wallpaper; video wallpaper không cần.)
-
-### Chạy thử với wallpaper mẫu
-
-```bash
-# Tạo thư mục workshop giả lập từ mẫu Frieren có sẵn
-mkdir -p ~/Library/Application\ Support/Steam/steamapps/workshop/content/431960/1234567890
-cp -R "/đường/dẫn/đến/Frieren_Live_Wallpaper_1080p/"* \
-      ~/Library/Application\ Support/Steam/steamapps/workshop/content/431960/1234567890/
-```
-
-Hoặc dùng menu **Settings → Browse** để trỏ tới thư mục Steam library của bạn.
-
-**Chọn thư mục nào?** Trỏ tới **thư mục Steam library** — thư mục chứa:
-- `steamapps/workshop/content/431960/` — **Thư mục chứa các hình nền (Workshop Content)**: mỗi wallpaper là một thư mục con có `project.json`.
-- `steamapps/common/wallpaper_engine/assets/` — **Thư mục tài nguyên dùng chung (Shared Assets, ~85 MB)**: chứa model/texture mà nhiều scene wallpaper dùng chung.
-- Ví dụ: `~/Library/Application Support/Steam` (hoặc `~/SteamLibrary`, `~/Games/Steam`…).
-
-Không có Steam cũng không sao: chỉ cần **copy một thư mục chứa các wallpaper** (thư mục con có `project.json`) tới bất kỳ đâu (ví dụ Desktop) rồi trỏ **Settings → Browse** vào đó — app quét trực tiếp thư mục đó.
-
-Sau đó:
-1. Mở **Gallery** từ Menu Bar (icon 🖻).
-2. Click vào card wallpaper → wallpaper chạy nền desktop.
-3. Menu Bar: Pause/Resume, Remove Wallpaper, Random, Display Mode (Aspect/Crop/Scale),
-   Pause Mode, Volume, Mute, Mouse Input (Web).
-4. Context menu trên card: Preview (cửa sổ nổi), Open in Finder, Remove Wallpaper.
-5. **Settings** (Menu Bar → Settings…) có **Launch at Login** (mặc định bật) —
-   đăng ký app vào System Settings → General → Login Items qua
-   `SMAppService.mainApp`, để wallpaper tự chạy lại mỗi lần khởi động máy.
+- **Menu Bar Icon:** Click the menu bar icon to toggle playback, change pause modes, adjust audio volume, or open the Wallpaper Gallery.
+- **Choosing Steam Library:** If your gallery is empty on first launch, click **Settings...** and select your Steam directory containing `steamapps/workshop/content/431960/`.
+- **Wallpaper Settings:** Right-click any wallpaper card in the gallery and click **Settings & Info...** to tune color schemes, frame rates, and custom options.
 
 ---
 
-## 4. TROUBLESHOOTING
+## 💡 Credits & Acknowledgements
 
-| Vấn đề | Nguyên nhân / Khắc phục |
-|---|---|
-| Gallery rỗng | Steam path chưa đúng — dùng Settings → Browse chọn thư mục chứa `steamapps/`. Kiểm tra thư mục `steamapps/workshop/content/431960/<id>/project.json` tồn tại. |
-| Wallpaper không hiện trên desktop | Đảm bảo không có app wallpaper khác đang chạy. Thử Pause → Resume từ Menu Bar. |
-| Video không có tiếng | Menu Bar → bỏ tick "Mute Audio". Video cần codec được VideoToolbox hỗ trợ (H.264/HEVC mp4 luôn chạy; webm VP9 tuỳ phiên bản macOS). |
-| Video import vào hiển thị đen / không chạy | Video dùng codec AV1 — chỉ Mac M3 trở lên mới decode được. Khi có ffmpeg (Homebrew) app tự chuyển sang H.264 lúc import; nếu không có ffmpeg, app hiển thị thông báo thay vì nền đen. Chuyển thủ công: `ffmpeg -i video.mp4 -c:v h264_videotoolbox -pix_fmt yuv420p out.mp4`. |
-| Chuột không tương tác web wallpaper | Bật "Mouse Input (Web)" trong Settings, sau đó cấp quyền **Accessibility** cho app trong System Settings → Privacy & Security. App tự hỏi quyền khi thiếu và tự kích hoạt chuột trong vòng 5 giây sau khi cấp — không cần mở lại app. Kiểm tra log: `grep "mouse event tap" ~/Library/Logs/WallpaperEngineMac.log` (`active` = xong, `unavailable` = chưa cấp quyền). |
-| Web wallpaper nền đen | Một số web wallpaper tự set background — app đã inject CSS `html, body { background: transparent }`; nếu wallpaper dùng canvas opaque thì không trong suốt được. |
-| Build lỗi signing | Project cấu hình `CODE_SIGNING_ALLOWED=NO` để build thử nhanh. Nếu lỗi signing trong Xcode, vào Target → Signing & Capabilities → uncheck "Automatically manage signing". |
+This project was made possible by referencing and standing upon the shoulders of amazing open-source projects:
 
-### Log của app
-
-App ghi log debug ra `~/Library/Logs/WallpaperEngineMac.log` (tự xoá/truncat khi quá ~2 MB). Khi tương tác chuột không hoạt động, kiểm tra dòng `WEM: mouse event tap` trong file này: `active` = tap đã tạo (lỗi nằm ở wallpaper), `unavailable` = chưa có quyền Accessibility — vào System Settings → Privacy & Security → Accessibility, bật/tắt lại WallpaperEngineMac, app tự tạo lại tap trong vòng 5 giây.
+- **[Waywallen](https://github.com/waywallen/waywallen)**: Inspiration for multi-monitor management architecture, smart pause policies, and display transformations.
+- **[open-wallpaper-engine / linux-wallpaperengine](https://github.com/Almamu/linux-wallpaperengine)**: The core C++ Vulkan scene rendering backend and asset parser for `scene.pkg`.
+- **Steam Wallpaper Engine**: Created and owned by Kristjan Skutta. This project is an independent community client and is not affiliated with or endorsed by Valve or Kristjan Skutta.
 
 ---
 
-## 5. GIỚI HẠN & GHI CHÚ
+## 📜 License
 
-- **`scene` wallpapers**: không hỗ trợ (cần runtime 3D riêng của Wallpaper Engine, chỉ có trên Windows).
-- **`webm` (VP9/AV1)**: AVPlayer hỗ trợ tuỳ phiên bản macOS; mp4/H.264 luôn chạy được.
-- **Audio visualization** cho web wallpaper (`wallpaperRegisterAudioListener`): bridge đã đăng ký
-  nhưng chưa cung cấp dữ liệu audio (cần phân tích audio real-time — future work).
-- **Web wallpaper pause**: WKWebView không có API freeze public; khi pause, view được ẩn
-  (tiết kiệm GPU compositing), JS timers vẫn chạy nền.
-- **LSUIElement = YES**: app chạy dạng agent (không hiện Dock icon), chỉ có Menu Bar item.
-- **Code signing**: build không sandbox để CGEventTap hoạt động; để distribute, bật signing +
-  hardened runtime (sandbox sẽ chặn event tap).
-- **AVPlayer volume/mute**: yêu cầu macOS 10.15+ (deployment target 12.0 thoả mãn);
-  hardware decode qua VideoToolbox tự động trên Apple Silicon M1-M4 và Intel.
-- **Color preset (app-level)**: đã nghiên cứu online — Waywallen không có
-  tính năng này (kiểm tra toàn bộ QML/protocol/i18n trong repo), và không
-  tìm thấy tài liệu nào về nó ở Wallpaper Engine gốc trên Windows.
-  Wallpaper tự mang preset màu (user property `color`/`combo`) **đã chạy**
-  trong app. Nếu cần làm lại: macOS hỗ trợ Core Image filter trên layer
-  (`CALayer.filters`: `CIColorControls`, `CIHueAdjust`, `CITemperatureAndTint`,
-  `CIColorCube`, `CIPhotoEffect*`) — cần mô tả/screenshot UI Windows để
-  implement đúng hành vi.
-
-## 6. ROADMAP (future work)
-
-- [ ] Per-screen wallpaper selection (hiện tại: apply cùng wallpaper cho mọi màn hình)
-- [ ] Randomize wallpaper theo timer (như Plasma6 `randomizeTimer`)
-- [ ] Audio visualization bridge cho web wallpaper (AudioToolbox / AVAudioEngine tap)
-- [ ] Favorites & playlists (đọc `config.json` của WE)
-- [ ] Volume fade animation khi play/pause
-- [ ] Import file `.wpe` / thư mục offline không qua Steam
-
----
-
-## 7. CREDITS & ACKNOWLEDGEMENTS
-
-Dự án này được phát triển với sự cảm hứng và tham khảo sâu rộng từ các dự án mã nguồn mở tuyệt vời:
-
-- **[Waywallen](https://github.com/waywallen/waywallen)**: Kiến trúc quản lý đa màn hình, pause policy thông minh, và cơ chế lật hình nền (Display Flip).
-- **[open-wallpaper-engine](https://github.com/Almamu/linux-wallpaperengine)**: Bộ parser và backend kết xuất scene 3D Wallpaper Engine (`scene.pkg`, MDL/TEXB/puppets) qua Vulkan & MoltenVK trên macOS.
-- **Steam Wallpaper Engine**: Thuộc sở hữu của Kristjan Skutta. Dự án này hoàn toàn độc lập, không liên kết chính thức với Valve hay Kristjan Skutta.
-
----
-
-## 8. LICENSE
-
-Phát hành theo giấy phép **GNU General Public License v3.0 (GPLv3)**. Xem chi tiết tại [LICENSE](LICENSE).
-
+Distributed under the **GNU General Public License v3.0 (GPLv3)**. See [LICENSE](LICENSE) for more details.
