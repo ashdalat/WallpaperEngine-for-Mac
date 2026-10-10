@@ -26,7 +26,7 @@ no Windows, no Steam client required at runtime.
 | **Multi-monitor** | One wallpaper window per screen (keyed by CGDisplayID) |
 | **Smart pause** | Pause on fullscreen/maximized/focused window (configurable modes), pause on battery / low battery, pause on screen sleep/lock |
 | **Per-wallpaper settings** | Renders every `project.json` property: checkbox, slider, color picker, combo, text, button, texture browse, group headers — including conditional visibility (`shu.value==true` etc.), saved per wallpaper |
-| **Display settings** | Flip (H/V/both), rotation (Normal/90°/180°/270°), position X/Y with a 9-point align grid — Waywallen-style, applied live to the running wallpaper |
+| **Display settings** | Flip (H/V/both) — Waywallen-style, applied live to the running wallpaper |
 | **Gallery** | SwiftUI grid with thumbnails (preview.jpg/gif), search, type filter, preview window, context menus (Preview / Settings & Info / Reveal in Finder / Remove) |
 | **Menu bar** | Pause/Resume, Random, Remove, Display Mode, Pause Mode, Volume, Mute, Mouse Input toggle, Settings (Steam path) |
 | **Persistence** | Remembers the last wallpaper, per-wallpaper settings, all display settings |
@@ -78,9 +78,9 @@ remains `MenuBarIcon.png`.
   is available. VP9 webm: depends on macOS version.
 - Audio visualization for web wallpapers (`wallpaperRegisterAudioListener`):
   bridge registered, no data feed — not implemented.
-- Position (X/Y) only has room to move when the wallpaper is rotated
-  90°/270° (Waywallen "Location" semantics); flip and rotation apply to any
-  wallpaper.
+- Position (X/Y) and rotation are kept in the settings model and the
+  transform code (and the `WEM_DEBUG_TRANSFORM` debug hook) but are
+  hidden from the UI; only Flip is exposed.
 
 ## Docs
 

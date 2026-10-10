@@ -66,22 +66,17 @@ App sẽ **tự động nhớ** wallpaper cuối cùng bạn dùng và đặt l�
 
 ---
 
-## Cài đặt hiển thị wallpaper (xoay / lật / vị trí)
+## Cài đặt hiển thị wallpaper (lật)
 
 Khi chọn wallpaper trong Gallery, **panel bên phải** có mục
 **Hiển thị** — chỉnh được cho mọi loại wallpaper (video, scene, web):
 
 | Mục | Chức năng |
 |---|---|
-| **Rotation** | Xoay wallpaper: Normal / 90° / 180° / 270° |
-| **Flip** | Lật: None / Horizontal / Vertical / Both |
-| **Position X / Y** | Vị trí 0–100 (50 = giữa màn hình), kèm lưới 9 nút (↖ ↑ ↗ / ← • → / ↙ ↓ ↘) để căn nhanh |
+| **Flip** | Lật wallpaper: None / Horizontal / Vertical / Both |
 
-- Chỉnh là **áp dụng ngay** lên wallpaper đang chạy, không cần nhấn nút nào.
-- **Vị trí chỉ có tác dụng khi wallpaper đã xoay 90°/270°** (lúc đó
-  wallpaper thừa ra so với màn hình, có chỗ để trượt). Wallpaper cùng
-  tỉ lệ màn hình thì Position không đổi được gì.
-- Reset: đặt Rotation = Normal, Flip = None, Position X/Y = 50.
+- Chỉnh là **áp dụng ngay** lên wallpaper đang chạy, không cần nhấn nút gì.
+- Muốn reset: đặt Flip = None.
 
 ---
 
