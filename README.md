@@ -13,7 +13,12 @@
 
 [Download Prebuilt App](https://github.com/ashdalat/WallpaperEngine-for-Mac/releases/latest) • [Features](#-features) • [Installation](#-installation) • [Build from Source](#-build-from-source) • [Credits](#-credits--acknowledgements)
 
+<br/>
+
+<img src="docs/screenshot.png" alt="Wallpaper Engine Mac Screenshot" width="850" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);"/>
+
 </div>
+
 
 ---
 
