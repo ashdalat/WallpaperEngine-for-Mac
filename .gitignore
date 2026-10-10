@@ -1,6 +1,8 @@
 # Build outputs
 build_manual/
+build_unbundled/
 scene_backend/build/
+scene_backend_new/build/
 build/
 
 # XcodeGen generated
@@ -12,6 +14,5 @@ WallpaperEngineMac.xcodeproj/
 
 # Shareable release output
 Share/
-
-# Unbundled test build output
-build_unbundled/
+*.zip
+*.dmg

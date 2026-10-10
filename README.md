@@ -321,3 +321,20 @@ App ghi log debug ra `~/Library/Logs/WallpaperEngineMac.log` (tự xoá/truncat 
 - [ ] Favorites & playlists (đọc `config.json` của WE)
 - [ ] Volume fade animation khi play/pause
 - [ ] Import file `.wpe` / thư mục offline không qua Steam
+
+---
+
+## 7. CREDITS & ACKNOWLEDGEMENTS
+
+Dự án này được phát triển với sự cảm hứng và tham khảo sâu rộng từ các dự án mã nguồn mở tuyệt vời:
+
+- **[Waywallen](https://github.com/waywallen/waywallen)**: Kiến trúc quản lý đa màn hình, pause policy thông minh, và cơ chế lật hình nền (Display Flip).
+- **[open-wallpaper-engine](https://github.com/Almamu/linux-wallpaperengine)**: Bộ parser và backend kết xuất scene 3D Wallpaper Engine (`scene.pkg`, MDL/TEXB/puppets) qua Vulkan & MoltenVK trên macOS.
+- **Steam Wallpaper Engine**: Thuộc sở hữu của Kristjan Skutta. Dự án này hoàn toàn độc lập, không liên kết chính thức với Valve hay Kristjan Skutta.
+
+---
+
+## 8. LICENSE
+
+Phát hành theo giấy phép **GNU General Public License v3.0 (GPLv3)**. Xem chi tiết tại [LICENSE](LICENSE).
+
