@@ -1,5 +1,6 @@
 import AVFoundation
 import AppKit
+import ScreenCaptureKit
 
 /// Captures a full-resolution still from a video or web
 /// wallpaper's first paint and installs it as the real
@@ -55,6 +56,72 @@ enum StaticWallpaper {
             }
             completion(result == .succeeded ? image : nil)
         }
+    }
+
+    /// Captures the composited content of one of the
+    /// app's own windows. Used for scene wallpapers:
+    /// their CAMetalLayer content comes back black
+    /// through the legacy window-capture APIs, but
+    /// ScreenCaptureKit sees the composited output.
+    /// Capturing only own windows needs no Screen
+    /// Recording permission (TCC exempt).
+    static func captureWindow(_ window: NSWindow,
+                              completion: @escaping (CGImage?) -> Void) {
+        guard #available(macOS 14.0, *) else {
+            completion(nil)
+            return
+        }
+        let windowID = CGWindowID(window.windowNumber)
+        Task {
+            do {
+                // Without screen-recording permission this
+                // enumeration only ever sees this app's
+                // windows — exactly what is needed here.
+                let content = try await SCShareableContent
+                    .excludingDesktopWindows(false, onScreenWindowsOnly: true)
+                guard let scWindow = content.windows
+                    .first(where: { $0.windowID == windowID }) else {
+                    completion(nil)
+                    return
+                }
+                let filter = SCContentFilter(desktopIndependentWindow: scWindow)
+                let config = SCStreamConfiguration()
+                config.width = Int(window.frame.width * window.backingScaleFactor)
+                config.height = Int(window.frame.height * window.backingScaleFactor)
+                config.scalesToFit = false
+                config.ignoreShadowsSingleWindow = true
+                let image = try await SCScreenshotManager
+                    .captureImage(contentFilter: filter, configuration: config)
+                completion(image)
+            } catch {
+                fputs("WEM: scene window capture failed: \(error.localizedDescription)\n", stderr)
+                completion(nil)
+            }
+        }
+    }
+
+    /// True when every sampled pixel is identical —
+    /// a Metal layer still blank (uniform clear color)
+    /// before the scene's first real frame.
+    static func isUniform(_ image: CGImage) -> Bool {
+        let width = 16, height = 16
+        guard let context = CGContext(
+            data: nil, width: width, height: height,
+            bitsPerComponent: 8, bytesPerRow: width * 4,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        else { return false }
+        context.interpolationQuality = .low
+        context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+        guard let data = context.data else { return false }
+        let pixels = data.bindMemory(to: UInt8.self, capacity: width * height * 4)
+        let first = (pixels[0], pixels[1], pixels[2])
+        for i in stride(from: 4, to: width * height * 4, by: 4) {
+            if (pixels[i], pixels[i + 1], pixels[i + 2]) != first {
+                return false
+            }
+        }
+        return true
     }
 
     static func install(_ image: CGImage,

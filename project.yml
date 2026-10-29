@@ -50,6 +50,7 @@ targets:
           - "-framework AudioToolbox"
           - "-framework AVFoundation"
           - "-framework CoreMedia"
+          - "-framework ScreenCaptureKit"
           - "-framework IOKit"
         # libMoltenVK.dylib lives in the Homebrew lib dir,
         # which is not in dyld's default search path.

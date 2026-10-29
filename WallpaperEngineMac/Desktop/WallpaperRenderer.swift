@@ -91,6 +91,9 @@ final class WallpaperRenderer: NSObject {
             }
             sceneView = sv
             renderedView = sv
+            StaticWallpaper.captureOnce(for: item) { [weak self] in
+                self?.pollSceneSnapshot(for: item, window: window, settings: settings)
+            }
         case .unknown:
             renderedView = makePlaceholderView(
                 message: "This wallpaper type is not supported on macOS yet."
@@ -270,6 +273,42 @@ final class WallpaperRenderer: NSObject {
               let screen = window.screen else { return }
         let displayMode = DisplayMode(rawValue: settings.displayMode) ?? .crop
         StaticWallpaper.install(image, for: item, screen: screen, displayMode: displayMode)
+    }
+
+    /// Scene wallpapers have no first-frame signal
+    /// from the engine, so poll: capture the window
+    /// every second until the Metal layer shows real
+    /// content (a non-uniform frame) — the layer is
+    /// a uniform clear color while the scene loads.
+    /// Gives up after `maxAttempts` (scene failed to
+    /// load, or a genuinely single-color scene).
+    private func pollSceneSnapshot(
+        for item: WallpaperItem,
+        window: NSWindow,
+        settings: AppSettings,
+        attempt: Int = 0
+    ) {
+        let maxAttempts = 20
+        guard attempt < maxAttempts, currentItem?.id == item.id else {
+            fputs("WEM: scene snapshot gave up after \(attempt) attempts\n", stderr)
+            return
+        }
+        StaticWallpaper.captureWindow(window) { [weak self] image in
+            DispatchQueue.main.async { [weak self] in
+                guard let self, let image,
+                      self.currentItem?.id == item.id else { return }
+                if StaticWallpaper.isUniform(image) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                        self?.pollSceneSnapshot(
+                            for: item, window: window, settings: settings,
+                            attempt: attempt + 1)
+                    }
+                } else {
+                    self.installStaticWallpaper(
+                        image, for: item, window: window, settings: settings)
+                }
+            }
+        }
     }
 
     // MARK: - Scene wallpaper support

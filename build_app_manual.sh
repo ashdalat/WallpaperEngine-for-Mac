@@ -63,6 +63,7 @@ swiftc \
     -framework QuartzCore -framework Metal -framework IOSurface -framework CoreVideo \
     -framework CoreGraphics -framework CoreAudio -framework AudioToolbox \
     -framework AVFoundation -framework CoreMedia -framework WebKit -framework IOKit \
+    -framework ScreenCaptureKit \
     -framework OpenGL
 
 echo ">> Packaging WallpaperEngineMac.app..."
