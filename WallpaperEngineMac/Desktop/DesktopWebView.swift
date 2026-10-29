@@ -7,6 +7,11 @@ final class DesktopWebView: NSView, WKNavigationDelegate {
     private var item: WallpaperItem?
     private var mouseEnabled = false
 
+    /// Fired once after the page finishes loading and
+    /// has had a beat to draw its first frame — the
+    /// static-wallpaper snapshot hooks in here.
+    var onFirstRender: (() -> Void)?
+
     override init(frame: NSRect) {
         super.init(frame: frame)
         wantsLayer = true
@@ -51,6 +56,25 @@ final class DesktopWebView: NSView, WKNavigationDelegate {
         applyGeneralProperties()
         applyUserProperties()
         makeBackgroundTransparent()
+        // Snapshoting immediately after didFinish can
+        // catch the page before its first canvas/JS
+        // draw, so give it a moment.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+            self?.onFirstRender?()
+            self?.onFirstRender = nil
+        }
+    }
+
+    /// Full-resolution capture of the page content
+    /// for the static desktop wallpaper.
+    func takeSnapshot(completion: @escaping (CGImage?) -> Void) {
+        guard let webView else {
+            completion(nil)
+            return
+        }
+        webView.takeSnapshot(with: nil) { image, _ in
+            completion(image?.cgImage(forProposedRect: nil, context: nil, hints: nil))
+        }
     }
 
     // MARK: - Wallpaper Engine JS bridge

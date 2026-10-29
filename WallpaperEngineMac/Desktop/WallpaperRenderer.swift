@@ -44,12 +44,30 @@ final class WallpaperRenderer: NSObject {
             vv.load(url: url, displayMode: displayMode, volume: settings.volume, muted: settings.muteAudio)
             videoView = vv
             renderedView = vv
+            StaticWallpaper.captureOnce(for: item) {
+                StaticWallpaper.captureVideoFrame(url: url) { [weak self] image in
+                    DispatchQueue.main.async { [weak self] in
+                        self?.installStaticWallpaper(
+                            image, for: item, window: window, settings: settings)
+                    }
+                }
+            }
         case .web:
             let wv = DesktopWebView(frame: frame)
             wv.autoresizingMask = [.width, .height]
             wv.load(item: item, mouseEnabled: settings.mouseInput)
             webView = wv
             renderedView = wv
+            wv.onFirstRender = { [weak self] in
+                StaticWallpaper.captureOnce(for: item) {
+                    wv.takeSnapshot { [weak self] image in
+                        DispatchQueue.main.async { [weak self] in
+                            self?.installStaticWallpaper(
+                                image, for: item, window: window, settings: settings)
+                        }
+                    }
+                }
+            }
         case .scene:
             guard item.contentURL != nil else {
                 renderedView = makePlaceholderView(message: "Scene file not found.")
@@ -231,6 +249,27 @@ final class WallpaperRenderer: NSObject {
         case .video, .unknown:
             break
         }
+    }
+
+    // MARK: - Static wallpaper snapshot
+
+    /// Installs a captured still as the real macOS
+    /// desktop wallpaper. Skipped if the renderer has
+    /// moved on to another wallpaper before the
+    /// capture finished — a slow decode must not
+    /// overwrite the still of the wallpaper that
+    /// replaced this one.
+    private func installStaticWallpaper(
+        _ image: CGImage?,
+        for item: WallpaperItem,
+        window: NSWindow,
+        settings: AppSettings
+    ) {
+        guard let image,
+              currentItem?.id == item.id,
+              let screen = window.screen else { return }
+        let displayMode = DisplayMode(rawValue: settings.displayMode) ?? .crop
+        StaticWallpaper.install(image, for: item, screen: screen, displayMode: displayMode)
     }
 
     // MARK: - Scene wallpaper support
