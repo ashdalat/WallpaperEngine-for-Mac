@@ -57,6 +57,42 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             keyEquivalent: "r"
         ).withTarget(self))
 
+        // Auto-rotate (the playlist in Settings),
+        // mirrored here so the interval and a
+        // manual "Switch Now" live in the menu too.
+        let rotateItem = NSMenuItem(
+            title: "Auto-Rotate",
+            action: #selector(toggleAutoRotate),
+            keyEquivalent: ""
+        )
+        rotateItem.state = appState.settings.autoRotateEnabled ? .on : .off
+        rotateItem.target = self
+        menu.addItem(rotateItem)
+
+        if appState.settings.autoRotateEnabled {
+            let intervalItem = NSMenuItem(
+                title: "Auto-Rotate Interval", action: nil, keyEquivalent: "")
+            let intervalSubmenu = NSMenu()
+            for minutes in [5, 10, 15, 30, 60, 120] {
+                let m = NSMenuItem(
+                    title: "\(minutes) min",
+                    action: #selector(setAutoRotateMinutes(_:)),
+                    keyEquivalent: "")
+                m.tag = minutes
+                m.state = (minutes == appState.settings.autoRotateMinutes) ? .on : .off
+                m.target = self
+                intervalSubmenu.addItem(m)
+            }
+            intervalItem.submenu = intervalSubmenu
+            menu.addItem(intervalItem)
+
+            menu.addItem(NSMenuItem(
+                title: "Switch Now",
+                action: #selector(rotateNow),
+                keyEquivalent: ""
+            ).withTarget(self))
+        }
+
         menu.addItem(.separator())
 
         let displayModeItem = NSMenuItem(title: "Display Mode", action: nil, keyEquivalent: "")
@@ -148,6 +184,20 @@ final class MenuBarController: NSObject, NSMenuDelegate {
 
     @objc private func randomWallpaper() {
         appState.randomWallpaper()
+    }
+
+    @objc private func toggleAutoRotate() {
+        appState.settings.autoRotateEnabled.toggle()
+        appState.refreshRotateTimer()
+    }
+
+    @objc private func setAutoRotateMinutes(_ sender: NSMenuItem) {
+        appState.settings.autoRotateMinutes = sender.tag
+        appState.refreshRotateTimer()
+    }
+
+    @objc private func rotateNow() {
+        appState.rotateToNextWallpaper()
     }
 
     @objc private func removeWallpaper() {
