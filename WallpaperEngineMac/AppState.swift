@@ -20,6 +20,7 @@ final class AppState: ObservableObject {
     private let pausePolicy = PausePolicy()
     private let powerMonitor = PowerMonitor()
     private let mouseEventTap = MouseEventTap()
+    private let libraryWatcher = LibraryWatcher()
 
     private var galleryWindowController: GalleryWindowController?
     private var settingsWindowController: SettingsWindowController?
@@ -74,6 +75,20 @@ final class AppState: ObservableObject {
 
         library.setSteamRoots(steamRoots())
         Task { await rescan() }
+
+        // Auto-rescan when the library changes on
+        // disk — a Workshop item Steam finishes
+        // downloading appears without a manual
+        // refresh (ported from Waywallen PR #325).
+        // Skipped while a scan runs, and the
+        // current wallpaper is not re-applied, so
+        // a background rescan never restarts it.
+        libraryWatcher.onChange = { [weak self] in
+            guard let self, !self.isScanning else { return }
+            fputs("WEM: library changed on disk, rescanning\n", stderr)
+            Task { await self.rescan(restoreOnFinish: false) }
+        }
+        libraryWatcher.watch(libraryWatchDirectories())
 
         // Debug switch hook: WEM_DEBUG_SWITCH="idA:idB:...:seconds"
         // applies the wallpapers in order, each after
@@ -289,14 +304,33 @@ final class AppState: ObservableObject {
         }
     }
 
-    func rescan() async {
+    /// Directories whose direct children are wallpaper
+    /// folders — the same set the scan walks, minus
+    /// plain Steam roots (watching those would fire on
+    /// every game update).
+    private func libraryWatchDirectories() -> [URL] {
+        let roots = steamRoots()
+        return SteamPathManager.workshopContentDirectories(steamRoots: roots)
+            + SteamPathManager.myProjectsDirectories(steamRoots: roots)
+            + SteamPathManager.defaultProjectsDirectories(steamRoots: roots)
+            + [localWallpapersDirectory()]
+    }
+
+    func rescan(restoreOnFinish: Bool = true) async {
         isScanning = true
         library.setSteamRoots(steamRoots())
         library.setExtraDirectories([localWallpapersDirectory()])
         await library.scan()
         fputs("WEM: scan done, items=\(library.items.count)\n", stderr)
         isScanning = false
-        restoreLastWallpaper()
+        if restoreOnFinish {
+            restoreLastWallpaper()
+        }
+        // The directory list may have moved (Steam
+        // relocates content dirs, the user picked a
+        // new Steam path) — re-establish the watch
+        // set from the same data the scan used.
+        libraryWatcher.watch(libraryWatchDirectories())
     }
 
     func restoreLastWallpaper() {
