@@ -144,4 +144,14 @@ final class AppSettings: ObservableObject {
     /// Launch the app automatically at
     /// login (SMAppService.mainApp).
     @AppStorage("launchAtLogin") var launchAtLogin: Bool = true
+    /// Auto-rotate playlist — port of Waywallen's
+    /// smart playlists (v0.5.0): periodically switch
+    /// to the next wallpaper matching the active
+    /// gallery filter (type + search).
+    @AppStorage("autoRotateEnabled") var autoRotateEnabled: Bool = false
+    /// Minutes between switches.
+    @AppStorage("autoRotateMinutes") var autoRotateMinutes: Int = 30
+    /// Random order (never the same wallpaper twice
+    /// in a row) vs sequential through the filtered list.
+    @AppStorage("autoRotateRandom") var autoRotateRandom: Bool = true
 }

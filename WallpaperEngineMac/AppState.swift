@@ -21,6 +21,7 @@ final class AppState: ObservableObject {
     private let powerMonitor = PowerMonitor()
     private let mouseEventTap = MouseEventTap()
     private let libraryWatcher = LibraryWatcher()
+    private var rotateTimer: Timer?
 
     private var galleryWindowController: GalleryWindowController?
     private var settingsWindowController: SettingsWindowController?
@@ -89,6 +90,8 @@ final class AppState: ObservableObject {
             Task { await self.rescan(restoreOnFinish: false) }
         }
         libraryWatcher.watch(libraryWatchDirectories())
+
+        refreshRotateTimer()
 
         // Debug switch hook: WEM_DEBUG_SWITCH="idA:idB:...:seconds"
         // applies the wallpapers in order, each after
@@ -488,6 +491,51 @@ final class AppState: ObservableObject {
         let candidates = library.filteredItems
         guard !candidates.isEmpty else { return }
         applyWallpaper(candidates.randomElement()!)
+    }
+
+    // MARK: - Auto-rotate playlist
+    //
+    // Port of Waywallen's smart playlists (v0.5.0),
+    // reduced to one implicit playlist: the wallpapers
+    // matching the current gallery filter (enabled
+    // types + search), advanced on a timer.
+
+    /// Rebuilds the auto-rotate timer from the
+    /// current settings; called on start and from
+    /// the settings UI on every related change.
+    func refreshRotateTimer() {
+        rotateTimer?.invalidate()
+        rotateTimer = nil
+        guard settings.autoRotateEnabled else { return }
+        let minutes = max(1, settings.autoRotateMinutes)
+        rotateTimer = Timer.scheduledTimer(
+            withTimeInterval: Double(minutes) * 60, repeats: true
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.rotateToNextWallpaper()
+            }
+        }
+    }
+
+    /// One playlist tick: advance to the next
+    /// wallpaper in the current filter. A paused
+    /// wallpaper does not advance — the pause
+    /// holds what is on screen.
+    func rotateToNextWallpaper() {
+        guard !isPaused else { return }
+        let candidates = library.filteredItems
+        guard candidates.count > 1 else { return }
+        let next: WallpaperItem
+        if settings.autoRotateRandom {
+            let others = candidates.filter { $0.id != settings.currentWallpaperId }
+            next = others.randomElement() ?? candidates.randomElement()!
+        } else if let index = candidates.firstIndex(
+            where: { $0.id == settings.currentWallpaperId }) {
+            next = candidates[(index + 1) % candidates.count]
+        } else {
+            next = candidates[0]
+        }
+        applyWallpaper(next)
     }
 
     func preview(_ item: WallpaperItem) {

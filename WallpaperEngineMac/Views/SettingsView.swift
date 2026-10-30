@@ -74,6 +74,32 @@ struct SettingsView: View {
                 )
             }
 
+            Section {
+                Toggle("Rotate wallpapers automatically", isOn: $state.settings.autoRotateEnabled)
+                    .onChange(of: state.settings.autoRotateEnabled) { state.refreshRotateTimer() }
+
+                if state.settings.autoRotateEnabled {
+                    Stepper(
+                        "Every \(state.settings.autoRotateMinutes) min",
+                        value: $state.settings.autoRotateMinutes,
+                        in: 1...720
+                    )
+                    .onChange(of: state.settings.autoRotateMinutes) { state.refreshRotateTimer() }
+
+                    Picker("Order", selection: $state.settings.autoRotateRandom) {
+                        Text("Random").tag(true)
+                        Text("Sequential").tag(false)
+                    }
+                    .pickerStyle(.segmented)
+
+                    Text("Rotates through the wallpapers matching the current gallery filter (enabled types and search). Paused wallpapers do not advance.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            } header: {
+                Text("Auto-Rotate")
+            }
+
             Section("About") {
                 HStack {
                     Text("Made using")
