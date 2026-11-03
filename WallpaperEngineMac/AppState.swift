@@ -121,6 +121,27 @@ final class AppState: ObservableObject {
            !path.isEmpty {
             importAndApply([URL(fileURLWithPath: path)])
         }
+        // Debug click hook: WEM_DEBUG_SYNTHCLICK=seconds —
+        // synthesizes a left click (down + up) through the
+        // same forwarding path the event tap uses, for
+        // testing click handling without a real mouse.
+        if let spec = Double(
+            ProcessInfo.processInfo.environment["WEM_DEBUG_SYNTHCLICK"] ?? ""),
+           spec > 0 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + spec) { [weak self] in
+                guard let self, let screen = NSScreen.main else { return }
+                let center = CGPoint(x: screen.frame.midX, y: screen.frame.midY)
+                let primary = NSScreen.screens.first!
+                let cg = CGPoint(x: center.x, y: primary.frame.height - center.y)
+                for type in [CGEventType.leftMouseDown, .leftMouseUp] {
+                    guard let event = CGEvent(
+                        mouseEventSource: nil, mouseType: type,
+                        mouseCursorPosition: cg, mouseButton: .left) else { continue }
+                    fputs("WEM: synth click type=\(type.rawValue)\n", stderr)
+                    self.windowManager.handleMouseEvent(event)
+                }
+            }
+        }
         if ProcessInfo.processInfo.environment["WEM_DEBUG_SETTINGS"] != nil {
             openSettings()
         }
