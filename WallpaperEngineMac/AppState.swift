@@ -275,9 +275,11 @@ final class AppState: ObservableObject {
                 tapIsActive = true
             }
             tapFailureLogged = false
+            stopMouseFallback()
             return
         }
         tapIsActive = false
+        startMouseFallback()
         // Log once and show the system prompt once
         // per launch — the 5s timer keeps retrying,
         // so once the permission is granted the tap
@@ -290,6 +292,51 @@ final class AppState: ObservableObject {
             accessibilityPromptShown = true
             mouseEventTap.ensureAccessibility(prompt: true)
         }
+    }
+
+    // MARK: - Mouse hover fallback
+    //
+    // Without the Accessibility grant the event tap
+    // cannot exist, but `NSEvent.mouseLocation` is a
+    // plain query that needs no permission — poll it
+    // and forward synthetic motion events, so hover
+    // interactions keep working (clicks still need
+    // the tap). Same effect as Waywallen's pointer
+    // forwarding, minus button events.
+
+    private var mouseFallbackTimer: Timer?
+
+    private func startMouseFallback() {
+        guard mouseFallbackTimer == nil else { return }
+        fputs("WEM: mouse hover fallback active (no Accessibility — hover only)\n", stderr)
+        mouseFallbackTimer = Timer.scheduledTimer(
+            withTimeInterval: 1.0 / 30, repeats: true
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.pollMouseLocation()
+            }
+        }
+    }
+
+    private func stopMouseFallback() {
+        mouseFallbackTimer?.invalidate()
+        mouseFallbackTimer = nil
+    }
+
+    private func pollMouseLocation() {
+        // NSEvent.mouseLocation: Cocoa global space,
+        // origin bottom-left of the primary screen.
+        // CGEvent wants the top-left origin.
+        let location = NSEvent.mouseLocation
+        guard let primary = NSScreen.screens.first else { return }
+        let cgPoint = CGPoint(x: location.x,
+                              y: primary.frame.height - location.y)
+        guard let event = CGEvent(
+            mouseEventSource: nil,
+            mouseType: .mouseMoved,
+            mouseCursorPosition: cgPoint,
+            mouseButton: .left) else { return }
+        windowManager.handleMouseEvent(event)
     }
 
     var currentPauseMode: PauseMode {
@@ -488,6 +535,7 @@ final class AppState: ObservableObject {
             retryMouseEventTap(prompt: true)
         } else {
             mouseEventTap.stop()
+            stopMouseFallback()
         }
         applySettingsChanges()
     }

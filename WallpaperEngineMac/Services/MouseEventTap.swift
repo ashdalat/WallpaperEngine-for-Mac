@@ -42,14 +42,25 @@ final class MouseEventTap {
             stop()
             return false
         }
-        guard eventTap == nil else {
-            // Belt and braces: make sure the tap
-            // is enabled. The window server can
-            // disable it (see the callback) and a
-            // disabled tap delivers nothing, so the
-            // retry timer re-enables it every pass.
-            CGEvent.tapEnable(tap: eventTap!, enable: true)
-            return true
+        if let tap = eventTap {
+            if createdWhileTrusted {
+                // Belt and braces: make sure the tap
+                // is enabled. The window server can
+                // disable it (see the callback) and a
+                // disabled tap delivers nothing, so the
+                // retry timer re-enables it every pass.
+                CGEvent.tapEnable(tap: tap, enable: true)
+                return true
+            }
+            // A tap created BEFORE the Accessibility grant
+            // exists but the window server never delivers a
+            // single event to it, and re-enabling does not
+            // fix that — tear it down and create a fresh
+            // one now that the process is trusted. This is
+            // exactly what happens after a reinstall: the
+            // 5s retry timer re-enabled the dead tap and
+            // logged "active" while zero events arrived.
+            stop()
         }
 
         let callback: CGEventTapCallBack = { _, type, event, refcon in
@@ -105,6 +116,7 @@ final class MouseEventTap {
             CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
         }
         CGEvent.tapEnable(tap: tap, enable: true)
+        createdWhileTrusted = true
         return true
     }
 
@@ -121,7 +133,10 @@ final class MouseEventTap {
         fputs("WEM: mouse event tap unavailable — grant Accessibility permission in System Settings > Privacy & Security > Accessibility\n", stderr)
     }
 
+    private var createdWhileTrusted = false
+
     func stop() {
+        createdWhileTrusted = false
         if let tap = eventTap {
             CGEvent.tapEnable(tap: tap, enable: false)
         }
