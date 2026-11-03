@@ -20,7 +20,8 @@ final class WallpaperRenderer: NSObject {
     private var transformHost: NSView?
 
     func load(item: WallpaperItem, in window: NSWindow, settings: AppSettings,
-              carryingVideoView: DesktopVideoView? = nil) {
+              carryingVideoView: DesktopVideoView? = nil,
+              carryingWebView: DesktopWebView? = nil) {
         unload()
         currentItem = item
 
@@ -65,7 +66,7 @@ final class WallpaperRenderer: NSObject {
                 }
             }
         case .web:
-            let wv = DesktopWebView(frame: frame)
+            let wv = carryingWebView ?? DesktopWebView(frame: frame)
             wv.autoresizingMask = [.width, .height]
             wv.load(item: item, mouseEnabled: settings.mouseInput)
             webView = wv
@@ -278,6 +279,17 @@ final class WallpaperRenderer: NSObject {
     func takeVideoView() -> DesktopVideoView? {
         let view = videoView
         videoView = nil
+        return view
+    }
+
+    /// Hands the running web container to the next
+    /// renderer (web→web switch on the same screen);
+    /// DesktopWebView swaps its inner page with a
+    /// crossfade, keeping the old page until the new
+    /// one is ready.
+    func takeWebView() -> DesktopWebView? {
+        let view = webView
+        webView = nil
         return view
     }
 

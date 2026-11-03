@@ -48,10 +48,16 @@ final class DesktopWindowManager: NSObject {
         // together, no intermediate frame.
         let previous = renderers[key]
         let carriedVideoView: DesktopVideoView?
+        let carriedWebView: DesktopWebView?
         if item!.type == .video, previous?.currentItem?.type == .video {
             carriedVideoView = previous?.takeVideoView()
+            carriedWebView = nil
+        } else if item!.type == .web, previous?.currentItem?.type == .web {
+            carriedVideoView = nil
+            carriedWebView = previous?.takeWebView()
         } else {
             carriedVideoView = nil
+            carriedWebView = nil
         }
 
         let renderer = WallpaperRenderer()
@@ -59,7 +65,8 @@ final class DesktopWindowManager: NSObject {
         renderers[key] = renderer
         fputs("WEM: apply renderer for \(item!.title) on screen\n", stderr)
         renderer.load(item: item!, in: window, settings: settings,
-                      carryingVideoView: carriedVideoView)
+                      carryingVideoView: carriedVideoView,
+                      carryingWebView: carriedWebView)
         // The pause policy only fires onChange on a
         // state transition, so at startup (already
         // unpaused) resumeAll() never runs and the
