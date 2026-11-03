@@ -289,18 +289,26 @@ final class AppState: ObservableObject {
     private var tapFailureLogged = false
 
     func retryMouseEventTap(prompt: Bool = false) {
-        guard settings.mouseInput else { return }
+        guard settings.mouseInput else {
+            stopMouseMotionPoll()
+            return
+        }
+        // The motion poll is the PRIMARY position source —
+        // NSEvent.mouseLocation is a plain query no permission
+        // can revoke, so hover interaction survives everything
+        // the event tap can suffer (stale grants, silent
+        // disables, rebuilds). The tap is an add-on that only
+        // contributes real click events while it is healthy.
+        startMouseMotionPoll()
         if mouseEventTap.start() {
             if !tapIsActive {
-                fputs("WEM: mouse event tap active\n", stderr)
+                fputs("WEM: mouse event tap active (clicks)\n", stderr)
                 tapIsActive = true
             }
             tapFailureLogged = false
-            stopMouseFallback()
             return
         }
         tapIsActive = false
-        startMouseFallback()
         // Log once and show the system prompt once
         // per launch — the 5s timer keeps retrying,
         // so once the permission is granted the tap
@@ -315,22 +323,23 @@ final class AppState: ObservableObject {
         }
     }
 
-    // MARK: - Mouse hover fallback
+    // MARK: - Mouse motion poll
     //
-    // Without the Accessibility grant the event tap
-    // cannot exist, but `NSEvent.mouseLocation` is a
-    // plain query that needs no permission — poll it
-    // and forward synthetic motion events, so hover
-    // interactions keep working (clicks still need
-    // the tap). Same effect as Waywallen's pointer
-    // forwarding, minus button events.
+    // The PRIMARY position source, mirroring Waywallen's
+    // pointer forwarding as closely as macOS allows:
+    // `NSEvent.mouseLocation` is a plain query that needs
+    // no permission and can never be revoked, so hover
+    // interaction does not depend on the Accessibility
+    // grant at all. The CGEventTap (when its grant is
+    // healthy) adds real click events on top.
 
-    private var mouseFallbackTimer: Timer?
+    private var mouseMotionPollTimer: Timer?
+    private var lastPolledLocation = CGPoint(x: -1, y: -1)
 
-    private func startMouseFallback() {
-        guard mouseFallbackTimer == nil else { return }
-        fputs("WEM: mouse hover fallback active (no Accessibility — hover only)\n", stderr)
-        mouseFallbackTimer = Timer.scheduledTimer(
+    private func startMouseMotionPoll() {
+        guard mouseMotionPollTimer == nil else { return }
+        fputs("WEM: mouse motion poll active (30 Hz, primary position source)\n", stderr)
+        mouseMotionPollTimer = Timer.scheduledTimer(
             withTimeInterval: 1.0 / 30, repeats: true
         ) { [weak self] _ in
             Task { @MainActor [weak self] in
@@ -339,9 +348,9 @@ final class AppState: ObservableObject {
         }
     }
 
-    private func stopMouseFallback() {
-        mouseFallbackTimer?.invalidate()
-        mouseFallbackTimer = nil
+    private func stopMouseMotionPoll() {
+        mouseMotionPollTimer?.invalidate()
+        mouseMotionPollTimer = nil
     }
 
     private func pollMouseLocation() {
@@ -350,6 +359,10 @@ final class AppState: ObservableObject {
         // CGEvent wants the top-left origin.
         let location = NSEvent.mouseLocation
         guard let primary = NSScreen.screens.first else { return }
+        // The cursor mostly sits still — forward only
+        // actual movement instead of a steady 30 msg/s.
+        guard location != lastPolledLocation else { return }
+        lastPolledLocation = location
         let cgPoint = CGPoint(x: location.x,
                               y: primary.frame.height - location.y)
         guard let event = CGEvent(
@@ -556,7 +569,7 @@ final class AppState: ObservableObject {
             retryMouseEventTap(prompt: true)
         } else {
             mouseEventTap.stop()
-            stopMouseFallback()
+            stopMouseMotionPoll()
         }
         applySettingsChanges()
     }
