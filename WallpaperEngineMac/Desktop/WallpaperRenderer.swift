@@ -19,7 +19,8 @@ final class WallpaperRenderer: NSObject {
     /// misplaces or blanks them.
     private var transformHost: NSView?
 
-    func load(item: WallpaperItem, in window: NSWindow, settings: AppSettings) {
+    func load(item: WallpaperItem, in window: NSWindow, settings: AppSettings,
+              carryingVideoView: DesktopVideoView? = nil) {
         unload()
         currentItem = item
 
@@ -39,7 +40,18 @@ final class WallpaperRenderer: NSObject {
                     message: "This video uses \(VideoCodecSupport.displayName(codec)), which this Mac cannot play. Convert it to H.264 to use it as a wallpaper.")
                 break
             }
-            let vv = DesktopVideoView(frame: frame)
+            var vv: DesktopVideoView
+            if let carried = carryingVideoView {
+                // Video→video switch on the same screen:
+                // reuse the previous renderer's view so
+                // its AVPlayer keeps showing the old
+                // frame until the new item renders (the
+                // swap itself is a replaceCurrentItem +
+                // fade inside DesktopVideoView.load).
+                vv = carried
+            } else {
+                vv = DesktopVideoView(frame: frame)
+            }
             vv.autoresizingMask = [.width, .height]
             vv.load(url: url, displayMode: displayMode, volume: settings.volume, muted: settings.muteAudio)
             videoView = vv
@@ -255,6 +267,19 @@ final class WallpaperRenderer: NSObject {
     }
 
     // MARK: - Static wallpaper snapshot
+
+    /// Hands the running video view to the next
+    /// renderer (video→video switch on the same
+    /// screen). Clearing `videoView` first makes
+    /// unload() skip stop()/remove — stopping the
+    /// player would wipe the layer's last frame,
+    /// which is exactly the frame that must stay
+    /// on screen during the swap.
+    func takeVideoView() -> DesktopVideoView? {
+        let view = videoView
+        videoView = nil
+        return view
+    }
 
     /// Installs a captured still as the real macOS
     /// desktop wallpaper. Skipped if the renderer has

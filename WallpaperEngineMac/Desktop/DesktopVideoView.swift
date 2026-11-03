@@ -22,6 +22,44 @@ final class DesktopVideoView: NSView {
     }
 
     func load(url: URL, displayMode: DisplayMode, volume: Double, muted: Bool) {
+        // Waywallen-style swap (see "Dynamic
+        // Wallpaper.app" — mainVideoView + one
+        // persistent AVPlayerLayer): never tear the
+        // player down between wallpapers. A new
+        // AVPlayerItem replaces the current one on
+        // the SAME player, so the layer keeps
+        // showing the previous video's last frame
+        // until the new item renders its first —
+        // no black gap. A short fade transition on
+        // the layer turns the cut into a crossfade.
+        if let player, player.currentItem != nil {
+            if let observer = loopObserver {
+                NotificationCenter.default.removeObserver(observer)
+                loopObserver = nil
+            }
+            let item = AVPlayerItem(url: url)
+            loopObserver = NotificationCenter.default.addObserver(
+                forName: .AVPlayerItemDidPlayToEndTime,
+                object: item,
+                queue: .main
+            ) { _ in
+                player.seek(to: .zero)
+                player.play()
+            }
+            let transition = CATransition()
+            transition.type = .fade
+            transition.duration = 0.3
+            transition.isRemovedOnCompletion = true
+            playerLayer.add(transition, forKey: "wem-video-swap-fade")
+            player.replaceCurrentItem(with: item)
+            playerLayer.videoGravity = displayMode.videoGravity
+            player.isMuted = muted
+            player.volume = Float(volume)
+            player.play()
+            fputs("WEM: video replace-current \(url.lastPathComponent)\n", stderr)
+            return
+        }
+
         stop()
         let player = AVPlayer(url: url)
         self.player = player

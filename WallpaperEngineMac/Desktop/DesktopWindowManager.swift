@@ -38,11 +38,28 @@ final class DesktopWindowManager: NSObject {
             windows[key] = window
         }
 
+        // Video→video switch on this screen: hand the
+        // running video view to the next renderer so
+        // its player keeps showing the old frame
+        // until the new wallpaper renders (no black
+        // gap). Everything happens inside one
+        // CATransaction — detach from the old host
+        // and re-attach to the new one commit
+        // together, no intermediate frame.
+        let previous = renderers[key]
+        let carriedVideoView: DesktopVideoView?
+        if item!.type == .video, previous?.currentItem?.type == .video {
+            carriedVideoView = previous?.takeVideoView()
+        } else {
+            carriedVideoView = nil
+        }
+
         let renderer = WallpaperRenderer()
-        renderers[key]?.unload()
+        previous?.unload()
         renderers[key] = renderer
         fputs("WEM: apply renderer for \(item!.title) on screen\n", stderr)
-        renderer.load(item: item!, in: window, settings: settings)
+        renderer.load(item: item!, in: window, settings: settings,
+                      carryingVideoView: carriedVideoView)
         // The pause policy only fires onChange on a
         // state transition, so at startup (already
         // unpaused) resumeAll() never runs and the
