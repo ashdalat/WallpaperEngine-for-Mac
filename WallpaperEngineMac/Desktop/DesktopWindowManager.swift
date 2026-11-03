@@ -49,15 +49,23 @@ final class DesktopWindowManager: NSObject {
         let previous = renderers[key]
         let carriedVideoView: DesktopVideoView?
         let carriedWebView: DesktopWebView?
+        let carriedSceneView: DesktopSceneView?
         if item!.type == .video, previous?.currentItem?.type == .video {
             carriedVideoView = previous?.takeVideoView()
             carriedWebView = nil
+            carriedSceneView = nil
         } else if item!.type == .web, previous?.currentItem?.type == .web {
             carriedVideoView = nil
             carriedWebView = previous?.takeWebView()
+            carriedSceneView = nil
+        } else if item!.type == .scene, previous?.currentItem?.type == .scene {
+            carriedVideoView = nil
+            carriedWebView = nil
+            carriedSceneView = previous?.takeSceneView()
         } else {
             carriedVideoView = nil
             carriedWebView = nil
+            carriedSceneView = nil
         }
 
         let renderer = WallpaperRenderer()
@@ -66,7 +74,14 @@ final class DesktopWindowManager: NSObject {
         fputs("WEM: apply renderer for \(item!.title) on screen\n", stderr)
         renderer.load(item: item!, in: window, settings: settings,
                       carryingVideoView: carriedVideoView,
-                      carryingWebView: carriedWebView)
+                      carryingWebView: carriedWebView,
+                      carryingSceneView: carriedSceneView)
+
+        if let seconds = Double(
+            ProcessInfo.processInfo.environment["WEM_DEBUG_BLACKDETECT"] ?? ""),
+           seconds > 0 {
+            Self.blackDetect(window: window, remaining: seconds)
+        }
         // The pause policy only fires onChange on a
         // state transition, so at startup (already
         // unpaused) resumeAll() never runs and the
@@ -78,6 +93,21 @@ final class DesktopWindowManager: NSObject {
 
     func pauseAll() {
         renderers.values.forEach { $0.pause() }
+    }
+
+    /// Debug hook (WEM_DEBUG_BLACKDETECT=seconds):
+    /// samples the wallpaper window every ~300 ms and
+    /// logs whether the frame is uniform — used to
+    /// verify switches do not flash a black frame.
+    private static func blackDetect(window: NSWindow, remaining: Double) {
+        guard remaining > 0 else { return }
+        StaticWallpaper.captureWindow(window) { image in
+            DispatchQueue.main.async {
+                let uniform = image.map(StaticWallpaper.isUniform) ?? true
+                fputs("WEM: blackdetect uniform=\(uniform)\n", stderr)
+                blackDetect(window: window, remaining: remaining - 0.3)
+            }
+        }
     }
 
     func resumeAll() {

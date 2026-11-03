@@ -21,7 +21,8 @@ final class WallpaperRenderer: NSObject {
 
     func load(item: WallpaperItem, in window: NSWindow, settings: AppSettings,
               carryingVideoView: DesktopVideoView? = nil,
-              carryingWebView: DesktopWebView? = nil) {
+              carryingWebView: DesktopWebView? = nil,
+              carryingSceneView: DesktopSceneView? = nil) {
         unload()
         currentItem = item
 
@@ -87,7 +88,7 @@ final class WallpaperRenderer: NSObject {
                 break
             }
             let dirs = sceneDirectories(settings: settings)
-            let sv = DesktopSceneView(frame: frame)
+            let sv = carryingSceneView ?? DesktopSceneView(frame: frame)
             sv.autoresizingMask = [.width, .height]
             sv.setMouseEnabled(settings.mouseInput)
             sv.load(item: item, assetsURL: dirs.assets, cacheURL: dirs.cache, settings: settings)
@@ -290,6 +291,17 @@ final class WallpaperRenderer: NSObject {
     func takeWebView() -> DesktopWebView? {
         let view = webView
         webView = nil
+        return view
+    }
+
+    /// Hands the running scene view to the next
+    /// renderer (scene→scene switch on the same
+    /// screen); the engine reloads the new scene into
+    /// the same swapchain instead of tearing the
+    /// Vulkan device down.
+    func takeSceneView() -> DesktopSceneView? {
+        let view = sceneView
+        sceneView = nil
         return view
     }
 

@@ -37,15 +37,27 @@ final class DesktopSceneView: NSView {
         let width = UInt32(max(1, (bounds.width * scale).rounded(.up)))
         let height = UInt32(max(1, (bounds.height * scale).rounded(.up)))
 
+        cursorInWindow = false
+        let displayMode = DisplayMode(rawValue: settings.displayMode) ?? .crop
+
+        if let bridge {
+            // Scene→scene switch on the same view: the engine
+            // API accepts "loads (or reloads) a wallpaper", and
+            // reloading keeps the swapchain — recreating the
+            // bridge would tear down the whole Vulkan device
+            // and guarantee a black gap.
+            fputs("WEM: scene reload \(width)x\(height)\n", stderr)
+            bridge.setFillMode(Int32(displayMode.fillModeRawValue))
+            bridge.setFps(30)
+            bridge.setMuted(settings.muteAudio)
+            bridge.setVolume(Float(settings.volume))
+            bridge.loadWallpaper(at: item.contentURL!, assetsURL: assetsURL, cacheURL: cacheURL)
+            return
+        }
+
         fputs("WEM: scene view load \(width)x\(height)\n", stderr)
         let bridge = SceneRendererBridge(metalLayer: metalLayer, width: width, height: height)
         self.bridge = bridge
-        // The engine starts with the cursor "outside"
-        // — re-sync so the next mouse event reports
-        // the real state.
-        cursorInWindow = false
-
-        let displayMode = DisplayMode(rawValue: settings.displayMode) ?? .crop
         bridge.setFillMode(Int32(displayMode.fillModeRawValue))
         bridge.setFps(30)
         bridge.setMuted(settings.muteAudio)
