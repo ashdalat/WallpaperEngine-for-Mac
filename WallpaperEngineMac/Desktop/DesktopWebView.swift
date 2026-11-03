@@ -235,8 +235,8 @@ final class DesktopWebView: NSView, WKNavigationDelegate {
 
         let type: String
         switch event.type {
-        case .leftMouseDown, .rightMouseDown: type = "mousedown"
-        case .leftMouseUp, .rightMouseUp: type = "mouseup"
+        case .leftMouseDown, .rightMouseDown, .otherMouseDown: type = "mousedown"
+        case .leftMouseUp, .rightMouseUp, .otherMouseUp: type = "mouseup"
         default: type = "mousemove"
         }
 

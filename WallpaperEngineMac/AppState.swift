@@ -228,7 +228,12 @@ final class AppState: ObservableObject {
         // window opens. Retry on a timer until the tap
         // comes up, so granting the permission is enough.
         Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
-            self?.retryMouseEventTap()
+            // prompt: true is once-per-launch — after a
+            // reinstall the ad-hoc signature changes and
+            // the old Accessibility grant goes stale
+            // silently, so the system dialog must come
+            // back on its own.
+            self?.retryMouseEventTap(prompt: true)
         }
 
         // The event tap cannot be created without the

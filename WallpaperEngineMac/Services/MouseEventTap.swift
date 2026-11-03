@@ -23,7 +23,9 @@ final class MouseEventTap {
         (1 << CGEventType.leftMouseDown.rawValue) |
         (1 << CGEventType.rightMouseDown.rawValue) |
         (1 << CGEventType.leftMouseUp.rawValue) |
-        (1 << CGEventType.rightMouseUp.rawValue)
+        (1 << CGEventType.rightMouseUp.rawValue) |
+        (1 << CGEventType.otherMouseDown.rawValue) |
+        (1 << CGEventType.otherMouseUp.rawValue)
 
     @discardableResult
     func start() -> Bool {
