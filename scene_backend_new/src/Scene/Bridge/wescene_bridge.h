@@ -80,6 +80,32 @@ void wescene_bridge_set_user_property(void* bridge,
                                             const char* key,
                                             const char* value);
 
+// Registers a host callback fired ONCE per load, when the
+// engine renders the scene's first real frame (the engine's
+// own FirstFrame message — m_first_frame_ok resets on every
+// load, so every load fires it again). The callback runs on
+// an engine thread; the host must hop to its own main queue.
+// Pass fn == NULL to unregister. Used by the host to keep the
+// previous wallpaper visible until the new scene is actually
+// drawing (cross-type switches without a black gap).
+typedef void (*wescene_first_frame_fn)(void* userdata);
+void wescene_bridge_set_first_frame_callback(void* bridge,
+                                             wescene_first_frame_fn fn,
+                                             void* userdata);
+
+// Registers a host callback fired ONCE per load, when the
+// engine renders the scene's first real frame (the engine's
+// own FirstFrame message — m_first_frame_ok resets on every
+// load, so every load fires it again). The callback runs on
+// an engine thread; the host must hop to its own main queue.
+// Pass fn == NULL to unregister. Used by the host to keep the
+// previous wallpaper visible until the new scene is actually
+// drawing (cross-type switches without a black gap).
+typedef void (*wescene_first_frame_fn)(void* userdata);
+void wescene_bridge_set_first_frame_callback(void* bridge,
+                                             wescene_first_frame_fn fn,
+                                             void* userdata);
+
 #ifdef __cplusplus
 }
 #endif

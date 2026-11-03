@@ -31,6 +31,26 @@ static void enableMoltenVKLogging() {
     void* _bridge;
 }
 
+@synthesize onFirstFrame = _onFirstFrame;
+
+// Engine-thread trampoline: the engine fires the C callback
+// off-main; hop to the main queue where the block is safe.
+static void wemFirstFrameTrampoline(void* userdata) {
+    SceneRendererBridge* bridge = (__bridge SceneRendererBridge*)userdata;
+    void (^block)(void) = bridge.onFirstFrame;
+    if (block != nil) dispatch_async(dispatch_get_main_queue(), block);
+}
+
+- (void)setOnFirstFrame:(void (^)(void))block {
+    _onFirstFrame = block;
+    if (_bridge != nullptr) {
+        wescene_bridge_set_first_frame_callback(
+            _bridge,
+            block != nil ? wemFirstFrameTrampoline : NULL,
+            (__bridge void*)self);
+    }
+}
+
 - (instancetype)initWithMetalLayer:(CAMetalLayer *)metalLayer
                             width:(uint32_t)width
                            height:(uint32_t)height {
@@ -52,6 +72,11 @@ static void enableMoltenVKLogging() {
 }
 
 - (void)dealloc {
+    // Disconnect the first-frame callback first: it
+    // holds a raw pointer back to self.
+    if (_bridge != nullptr) {
+        wescene_bridge_set_first_frame_callback(_bridge, NULL, NULL);
+    }
     // ~SceneWallpaper stops the engine's loopers on
     // the way out.
     if (_bridge != nullptr) {

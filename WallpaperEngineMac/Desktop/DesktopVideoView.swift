@@ -6,6 +6,7 @@ final class DesktopVideoView: NSView {
 
     private var player: AVPlayer?
     private var loopObserver: Any?
+    private var statusObservation: NSKeyValueObservation?
 
     private var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
 
@@ -21,7 +22,17 @@ final class DesktopVideoView: NSView {
         wantsLayer = true
     }
 
-    func load(url: URL, displayMode: DisplayMode, volume: Double, muted: Bool) {
+    /// `hideUntilReady` (cross-type switch): the view
+    /// starts at alpha 0, does not autoplay, and
+    /// `onReady` fires on the main queue once the new
+    /// item is ready to play (plus a beat so its first
+    /// frame actually lands on the layer). The host
+    /// then fades the view in over the old wallpaper.
+    func load(url: URL, displayMode: DisplayMode, volume: Double, muted: Bool,
+              hideUntilReady: Bool = false, onReady: (() -> Void)? = nil) {
+        alphaValue = hideUntilReady ? 0 : 1
+        statusObservation?.invalidate()
+        statusObservation = nil
         // Waywallen-style swap (see "Dynamic
         // Wallpaper.app" — mainVideoView + one
         // persistent AVPlayerLayer): never tear the
@@ -55,8 +66,9 @@ final class DesktopVideoView: NSView {
             playerLayer.videoGravity = displayMode.videoGravity
             player.isMuted = muted
             player.volume = Float(volume)
-            player.play()
+            if !hideUntilReady { player.play() }
             fputs("WEM: video replace-current \(url.lastPathComponent)\n", stderr)
+            armReadyObservation(hideUntilReady: hideUntilReady, onReady: onReady)
             return
         }
 
@@ -76,8 +88,9 @@ final class DesktopVideoView: NSView {
             player.seek(to: .zero)
             player.play()
         }
-        player.play()
+        if !hideUntilReady { player.play() }
         fputs("WEM: video load \(url.lastPathComponent)\n", stderr)
+        armReadyObservation(hideUntilReady: hideUntilReady, onReady: onReady)
         // Playback can fail silently (unsupported
         // codec, truncated file) and leave a black
         // layer — surface the player status so the
@@ -90,6 +103,23 @@ final class DesktopVideoView: NSView {
         }
     }
 
+    private func armReadyObservation(hideUntilReady: Bool, onReady: (() -> Void)?) {
+        guard hideUntilReady, let onReady, let item = player?.currentItem else { return }
+        statusObservation = item.observe(\.status, options: [.new]) { [weak self] observed, _ in
+            guard observed.status == .readyToPlay else { return }
+            DispatchQueue.main.async {
+                self?.statusObservation?.invalidate()
+                self?.statusObservation = nil
+                // A quarter beat so the first frame
+                // actually lands on the layer before
+                // the fade reveals it.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                    onReady()
+                }
+            }
+        }
+    }
+
     func play() {
         player?.play()
     }
@@ -99,6 +129,8 @@ final class DesktopVideoView: NSView {
     }
 
     func stop() {
+        statusObservation?.invalidate()
+        statusObservation = nil
         if let observer = loopObserver {
             NotificationCenter.default.removeObserver(observer)
             loopObserver = nil

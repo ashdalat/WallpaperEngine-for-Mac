@@ -22,7 +22,9 @@ final class WallpaperRenderer: NSObject {
     func load(item: WallpaperItem, in window: NSWindow, settings: AppSettings,
               carryingVideoView: DesktopVideoView? = nil,
               carryingWebView: DesktopWebView? = nil,
-              carryingSceneView: DesktopSceneView? = nil) {
+              carryingSceneView: DesktopSceneView? = nil,
+              hideUntilReady: Bool = false,
+              onReady: (() -> Void)? = nil) {
         unload()
         currentItem = item
 
@@ -55,7 +57,8 @@ final class WallpaperRenderer: NSObject {
                 vv = DesktopVideoView(frame: frame)
             }
             vv.autoresizingMask = [.width, .height]
-            vv.load(url: url, displayMode: displayMode, volume: settings.volume, muted: settings.muteAudio)
+            vv.load(url: url, displayMode: displayMode, volume: settings.volume, muted: settings.muteAudio,
+                    hideUntilReady: hideUntilReady, onReady: onReady)
             videoView = vv
             renderedView = vv
             StaticWallpaper.captureOnce(for: item) {
@@ -70,9 +73,11 @@ final class WallpaperRenderer: NSObject {
             let wv = carryingWebView ?? DesktopWebView(frame: frame)
             wv.autoresizingMask = [.width, .height]
             wv.load(item: item, mouseEnabled: settings.mouseInput)
+            if hideUntilReady { wv.alphaValue = 0 }
             webView = wv
             renderedView = wv
             wv.onFirstRender = { [weak self] in
+                if hideUntilReady { onReady?() }
                 StaticWallpaper.captureOnce(for: item) {
                     wv.takeSnapshot { [weak self] image in
                         DispatchQueue.main.async { [weak self] in
@@ -91,7 +96,13 @@ final class WallpaperRenderer: NSObject {
             let sv = carryingSceneView ?? DesktopSceneView(frame: frame)
             sv.autoresizingMask = [.width, .height]
             sv.setMouseEnabled(settings.mouseInput)
-            sv.load(item: item, assetsURL: dirs.assets, cacheURL: dirs.cache, settings: settings)
+            // A hidden pending renderer loads muted — it
+            // starts playing (the frame timer drives
+            // drawing) while still invisible, and the
+            // real audio setting returns with the first
+            // frame via updateSettings below.
+            sv.load(item: item, assetsURL: dirs.assets, cacheURL: dirs.cache, settings: settings,
+                    mutedOverride: hideUntilReady ? true : nil)
             // applyToAllScreens replaces renderers, so
             // saved user property values must be pushed
             // again here. The engine's message loop is
@@ -105,8 +116,20 @@ final class WallpaperRenderer: NSObject {
             }
             sceneView = sv
             renderedView = sv
-            StaticWallpaper.captureOnce(for: item) { [weak self] in
-                self?.pollSceneSnapshot(for: item, window: window, settings: settings)
+            // The snapshot must wait for the scene's first
+            // real frame: during a cross-type overlap the
+            // window still shows the OLD wallpaper until
+            // then, and a window capture would install the
+            // old content as this item's still.
+            sv.onFirstFrame = { [weak self] in
+                if hideUntilReady { sv.updateSettings(settings) }
+                onReady?()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                    guard let self else { return }
+                    StaticWallpaper.captureOnce(for: item) { [weak self] in
+                        self?.pollSceneSnapshot(for: item, window: window, settings: settings)
+                    }
+                }
             }
         case .unknown:
             renderedView = makePlaceholderView(
@@ -269,6 +292,32 @@ final class WallpaperRenderer: NSObject {
     }
 
     // MARK: - Static wallpaper snapshot
+
+    /// Fades the rendered view in (cross-type overlap:
+    /// the view loaded hidden on top of the old one).
+    func fadeIn(duration: TimeInterval = 0.35, completion: (() -> Void)? = nil) {
+        guard let view = renderedView else {
+            completion?()
+            return
+        }
+        NSAnimationContext.runAnimationGroup({ context in
+            context.duration = duration
+            view.animator().alphaValue = 1
+        }, completionHandler: completion)
+    }
+
+    /// Starts what a hidden pending renderer needs to
+    /// produce its first frame: the scene frame timer
+    /// only runs while playing; video waits for
+    /// readyToPlay; web pages draw by themselves.
+    func startPresentation() {
+        switch currentItem?.type {
+        case .scene:
+            sceneView?.play()
+        default:
+            break
+        }
+    }
 
     /// Hands the running video view to the next
     /// renderer (video→video switch on the same

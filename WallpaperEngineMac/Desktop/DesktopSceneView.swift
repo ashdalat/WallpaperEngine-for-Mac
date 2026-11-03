@@ -9,6 +9,10 @@ final class DesktopSceneView: NSView {
     private var bridge: SceneRendererBridge?
     private var mouseEnabled = false
 
+    /// Fired on the main queue once per load, when the
+    /// engine renders the scene's first real frame.
+    var onFirstFrame: (() -> Void)?
+
     override init(frame: NSRect) {
         super.init(frame: frame)
         setup()
@@ -26,7 +30,8 @@ final class DesktopSceneView: NSView {
         layer = CAMetalLayer()
     }
 
-    func load(item: WallpaperItem, assetsURL: URL, cacheURL: URL, settings: AppSettings) {
+    func load(item: WallpaperItem, assetsURL: URL, cacheURL: URL, settings: AppSettings,
+              mutedOverride: Bool? = nil) {
         guard let metalLayer = layer as? CAMetalLayer,
               item.contentURL != nil else { return }
 
@@ -39,6 +44,10 @@ final class DesktopSceneView: NSView {
 
         cursorInWindow = false
         let displayMode = DisplayMode(rawValue: settings.displayMode) ?? .crop
+        // A hidden pending renderer must stay silent until it
+        // is revealed — the host unmutes via updateSettings
+        // once the first frame fires.
+        let muted = mutedOverride ?? settings.muteAudio
 
         if let bridge {
             // Scene→scene switch on the same view: the engine
@@ -49,20 +58,22 @@ final class DesktopSceneView: NSView {
             fputs("WEM: scene reload \(width)x\(height)\n", stderr)
             bridge.setFillMode(Int32(displayMode.fillModeRawValue))
             bridge.setFps(30)
-            bridge.setMuted(settings.muteAudio)
+            bridge.setMuted(muted)
             bridge.setVolume(Float(settings.volume))
             bridge.loadWallpaper(at: item.contentURL!, assetsURL: assetsURL, cacheURL: cacheURL)
-            return
+        } else {
+            fputs("WEM: scene view load \(width)x\(height)\n", stderr)
+            let bridge = SceneRendererBridge(metalLayer: metalLayer, width: width, height: height)
+            self.bridge = bridge
+            bridge.setFillMode(Int32(displayMode.fillModeRawValue))
+            bridge.setFps(30)
+            bridge.setMuted(muted)
+            bridge.setVolume(Float(settings.volume))
+            bridge.loadWallpaper(at: item.contentURL!, assetsURL: assetsURL, cacheURL: cacheURL)
         }
-
-        fputs("WEM: scene view load \(width)x\(height)\n", stderr)
-        let bridge = SceneRendererBridge(metalLayer: metalLayer, width: width, height: height)
-        self.bridge = bridge
-        bridge.setFillMode(Int32(displayMode.fillModeRawValue))
-        bridge.setFps(30)
-        bridge.setMuted(settings.muteAudio)
-        bridge.setVolume(Float(settings.volume))
-        bridge.loadWallpaper(at: item.contentURL!, assetsURL: assetsURL, cacheURL: cacheURL)
+        bridge?.onFirstFrame = { [weak self] in
+            self?.onFirstFrame?()
+        }
     }
 
     func setMouseEnabled(_ enabled: Bool) {

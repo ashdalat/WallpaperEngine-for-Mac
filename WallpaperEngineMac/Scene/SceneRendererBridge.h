@@ -64,6 +64,12 @@ NS_ASSUME_NONNULL_BEGIN
 /// (checkbox), "0.2 0.4 0.9" (color).
 - (void)setUserProperty:(NSString *)key value:(NSString *)value;
 
+/// Block fired ONCE per load when the engine renders the
+/// scene's first real frame (on the main queue). The host
+/// uses it to reveal a hidden pending wallpaper without a
+/// black gap on cross-type switches.
+@property(nonatomic, copy, nullable) void (^onFirstFrame)(void);
+
 /// Generic property passthrough.
 - (void)setPropertyString:(NSString *)name value:(NSString *)value;
 - (void)setPropertyBool:(NSString *)name value:(BOOL)value;

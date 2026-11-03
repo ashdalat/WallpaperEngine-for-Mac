@@ -46,6 +46,8 @@ struct BridgeState {
     float          volume { 1.0f };
     float          speed { 1.0f };
     bool           muted { false };
+    wescene_first_frame_fn first_frame_fn { nullptr };
+    void*          first_frame_userdata { nullptr };
 };
 
 } // namespace
@@ -97,6 +99,26 @@ void* wescene_bridge_create(void* metal_layer, unsigned width, unsigned height)
 void wescene_bridge_destroy(void* bridge)
 {
     delete static_cast<BridgeState*>(bridge);
+}
+
+void wescene_bridge_set_first_frame_callback(void* bridge,
+                                             wescene_first_frame_fn fn,
+                                             void* userdata)
+{
+    auto* state = static_cast<BridgeState*>(bridge);
+    if (state == nullptr) return;
+    state->first_frame_fn = fn;
+    state->first_frame_userdata = userdata;
+    // The engine invokes this on its runtime thread. The
+    // captures are copies, so the lambda never touches
+    // BridgeState — and a null fn installs a no-op, which
+    // also disconnects any previous registration (the
+    // host does this before destroying the bridge).
+    wescene_first_frame_fn captured_fn = fn;
+    void* captured_user = userdata;
+    state->scene->setOnFirstFrame([captured_fn, captured_user] {
+        if (captured_fn != nullptr) captured_fn(captured_user);
+    });
 }
 
 // The engine logs through rstd-log, which is inert until a logger is
