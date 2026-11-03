@@ -18,8 +18,17 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             button.image = NSImage(systemSymbolName: "photo.on.rectangle", accessibilityDescription: "Wallpaper Engine")
             button.image?.size = NSSize(width: 18, height: 18)
         }
-        statusItem.menu = NSMenu()
-        statusItem.menu?.delegate = self
+        // One persistent menu: the delegate lives on
+        // this instance for the app's lifetime.
+        // rebuildMenu() used to assign a fresh NSMenu
+        // without re-attaching the delegate, so after
+        // the first open menuWillOpen never fired
+        // again and the menu froze with its first-open
+        // state — toggles looked like they did
+        // nothing because the checkmark never moved.
+        let menu = NSMenu()
+        menu.delegate = self
+        statusItem.menu = menu
     }
 
     func menuWillOpen(_ menu: NSMenu) {
@@ -27,7 +36,12 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     }
 
     func rebuildMenu() {
-        let menu = NSMenu()
+        // Repopulate the existing menu in place —
+        // replacing the NSMenu instance would drop
+        // its delegate (NSMenu.delegate is weak and
+        // per-instance) and freeze future updates.
+        guard let menu = statusItem.menu else { return }
+        menu.removeAllItems()
 
         let header = NSMenuItem(title: "Wallpaper Engine Mac", action: nil, keyEquivalent: "")
         header.isEnabled = false
@@ -174,8 +188,6 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             action: #selector(NSApplication.terminate(_:)),
             keyEquivalent: "q"
         ))
-
-        statusItem.menu = menu
     }
 
     @objc private func togglePause() {
