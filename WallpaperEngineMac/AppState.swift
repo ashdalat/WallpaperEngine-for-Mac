@@ -338,9 +338,9 @@ final class AppState: ObservableObject {
 
     private func startMouseMotionPoll() {
         guard mouseMotionPollTimer == nil else { return }
-        fputs("WEM: mouse motion poll active (30 Hz, primary position source)\n", stderr)
+        fputs("WEM: mouse motion poll active (60 Hz, primary position source)\n", stderr)
         mouseMotionPollTimer = Timer.scheduledTimer(
-            withTimeInterval: 1.0 / 30, repeats: true
+            withTimeInterval: 1.0 / 60, repeats: true
         ) { [weak self] _ in
             Task { @MainActor [weak self] in
                 self?.pollMouseLocation()

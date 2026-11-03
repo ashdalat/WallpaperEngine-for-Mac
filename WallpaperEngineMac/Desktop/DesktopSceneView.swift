@@ -57,7 +57,7 @@ final class DesktopSceneView: NSView {
             // and guarantee a black gap.
             fputs("WEM: scene reload \(width)x\(height)\n", stderr)
             bridge.setFillMode(Int32(displayMode.fillModeRawValue))
-            bridge.setFps(30)
+            bridge.setFps(60)
             bridge.setMuted(muted)
             bridge.setVolume(Float(settings.volume))
             bridge.loadWallpaper(at: item.contentURL!, assetsURL: assetsURL, cacheURL: cacheURL)
@@ -66,7 +66,7 @@ final class DesktopSceneView: NSView {
             let bridge = SceneRendererBridge(metalLayer: metalLayer, width: width, height: height)
             self.bridge = bridge
             bridge.setFillMode(Int32(displayMode.fillModeRawValue))
-            bridge.setFps(30)
+            bridge.setFps(60)
             bridge.setMuted(muted)
             bridge.setVolume(Float(settings.volume))
             bridge.loadWallpaper(at: item.contentURL!, assetsURL: assetsURL, cacheURL: cacheURL)
