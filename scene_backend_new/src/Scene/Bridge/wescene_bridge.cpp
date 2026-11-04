@@ -13,12 +13,19 @@
 #define VK_USE_PLATFORM_METAL_EXT 1
 #include <vulkan/vulkan.h>
 
+#include <atomic>
+#include <chrono>
+#include <cstdint>
+#include <thread>
+
 #include "wescene_bridge.h"
 
 #include <memory>
 
 import rstd;
 import rstd.log;
+import owe.audio_response;
+import wavsen.audio;
 import wescene.scene_wallpaper;
 
 using namespace rstd::prelude;
@@ -48,6 +55,13 @@ struct BridgeState {
     bool           muted { false };
     wescene_first_frame_fn first_frame_fn { nullptr };
     void*          first_frame_userdata { nullptr };
+
+    std::atomic<bool> audio_enabled { false };
+    std::atomic<bool> audio_demand { false };
+    std::atomic<bool> audio_worker_quit { false };
+    wescene_audio_data_fn audio_data_fn { nullptr };
+    void*                 audio_data_userdata { nullptr };
+    std::unique_ptr<std::thread> audio_worker;
 };
 
 } // namespace
@@ -59,6 +73,13 @@ void* wescene_bridge_create(void* metal_layer, unsigned width, unsigned height)
     auto state = std::make_unique<BridgeState>();
     state->scene = std::make_unique<owe::SceneWallpaper>();
     if (! state->scene->init()) return nullptr;
+
+    // The scene reports when it wants audio response data; the
+    // capture worker idles unless it does.
+    auto* raw_state = state.get();
+    state->scene->setAudioResponseDemandCallback([raw_state](bool active) {
+        raw_state->audio_demand.store(active, std::memory_order_release);
+    });
 
     owe::RenderInitInfo info;
     info.offscreen = false; // onscreen desktop rendering
@@ -98,7 +119,12 @@ void* wescene_bridge_create(void* metal_layer, unsigned width, unsigned height)
 
 void wescene_bridge_destroy(void* bridge)
 {
-    delete static_cast<BridgeState*>(bridge);
+    auto* state = static_cast<BridgeState*>(bridge);
+    if (state == nullptr) return;
+    state->audio_worker_quit.store(true, std::memory_order_release);
+    if (state->audio_worker != nullptr && state->audio_worker->joinable())
+        state->audio_worker->join();
+    delete state;
 }
 
 void wescene_bridge_set_first_frame_callback(void* bridge,
@@ -119,6 +145,100 @@ void wescene_bridge_set_first_frame_callback(void* bridge,
     state->scene->setOnFirstFrame([captured_fn, captured_user] {
         if (captured_fn != nullptr) captured_fn(captured_user);
     });
+}
+
+// Audio response worker — mirrors the reference SceneViewer host:
+// the scene demands audio (demand callback), the worker taps the
+// system default output through wavsen's CoreAudio capture and
+// pushes complete stereo windows to the engine's FFT pipeline.
+// Runs for the bridge's lifetime; idles (and releases the tap)
+// whenever the feature is disabled or the scene does not want it.
+static void wem_audio_worker(BridgeState* state)
+{
+    wavsen::audio::AudioCapture capture;
+    owe::audio::ResponseEngine  response_engine;
+    bool capture_ready = false;
+    bool ended_sent    = true;
+    unsigned tick      = 0;
+
+    while (! state->audio_worker_quit.load(std::memory_order_acquire)) {
+        const bool active = state->audio_enabled.load(std::memory_order_acquire) &&
+                            state->audio_demand.load(std::memory_order_acquire);
+        if (! active) {
+            if (capture_ready) {
+                capture.uninit();
+                capture_ready = false;
+            }
+            response_engine.end();
+            if (! ended_sent) {
+                state->scene->endAudioResponse();
+                ended_sent = true;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            continue;
+        }
+        if (! capture_ready) {
+            capture_ready = capture.init();
+            if (! capture_ready) {
+                // Common before the Screen & System Audio Recording
+                // permission is granted — retry, the engine also
+                // keeps working without audio response meanwhile.
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                continue;
+            }
+        }
+        wavsen::audio::AudioPcmWindow captured {};
+        // ~30 Hz snapshot cadence, same as the reference host.
+        if ((tick++ & 1u) == 0u && capture.snapshot(captured)) {
+            ended_sent = false;
+            owe::audio::PcmWindow window {};
+            window.generation       = captured.generation;
+            window.sequence         = captured.sequence;
+            window.captured_at_ns   = captured.captured_at_ns;
+            window.end_sample_frame = captured.end_sample_frame;
+            window.sample_rate_hz   = captured.sample_rate_hz;
+            window.channels         = captured.channels;
+            window.frames           = captured.frames;
+            for (std::size_t index = 0; index < owe::audio::kSampleCount; ++index)
+                window.samples[rstd::usize(index)] =
+                    captured.samples[rstd::usize(index)].to_primitive();
+
+            if (state->audio_data_fn != nullptr) {
+                owe::audio::ResponseFrame response {};
+                if (response_engine.analyze(window, response)) {
+                    float spectrum[128];
+                    for (std::size_t index = 0; index < owe::audio::kResponseBins; ++index) {
+                        spectrum[index]       = response.left[rstd::usize(index)];
+                        spectrum[64u + index] = response.right[rstd::usize(index)];
+                    }
+                    state->audio_data_fn(spectrum, state->audio_data_userdata);
+                }
+            }
+            state->scene->setAudioPcmWindow(std::move(window));
+        } else {
+            std::this_thread::sleep_for(std::chrono::milliseconds(16));
+        }
+    }
+    if (capture_ready) capture.uninit();
+}
+
+void wescene_bridge_set_audio_response_enabled(void* bridge, int enabled)
+{
+    auto* state = static_cast<BridgeState*>(bridge);
+    if (state == nullptr) return;
+    state->audio_enabled.store(enabled != 0, std::memory_order_release);
+    if (enabled != 0 && state->audio_worker == nullptr)
+        state->audio_worker = std::make_unique<std::thread>(wem_audio_worker, state);
+}
+
+void wescene_bridge_set_audio_data_callback(void* bridge,
+                                            wescene_audio_data_fn fn,
+                                            void* userdata)
+{
+    auto* state = static_cast<BridgeState*>(bridge);
+    if (state == nullptr) return;
+    state->audio_data_fn       = fn;
+    state->audio_data_userdata = userdata;
 }
 
 // The engine logs through rstd-log, which is inert until a logger is

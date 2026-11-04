@@ -89,6 +89,21 @@ void wescene_bridge_set_user_property(void* bridge,
 // previous wallpaper visible until the new scene is actually
 // drawing (cross-type switches without a black gap).
 typedef void (*wescene_first_frame_fn)(void* userdata);
+
+// Audio response (Wallpaper Engine visualizer protocol). The
+// bridge owns the CoreAudio system-output capture (CoreAudio
+// process tap — triggers the Screen & System Audio Recording
+// permission) and feeds the engine's FFT pipeline whenever the
+// loaded scene demands audio. `enabled` gates the whole thing.
+void wescene_bridge_set_audio_response_enabled(void* bridge, int enabled);
+
+// Spectrum (64 left + 64 right floats) of the same audio, for
+// hosts with their own visualizer consumers (web wallpapers).
+// Fires on an engine/worker thread at ~30 Hz while audio flows.
+typedef void (*wescene_audio_data_fn)(const float* spectrum, void* userdata);
+void wescene_bridge_set_audio_data_callback(void* bridge,
+                                            wescene_audio_data_fn fn,
+                                            void* userdata);
 void wescene_bridge_set_first_frame_callback(void* bridge,
                                              wescene_first_frame_fn fn,
                                              void* userdata);
