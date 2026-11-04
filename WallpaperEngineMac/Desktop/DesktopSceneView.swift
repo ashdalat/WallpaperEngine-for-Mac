@@ -80,6 +80,13 @@ final class DesktopSceneView: NSView {
         mouseEnabled = enabled
     }
 
+    /// Toggles the engine's audio-response capture (see
+    /// SceneRendererBridge). New bridges start from the
+    /// current setting at load; live changes go through here.
+    func setAudioResponseEnabled(_ enabled: Bool) {
+        bridge?.setAudioResponseEnabled(enabled)
+    }
+
     func play() {
         fputs("WEM: scene play\n", stderr)
         bridge?.play()

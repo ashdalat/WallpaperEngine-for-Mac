@@ -116,6 +116,7 @@ final class WallpaperRenderer: NSObject {
             }
             sceneView = sv
             renderedView = sv
+            sv.setAudioResponseEnabled(settings.audioResponse)
             // The snapshot must wait for the scene's first
             // real frame: during a cross-type overlap the
             // window still shows the OLD wallpaper until
@@ -187,6 +188,10 @@ final class WallpaperRenderer: NSObject {
         videoView?.pause()
         webView?.pause()
         sceneView?.pause()
+    }
+
+    func setAudioResponse(_ enabled: Bool) {
+        sceneView?.setAudioResponseEnabled(enabled)
     }
 
     func updateSettings(_ settings: AppSettings) {

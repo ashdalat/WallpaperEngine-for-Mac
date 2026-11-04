@@ -56,6 +56,11 @@ struct SettingsView: View {
                     get: { state.settings.mouseInput },
                     set: { state.setMouseInput($0) }
                 ))
+
+                Toggle("Audio Response (Scene visualizers)", isOn: Binding(
+                    get: { state.settings.audioResponse },
+                    set: { state.setAudioResponse($0) }
+                ))
             }
 
             Section("Pause & Power") {

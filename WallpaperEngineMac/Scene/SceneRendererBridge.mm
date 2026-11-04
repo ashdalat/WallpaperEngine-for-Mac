@@ -140,6 +140,11 @@ static void wemFirstFrameTrampoline(void* userdata) {
     wescene_bridge_set_muted(_bridge, muted ? 1 : 0);
 }
 
+- (void)setAudioResponseEnabled:(BOOL)enabled {
+    if (_bridge == nullptr) return;
+    wescene_bridge_set_audio_response_enabled(_bridge, enabled ? 1 : 0);
+}
+
 - (void)setUserProperty:(NSString *)key value:(NSString *)value {
     if (_bridge == nullptr) return;
     wescene_bridge_set_user_property(_bridge,

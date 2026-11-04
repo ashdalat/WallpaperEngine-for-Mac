@@ -154,4 +154,9 @@ final class AppSettings: ObservableObject {
     /// Random order (never the same wallpaper twice
     /// in a row) vs sequential through the filtered list.
     @AppStorage("autoRotateRandom") var autoRotateRandom: Bool = true
+    /// Audio response (Wallpaper Engine visualizers): taps
+    /// the system output (CoreAudio process tap — asks for the
+    /// Screen & System Audio Recording permission) and feeds
+    /// the scene's spectrum uniforms.
+    @AppStorage("audioResponse") var audioResponse: Bool = false
 }

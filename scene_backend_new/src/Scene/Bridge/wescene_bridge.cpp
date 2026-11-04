@@ -16,6 +16,7 @@
 #include <atomic>
 #include <chrono>
 #include <cstdint>
+#include <cstdio>
 #include <thread>
 
 #include "wescene_bridge.h"
@@ -168,6 +169,7 @@ static void wem_audio_worker(BridgeState* state)
             if (capture_ready) {
                 capture.uninit();
                 capture_ready = false;
+                std::fputs("WEM: audio response capture stopped\n", stderr);
             }
             response_engine.end();
             if (! ended_sent) {
@@ -179,10 +181,13 @@ static void wem_audio_worker(BridgeState* state)
         }
         if (! capture_ready) {
             capture_ready = capture.init();
-            if (! capture_ready) {
+            if (capture_ready) {
+                std::fputs("WEM: audio response capture started\n", stderr);
+            } else {
                 // Common before the Screen & System Audio Recording
                 // permission is granted — retry, the engine also
                 // keeps working without audio response meanwhile.
+                std::fputs("WEM: audio response capture init failed (permission?)\n", stderr);
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 continue;
             }

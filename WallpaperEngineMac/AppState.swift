@@ -562,6 +562,14 @@ final class AppState: ObservableObject {
         windowManager.updateSettings(settings)
     }
 
+    /// Toggles the audio-response pipeline. New scene
+    /// renderers pick the value up from settings at load;
+    /// live changes push straight to the running bridge.
+    func setAudioResponse(_ enabled: Bool) {
+        settings.audioResponse = enabled
+        windowManager.setAudioResponse(enabled)
+    }
+
     func setMouseInput(_ enabled: Bool) {
         settings.mouseInput = enabled
         if enabled {

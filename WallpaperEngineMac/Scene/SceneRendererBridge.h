@@ -64,6 +64,12 @@ NS_ASSUME_NONNULL_BEGIN
 /// (checkbox), "0.2 0.4 0.9" (color).
 - (void)setUserProperty:(NSString *)key value:(NSString *)value;
 
+/// Enables the engine's audio-response pipeline: the bridge
+/// taps system output audio (CoreAudio process tap; needs the
+/// Screen & System Audio Recording permission) and feeds the
+/// scene whenever the scene demands it.
+- (void)setAudioResponseEnabled:(BOOL)enabled;
+
 /// Block fired ONCE per load when the engine renders the
 /// scene's first real frame (on the main queue). The host
 /// uses it to reveal a hidden pending wallpaper without a

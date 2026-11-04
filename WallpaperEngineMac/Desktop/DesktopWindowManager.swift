@@ -179,6 +179,10 @@ final class DesktopWindowManager: NSObject {
         allRenderers.forEach { $0.play() }
     }
 
+    func setAudioResponse(_ enabled: Bool) {
+        allRenderers.forEach { $0.setAudioResponse(enabled) }
+    }
+
     /// Pushes settings to the live renderers
     /// without reloading the wallpaper. Used for
     /// display transform changes (rotation, flip,
