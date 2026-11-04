@@ -1,5 +1,8 @@
 module;
 
+#include <cstdint>
+#include <cstdlib>
+
 #include <rstd/enum.hpp>
 
 module wescene.scene_wallpaper;
@@ -534,6 +537,14 @@ void SceneRenderController::on(RenderMsg::Stop_payload&& m) {
 
 void SceneRenderController::onDraw() {
     frame_timer.FrameBegin();
+    // Reports the measured render fps to stderr every 2 s
+    // (the counter prints itself) when WEM_DEBUG_FPS is set —
+    // the counter existed but was never wired to anything.
+    static const bool wem_fps_debug = std::getenv("WEM_DEBUG_FPS") != nullptr;
+    if (wem_fps_debug) fps_counter.RegisterFrame();
+    auto wem_t0 = rstd::time::Instant::now();
+    static std::uint64_t wem_frame_no = 0;
+    const bool wem_profile = (++wem_frame_no % 120u == 0u);
     if (m_rg.is_some()) {
         const bool first_draw = ! m_first_frame_ok;
         auto       load_bench = loadBenchView();
@@ -593,7 +604,9 @@ void SceneRenderController::onDraw() {
 
         /* Advance video textures (no-op if none) before drawFrame so
          * the new RGBA frame is sampled by the same render pass. */
+        auto wem_t1 = rstd::time::Instant::now();
         m_render->pumpVideoTextures(frame_timer.TargetFrameTime() * m_speed.to_primitive());
+        auto wem_t2 = rstd::time::Instant::now();
 
         /* Upload any glyph rects the actuators added this tick. Runs after
          * TickSceneScripts (which calls FontFace::Populate) and before
@@ -605,6 +618,15 @@ void SceneRenderController::onDraw() {
             first_draw ? SceneLoadSpan(load_bench, &SceneLoadProbeIds::render_first_draw)
                        : rstd::bench::probe::SpanGuard {};
         m_render->drawFrame(*m_scene);
+        auto wem_t3 = rstd::time::Instant::now();
+        if (wem_profile && wem_fps_debug) {
+            auto us = [](auto a, auto b) {
+                return rstd::as_cast<u64>(
+                    rstd::time::Duration(rstd::move(b) - rstd::move(a)).as_micros());
+            };
+            rstd::io::eprintln("WEM: frame span pre={}us pump={}us draw={}us",
+                               us(wem_t0, wem_t1), us(wem_t1, wem_t2), us(wem_t2, wem_t3));
+        }
         (void)first_draw_span.finish();
         (void)first_frame_span.finish();
 
@@ -1479,6 +1501,16 @@ bool SceneRuntimeController::init() {
         auto& frameTimer = m_render_controller->frame_timer;
         auto  rtx        = m_render_controller->sender();
         frameTimer.SetCallback(Some(FrameTimer::Callback::make([rtx]() mutable {
+            static std::uint64_t wem_cb_count = 0;
+            static auto wem_cb_start = rstd::time::Instant::now();
+            ++wem_cb_count;
+            if (wem_cb_count % 120u == 0u) {
+                auto elapsed = rstd::time::Duration(rstd::time::Instant::now() - wem_cb_start);
+                rstd::io::eprintln("WEM: timer cb rate = {} fps",
+                                   double(wem_cb_count) / elapsed.as_secs_f64());
+                wem_cb_count = 0;
+                wem_cb_start = rstd::time::Instant::now();
+            }
             (void)rtx.send(RenderMsg::Draw());
         })));
         frameTimer.SetRequiredFps(u16(15));
