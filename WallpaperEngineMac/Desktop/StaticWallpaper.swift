@@ -72,6 +72,7 @@ enum StaticWallpaper {
             return
         }
         guard CGPreflightScreenCaptureAccess() else {
+            _ = CGRequestScreenCaptureAccess()
             completion(nil)
             return
         }

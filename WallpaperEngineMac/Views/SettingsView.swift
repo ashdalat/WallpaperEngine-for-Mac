@@ -1,3 +1,5 @@
+import ApplicationServices
+import CoreGraphics
 import SwiftUI
 
 struct SettingsView: View {
@@ -103,6 +105,43 @@ struct SettingsView: View {
                 }
             } header: {
                 Text("Auto-Rotate")
+            }
+
+            Section("Permissions") {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Screen Recording")
+                        Text("Required to capture live scene wallpapers as desktop background")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    if CGPreflightScreenCaptureAccess() {
+                        Label("Granted", systemImage: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                    } else {
+                        Button("Grant") {
+                            CGRequestScreenCaptureAccess()
+                        }
+                    }
+                }
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Accessibility")
+                        Text("Required for forwarding mouse clicks to web wallpapers")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    if AXIsProcessTrusted() {
+                        Label("Granted", systemImage: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                    } else {
+                        Button("Grant") {
+                            state.retryMouseEventTap(prompt: true, userInitiated: true)
+                        }
+                    }
+                }
             }
 
             Section("About") {

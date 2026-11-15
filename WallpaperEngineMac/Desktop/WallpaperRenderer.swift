@@ -392,9 +392,9 @@ final class WallpaperRenderer: NSObject {
         attempt: Int = 0
     ) {
         guard CGPreflightScreenCaptureAccess() else {
-            // Screen recording permission is not granted.
-            // Avoid triggering unwanted system permission popups on startup;
-            // fall back to the wallpaper preview thumbnail.
+            // Request permission so the user is prompted to grant it (1 time)
+            _ = CGRequestScreenCaptureAccess()
+            // In the meantime, fall back to the wallpaper preview thumbnail
             if let previewURL = item.previewURL,
                let imageSource = CGImageSourceCreateWithURL(previewURL as CFURL, nil),
                let image = CGImageSourceCreateImageAtIndex(imageSource, 0, nil) {
