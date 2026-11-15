@@ -99,8 +99,8 @@ sed -e 's|\$(EXECUTABLE_NAME)|WallpaperEngineMac|g' \
 # stick, and the mouse event tap could never be
 # created. Re-sign ad-hoc like the bundled build
 # so the permission persists.
-codesign --force --sign - "$APP/Contents/MacOS/WallpaperEngineMac"
-codesign --force --sign - "$APP"
+codesign --force --sign - -r '=designated => identifier "com.wallpaperengine.mac"' "$APP/Contents/MacOS/WallpaperEngineMac"
+codesign --force --deep --sign - -r '=designated => identifier "com.wallpaperengine.mac"' "$APP"
 
 echo ""
 echo ">> Done (unbundled): ${APP}"

@@ -239,22 +239,16 @@ final class AppState: ObservableObject {
         }
         if settings.mouseInput {
             fputs("WEM: mouseInput enabled at startup\n", stderr)
-            retryMouseEventTap(prompt: true)
+            // On startup, only prompt if the app has never prompted the user before.
+            // Persisted in UserDefaults so we never ask repeatedly across restarts.
+            retryMouseEventTap(prompt: !hasPromptedAccessibility)
         }
 
-        // The event tap needs the Accessibility grant, and
-        // an agent app (LSUIElement) never becomes active
-        // when the user returns from System Settings after
-        // granting it — the notification only fires when a
-        // window opens. Retry on a timer until the tap
-        // comes up, so granting the permission is enough.
+        // The event tap needs the Accessibility grant. Retry silently on a
+        // timer so when the user grants the permission in System Settings,
+        // the tap activates automatically without nagging or restarting.
         Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
-            // prompt: true is once-per-launch — after a
-            // reinstall the ad-hoc signature changes and
-            // the old Accessibility grant goes stale
-            // silently, so the system dialog must come
-            // back on its own.
-            self?.retryMouseEventTap(prompt: true)
+            self?.retryMouseEventTap(prompt: false)
         }
 
         // The event tap cannot be created without the
@@ -283,12 +277,15 @@ final class AppState: ObservableObject {
     /// user grants the permission — see the timer
     /// in start() for why a plain didBecomeActive
     /// retry is not enough.
-    private var accessibilityPromptShown = false
+    private var hasPromptedAccessibility: Bool {
+        get { UserDefaults.standard.bool(forKey: "hasPromptedAccessibility") }
+        set { UserDefaults.standard.set(newValue, forKey: "hasPromptedAccessibility") }
+    }
     private var tapEventLogCount = 0
     private var tapIsActive = false
     private var tapFailureLogged = false
 
-    func retryMouseEventTap(prompt: Bool = false) {
+    func retryMouseEventTap(prompt: Bool = false, userInitiated: Bool = false) {
         guard settings.mouseInput else {
             stopMouseMotionPoll()
             return
@@ -309,16 +306,14 @@ final class AppState: ObservableObject {
             return
         }
         tapIsActive = false
-        // Log once and show the system prompt once
-        // per launch — the 5s timer keeps retrying,
-        // so once the permission is granted the tap
-        // comes up on its own, without a restart.
         if !tapFailureLogged {
             tapFailureLogged = true
             fputs("WEM: mouse event tap unavailable — grant Accessibility permission in System Settings > Privacy & Security > Accessibility\n", stderr)
         }
-        if prompt && !accessibilityPromptShown {
-            accessibilityPromptShown = true
+        // Only trigger the system dialog if userInitiated (e.g. toggled in Settings UI)
+        // or if prompt is true AND the user has never been prompted before.
+        if userInitiated || (prompt && !hasPromptedAccessibility) {
+            hasPromptedAccessibility = true
             mouseEventTap.ensureAccessibility(prompt: true)
         }
     }
@@ -573,8 +568,7 @@ final class AppState: ObservableObject {
     func setMouseInput(_ enabled: Bool) {
         settings.mouseInput = enabled
         if enabled {
-            accessibilityPromptShown = false
-            retryMouseEventTap(prompt: true)
+            retryMouseEventTap(prompt: true, userInitiated: true)
         } else {
             mouseEventTap.stop()
             stopMouseMotionPoll()

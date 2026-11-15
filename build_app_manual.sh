@@ -107,6 +107,9 @@ sed -e 's|\$(EXECUTABLE_NAME)|WallpaperEngineMac|g' \
 echo ">> Bundling dylibs into the app..."
 bash bundle_dylibs.sh "$APP"
 
+echo ">> Signing WallpaperEngineMac.app with stable designated requirement..."
+codesign --force --deep --sign - -r '=designated => identifier "com.wallpaperengine.mac"' "$APP"
+
 echo ""
 echo ">> Done: ${APP}"
 echo "   Run with: open '${APP}'"

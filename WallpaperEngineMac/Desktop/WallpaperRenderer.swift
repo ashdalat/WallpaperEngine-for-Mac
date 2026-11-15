@@ -391,6 +391,17 @@ final class WallpaperRenderer: NSObject {
         settings: AppSettings,
         attempt: Int = 0
     ) {
+        guard CGPreflightScreenCaptureAccess() else {
+            // Screen recording permission is not granted.
+            // Avoid triggering unwanted system permission popups on startup;
+            // fall back to the wallpaper preview thumbnail.
+            if let previewURL = item.previewURL,
+               let imageSource = CGImageSourceCreateWithURL(previewURL as CFURL, nil),
+               let image = CGImageSourceCreateImageAtIndex(imageSource, 0, nil) {
+                installStaticWallpaper(image, for: item, window: window, settings: settings)
+            }
+            return
+        }
         let maxAttempts = 20
         guard attempt < maxAttempts, currentItem?.id == item.id else {
             fputs("WEM: scene snapshot gave up after \(attempt) attempts\n", stderr)

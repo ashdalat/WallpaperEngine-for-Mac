@@ -63,11 +63,15 @@ enum StaticWallpaper {
     /// their CAMetalLayer content comes back black
     /// through the legacy window-capture APIs, but
     /// ScreenCaptureKit sees the composited output.
-    /// Capturing only own windows needs no Screen
-    /// Recording permission (TCC exempt).
+    /// Check CGPreflightScreenCaptureAccess() first to avoid
+    /// triggering unwanted system permission alerts on macOS 14.4+/15.
     static func captureWindow(_ window: NSWindow,
                               completion: @escaping (CGImage?) -> Void) {
         guard #available(macOS 14.0, *) else {
+            completion(nil)
+            return
+        }
+        guard CGPreflightScreenCaptureAccess() else {
             completion(nil)
             return
         }

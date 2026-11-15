@@ -91,10 +91,17 @@ done
 # install_name_tool invalidates the ad-hoc signature the
 # linker produced; macOS kills apps whose signature does not
 # match their content, so re-sign everything ad-hoc.
+# We explicitly set a stable designated requirement
+# '=designated => identifier "com.wallpaperengine.mac"'
+# so macOS TCC preserves permissions (Accessibility, etc.)
+# across updates and launches instead of tying them to an ephemeral cdhash.
 for f in "$FW"/*.dylib; do
     [ -f "$f" ] || continue
     codesign --force --sign - "$f" 2>/dev/null || true
 done
-codesign --force --sign - "$BIN"
+codesign --force --sign - -r '=designated => identifier "com.wallpaperengine.mac"' "$BIN"
+if [ -d "$APP" ]; then
+    codesign --force --deep --sign - -r '=designated => identifier "com.wallpaperengine.mac"' "$APP" 2>/dev/null || true
+fi
 
 echo "bundled $(ls "$FW" | wc -l) dylibs into $FW"
